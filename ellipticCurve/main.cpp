@@ -2,19 +2,18 @@
 #include "curve.h"
 
 int main() {
-    mpz_class a = 0;
-    mpz_class b = 1;
-    mpz_class p = 17;
+    mpz_class a = 2;
+    mpz_class b = 3;
+    mpz_class p = 19;
 
-    EllipticCurve EC = NewCurve(a, b, p);
+    EllipticCurve EC = EllipticCurve(a, b, p);
     EC.printCurve();
 
-    mpz_class x, y;
-    x = 2;
-    y = 3;
-    point P = EC.Point(x, y);
-    std::cout << P.x << std::endl;
-    std::cout << P.y << std::endl;
+    EllipticCurve::Point P = EC(1, 5);
+    EllipticCurve::Point Q = EC(3, 6);
 
+    EllipticCurve::Point R;
+    R = P + Q;
+    std::cout << R.x << " : " << R.y << " : " << R.z << std::endl;
     return 0;
 }
