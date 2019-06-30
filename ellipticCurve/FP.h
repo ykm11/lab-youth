@@ -36,7 +36,6 @@ public:
         return z; 
     }
 };
-
 mpz_class Fp::modulus;
 
 void add(Fp& z, const Fp& x, const Fp& y) {
@@ -61,5 +60,4 @@ void mul(Fp& z, const Fp& x, const Fp& y) {
 }
 
 
-
-
+Fp two = Fp(2);
