@@ -16,15 +16,10 @@ int main() {
     R = P + Q;
     std::cout << R.x << " : " << R.y << " : " << R.z << std::endl;
 
+    Fp::setModulo(23);
 
-    // Fp = 19
-    // x = Fp(12)
-    // y = Fp(14)
-
-    Fp::setModulo(19);
-
-    Fp x = Fp(-2);
-    Fp y = Fp(11);
+    Fp x = Fp(21);
+    Fp y = Fp(9);
 
     Fp z;
     z = x + y;
