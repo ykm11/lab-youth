@@ -35,6 +35,12 @@ public:
         mul(z, *this, other); 
         return z; 
     }
+
+    bool operator==(const Fp& other) const {
+        bool isEq;
+        isEq = (value == other.value);
+        return isEq;
+    }
 };
 mpz_class Fp::modulus;
 
@@ -61,3 +67,5 @@ void mul(Fp& z, const Fp& x, const Fp& y) {
 
 
 Fp two = Fp(2);
+Fp one = Fp(1);
+Fp zero = Fp(0);
