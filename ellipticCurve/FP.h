@@ -66,6 +66,9 @@ void mul(Fp& z, const Fp& x, const Fp& y) {
 }
 
 
+Fp eight = Fp(8);
+Fp four = Fp(4);
+Fp three = Fp(3);
 Fp two = Fp(2);
 Fp one = Fp(1);
 Fp zero = Fp(0);
