@@ -14,7 +14,7 @@ public:
     //Fp(mpz_class v) : value(std::move(v)) { }
      
 
-    static void setModulo(mpz_class v) {
+    static void setModulo(const mpz_class& v) {
         modulus = v;
     }
 
@@ -38,7 +38,10 @@ public:
 
     bool operator==(const Fp& other) const {
         bool isEq;
-        isEq = (value == other.value);
+        //isEq = (value == other.value);
+        Fp z;
+        sub(z, *this, other);
+        isEq = (z.value == 0);
         return isEq;
     }
 };
@@ -64,7 +67,6 @@ void mul(Fp& z, const Fp& x, const Fp& y) {
         z.value += z.modulus;
     }
 }
-
 
 Fp eight = Fp(8);
 Fp four = Fp(4);
