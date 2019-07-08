@@ -4,6 +4,7 @@ void add(Fp& z, const Fp& x, const Fp& y);
 void sub(Fp& z, const Fp& x, const Fp& y);
 void mul(Fp& z, const Fp& x, const Fp& y);
 void invmod(Fp& r, const Fp& x);
+bool isEq(const Fp& x, const Fp& y);
 
 class Fp {
 public:
@@ -38,13 +39,12 @@ public:
     }
 
     bool operator==(const Fp& other) const {
-        bool isEq;
-        //isEq = (value == other.value);
-        Fp z;
-        sub(z, *this, other);
-        isEq = (z.value == 0);
-        return isEq;
+        return isEq(*this, other);
     }
+    bool operator!=(const Fp& other) const {
+        return !isEq(*this, other);
+    }
+
 };
 mpz_class Fp::modulus;
 
@@ -73,6 +73,16 @@ void invmod(Fp& r, const Fp& x) {
     mpz_class p_2 = x.modulus - 2;
     mpz_powm_sec(r.value.get_mpz_t(), x.value.get_mpz_t(),
             p_2.get_mpz_t(), x.modulus.get_mpz_t()); // r <- x^{p-2} mod p = a^{-1}
+}
+
+bool isEq(const Fp& x, const Fp& y) {
+    Fp z;
+    sub(z, x, y);
+    if (z.value == 0) {
+        return true;
+    } else {
+        return false;
+    }
 }
 
 Fp eight = Fp(8);

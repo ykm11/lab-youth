@@ -209,7 +209,6 @@ void mul(Point& R, const Point& P, const mpz_class& x) {
     mpz_class n = x;
     while (n > 0) {
         if (n % 2 == 1) {
-            std::cout << "OK" << std::endl;
             add(k, k, tmp_P);
         }
         
