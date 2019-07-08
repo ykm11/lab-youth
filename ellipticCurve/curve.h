@@ -10,6 +10,8 @@ void add(Point& R, const Point& P, const Point& Q);
 void sub(Point& R, const Point& P, const Point& Q);
 void mul(Point& R, const Point& P, const mpz_class& x); // scalar multiplying
 
+void print(const Point& P);
+
 
 class Point {
 public:
@@ -17,6 +19,7 @@ public:
 
     Point() {}
     Point(const Fp& X, const Fp& Y, const Fp& Z) : x(X), y(Y), z(Z) {}
+    //~Point() = default;
 
 
     Point operator+(const Point& other) const {
@@ -44,7 +47,7 @@ public:
     }
 
 
-    void xy(Fp& s, Fp& t) { // 射影座標からアフィン座標へ
+    void xy(Fp& s, Fp& t) const { // 射影座標からアフィン座標へ
         Fp inv_z;
         invmod(inv_z, z);
         
@@ -64,6 +67,7 @@ public:
         a = Fp(A);
         b = Fp(B);
     }
+    //~EllipticCurve() = default;
 
     Point point(const mpz_class& x, const mpz_class& y) const {
         Fp r, l, u;
@@ -82,6 +86,12 @@ public:
         }
         return P;
     }
+
+    Point operator()(const mpz_class& x, const mpz_class& y) const {
+        Point P = point(x, y);
+        return P;
+    }
+
 };
 Fp EllipticCurve::a;
 Fp EllipticCurve::b;
@@ -199,11 +209,13 @@ void mul(Point& R, const Point& P, const mpz_class& x) {
     mpz_class n = x;
     while (n > 0) {
         if (n % 2 == 1) {
+            std::cout << "OK" << std::endl;
             add(k, k, tmp_P);
         }
         
-        add(tmp_P, tmp_P, P);
+        add(tmp_P, tmp_P, tmp_P);
         n >>= 1;
+        
     }
     R.x = k.x;
     R.y = k.y;
@@ -220,5 +232,15 @@ bool isEqual(const Point& P, const Point& Q) {
     mul(v, Q.x, P.z); // X' * Z
  
     return (s == t) && (u == v);
+}
+
+void print(const Point& P) {
+    if (P.z == zero) {
+        std::cout << "(0 : 1 : 0)" << std::endl;
+    } else {
+        Fp x_z, y_z;
+        P.xy(x_z, y_z);
+        std::cout << "(" << x_z.value << " : " << y_z.value << " : 1)" << std::endl;
+    }
 }
 
