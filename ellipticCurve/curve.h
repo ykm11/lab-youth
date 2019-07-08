@@ -8,7 +8,8 @@ class Point;
 bool isEqual(const Point& P, const Point& Q);
 void add(Point& R, const Point& P, const Point& Q);
 void sub(Point& R, const Point& P, const Point& Q);
-void mul(Point& R, const Point& P, const Fp& x); // scalar multiplying
+void mul(Point& R, const Point& P, const mpz_class& x); // scalar multiplying
+
 
 class Point {
 public:
@@ -30,21 +31,25 @@ public:
         return r;
     }
 
-    bool operator==(const Point& other) const {
-        return isEqual(*this, other);
-    }
-
-    Point operator*(const Fp& x) const { // 右からかける P*x
+    Point operator*(const mpz_class& x) const {
         Point r;
+        //Fp d = Fp(x);
+        //mul(r, *this, d);
         mul(r, *this, x);
         return r;
     }
 
-    Point operator*(const mpz_class& x) const {
-        Point r;
-        Fp d = Fp(x);
-        mul(r, *this, d);
-        return r;
+    bool operator==(const Point& other) const {
+        return isEqual(*this, other);
+    }
+
+
+    void xy(Fp& s, Fp& t) { // 射影座標からアフィン座標へ
+        Fp inv_z;
+        invmod(inv_z, z);
+        
+        mul(s, x, inv_z); // s <- X/Z
+        mul(t, y, inv_z); // t <- Y/Z
     }
 
 };
@@ -187,18 +192,18 @@ void sub(Point& R, const Point& P, const Point& Q) {
     add(R, P, minus_Q);
 }
 
-void mul(Point& R, const Point& P, const Fp& x) {
+void mul(Point& R, const Point& P, const mpz_class& x) {
     Point k = Point(zero, one, zero);
     Point tmp_P = P;
 
-    Fp n = x;
-    while (n.value > 0) {
-        if (n.value % 2 == 1) {
+    mpz_class n = x;
+    while (n > 0) {
+        if (n % 2 == 1) {
             add(k, k, tmp_P);
         }
         
         add(tmp_P, tmp_P, P);
-        n.value >>= 1;
+        n >>= 1;
     }
     R.x = k.x;
     R.y = k.y;
@@ -208,11 +213,11 @@ void mul(Point& R, const Point& P, const Fp& x) {
 bool isEqual(const Point& P, const Point& Q) {
     Fp s, t, u, v;
 
-    mul(s, Q.x, P.y);
-    mul(t, P.x, Q.y);
+    mul(s, P.x, Q.y); // X  * Y'
+    mul(t, Q.x, P.y); // X' * Y
     
-    mul(u, P.x, Q.z);
-    mul(v, Q.x, P.z);
+    mul(u, P.x, Q.z); // X  * Z'
+    mul(v, Q.x, P.z); // X' * Z
  
     return (s == t) && (u == v);
 }

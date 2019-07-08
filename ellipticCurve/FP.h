@@ -3,6 +3,7 @@ class Fp;
 void add(Fp& z, const Fp& x, const Fp& y);
 void sub(Fp& z, const Fp& x, const Fp& y);
 void mul(Fp& z, const Fp& x, const Fp& y);
+void invmod(Fp& r, const Fp& x);
 
 class Fp {
 public:
@@ -66,6 +67,12 @@ void mul(Fp& z, const Fp& x, const Fp& y) {
     if (z.value < 0) {
         z.value += z.modulus;
     }
+}
+
+void invmod(Fp& r, const Fp& x) {
+    mpz_class p_2 = x.modulus - 2;
+    mpz_powm_sec(r.value.get_mpz_t(), x.value.get_mpz_t(),
+            p_2.get_mpz_t(), x.modulus.get_mpz_t()); // r <- x^{p-2} mod p = a^{-1}
 }
 
 Fp eight = Fp(8);
