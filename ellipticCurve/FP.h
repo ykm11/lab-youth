@@ -1,3 +1,4 @@
+#pragma once
 
 class Fp;
 void add(Fp& z, const Fp& x, const Fp& y);
@@ -14,7 +15,7 @@ public:
     Fp() { }
     Fp(const mpz_class& v) : value(v) { }
     //Fp(mpz_class v) : value(std::move(v)) { }
-     
+    ~Fp() = default; 
 
     static void setModulo(const mpz_class& v) {
         modulus = v;

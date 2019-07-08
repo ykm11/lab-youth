@@ -1,20 +1,32 @@
 #include<iostream>
 #include "curve.h"
 
+
 int main() {
-    Fp::setModulo(19);
+    mpz_class p = 65537;
+    Fp::setModulo(p);
 
-    EllipticCurve EC = EllipticCurve(2, 3);
+    mpz_class a = mpz_class("0", 10);
+    mpz_class b = mpz_class("0", 10);
 
+    EllipticCurve EC = EllipticCurve(a, b);
 
-    Point P = EC.point(1, 5);
-    Point Q = EC.point(3, 6);
-    std::cout << P.x.value << " " << P.y.value << " " << P.z.value << std::endl;
-    std::cout << Q.x.value << " " << Q.y.value << " " << Q.z.value << std::endl;
+    Fp x, y, inv_y, inv_g;
+    Fp g, d;
 
-    Point R = P + P;
-    std::cout << R.x.value << " " << R.y.value << " " << R.z.value << std::endl;
+    Point P = EC(2, 8160);
+    print(P);
+    P.xy(x, y);
+    invmod(inv_y, y); // inv_y := y^{-1}
+    mul(g, x, inv_y); // x / y
 
-    R = P*3;
-    std::cout << R.x.value << " " << R.y.value << " " << R.z.value << std::endl;
+    Point R = P*18;
+    print(R);
+    R.xy(x, y);
+    invmod(inv_y, y); 
+    mul(y, x, inv_y); // x / y
+
+    invmod(inv_g, g); 
+    mul(d, y, inv_g);
+    std::cout << d.value << std::endl;
 }
