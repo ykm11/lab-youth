@@ -7,6 +7,9 @@ void mul(Fp& z, const Fp& x, const Fp& y);
 void invmod(Fp& r, const Fp& x);
 bool isEq(const Fp& x, const Fp& y);
 
+void mod(Fp& r, const Fp& x, const mpz_class& modulus);
+
+
 class Fp {
 public:
     static mpz_class modulus;
@@ -37,6 +40,12 @@ public:
         Fp z; 
         mul(z, *this, other); 
         return z; 
+    }
+
+    Fp operator%(const mpz_class& other) const { 
+        Fp z;
+        mod(z, *this, other);
+        return z;
     }
 
     bool operator==(const Fp& other) const {
@@ -74,6 +83,10 @@ void invmod(Fp& r, const Fp& x) {
     mpz_class p_2 = x.modulus - 2;
     mpz_powm_sec(r.value.get_mpz_t(), x.value.get_mpz_t(),
             p_2.get_mpz_t(), x.modulus.get_mpz_t()); // r <- x^{p-2} mod p = a^{-1}
+}
+
+void mod(Fp& z, const Fp& x, const mpz_class& modulus) {
+    z.value = z.value % modulus;
 }
 
 bool isEq(const Fp& x, const Fp& y) {
