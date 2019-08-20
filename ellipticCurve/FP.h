@@ -6,7 +6,6 @@ void add(Fp& z, const Fp& x, const Fp& y);
 void sub(Fp& z, const Fp& x, const Fp& y);
 void mul(Fp& z, const Fp& x, const Fp& y);
 void invmod(Fp& r, const Fp& x);
-void invmod2(Fp& r, const Fp& x);
 bool isEq(const Fp& x, const Fp& y);
 
 void mod(Fp& r, const Fp& x, const mpz_class& modulus);
@@ -84,14 +83,8 @@ void mul(Fp& z, const Fp& x, const Fp& y) {
     z.value = (x.value * y.value) % Fp::modulus;
 }
 
-void invmod(Fp& r, const Fp& x) { // mpz_invertを使った方が速いかも
-#if 0
-    mpz_class p_2 = x.modulus - 2;
-    mpz_powm_sec(r.value.get_mpz_t(), x.value.get_mpz_t(),
-            p_2.get_mpz_t(), x.modulus.get_mpz_t()); // r <- x^{p-2} mod p = a^{-1}
-#else
+void invmod(Fp& r, const Fp& x) { 
     mpz_invert(r.value.get_mpz_t(), x.value.get_mpz_t(), Fp::modulus.get_mpz_t());
-#endif
 }
 
 void mod(Fp& z, const mpz_class& modulus) {

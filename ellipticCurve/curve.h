@@ -1,3 +1,4 @@
+#pragma once
 #include<stdio.h>
 #include<gmpxx.h>
 #include<iostream>
@@ -36,8 +37,6 @@ public:
 
     Point operator*(const mpz_class& x) const {
         Point r;
-        //Fp d = Fp(x);
-        //mul(r, *this, d);
         mul(r, *this, x);
         return r;
     }
@@ -46,7 +45,6 @@ public:
         return isEqual(*this, other);
     }
 
-
     void xy(Fp& s, Fp& t) const { // 射影座標からアフィン座標へ
         Fp inv_z;
         invmod(inv_z, z);
@@ -54,7 +52,6 @@ public:
         mul(s, x, inv_z); // s <- X/Z
         mul(t, y, inv_z); // t <- Y/Z
     }
-
 };
 
 
@@ -70,7 +67,10 @@ public:
     //~EllipticCurve() = default;
 
     Point point(const mpz_class& x, const mpz_class& y) const {
-        Fp r, l, u;
+        Point P;
+        Fp r, l, u, one;
+        one = Fp(1);
+
         mul(l, y, y); // y^2
         mul(r, x, x);
         mul(r, r, x); // x^3
@@ -78,26 +78,65 @@ public:
         add(r, r, u); // x^3 + ax 
         add(r, r, b); // x^3 + ax + b
 
-        Point P;
         if (l == r) {
             P = Point(x, y, one);
-        } else { // 曲線に乗らない場合をどうするか
-            P = Point(zero, one, zero);
+        } else { // 曲線に乗らない場合はエラーを返すか例外を投げる
+            throw "Exception: Point does not exist on the curve";
         }
         return P;
     }
 
+    Point point(const mpz_class& x, const mpz_class& y, const mpz_class& z) const {
+        Point P;
+        Fp r, l, u, v, z2;
+
+        mul(z2, z, z);
+
+        mul(l, y, y);
+        mul(l, l, z); // z * y^2
+        mul(r, x, x);
+        mul(r, r, x); // x^3
+        mul(u, a, x); // ax
+        mul(u, u, z2); // ax * z^2
+        add(r, r, u); // x^3 + ax * z^2
+        mul(v, b, z);
+        mul(v, v, z2); // b * z^3
+        add(r, r, v); // x^3 + ax * z^2 + b * z^3
+
+        if (l == r) {
+            P = Point(x, y, z);
+        } else { // 曲線に乗らない場合はエラーを返すか例外を投げる
+            throw "Exception: Point does not exist on the curve";
+        }
+        return P;
+    }
+ 
     Point operator()(const mpz_class& x, const mpz_class& y) const {
         Point P = point(x, y);
         return P;
     }
 
+    Point operator()(const mpz_class& x, const mpz_class& y, const mpz_class& z) const {
+        Point P = point(x, y, z);
+        return P;
+    }
+
+
 };
-Fp EllipticCurve::a;
-Fp EllipticCurve::b;
+// static変数をヘッダファイルに置くと, 複数のファイルからincludeされるときにリンクエラーが起きる.
+//Fp EllipticCurve::a;
+//Fp EllipticCurve::b;
 
 
 void add(Point& R, const Point& P, const Point& Q) {
+    Fp eight, four, three, two, one, zero;
+    eight = Fp(8);
+    four = Fp(4);
+    three = Fp(3);
+    two = Fp(2);
+    one = Fp(1);
+    zero = Fp(0);
+
     if (P.z == zero) {
         R.x = Q.x;
         R.y = Q.y;
@@ -198,11 +237,15 @@ void add(Point& R, const Point& P, const Point& Q) {
 
 void sub(Point& R, const Point& P, const Point& Q) {
     Point minus_Q = Q;
-    sub(minus_Q.y, zero, minus_Q.y); // y <- p - y
+    sub(minus_Q.y, Fp::modulus, minus_Q.y); // y <- p - y
     add(R, P, minus_Q);
 }
 
 void mul(Point& R, const Point& P, const mpz_class& x) {
+    Fp one, zero;
+    one = Fp(1);
+    zero = Fp(0);
+
     Point k = Point(zero, one, zero);
     Point tmp_P = P;
 
@@ -234,7 +277,7 @@ bool isEqual(const Point& P, const Point& Q) {
 }
 
 void print(const Point& P) {
-    if (P.z == zero) {
+    if (P.z.value == 0) {
         std::cout << "(0 : 1 : 0)" << std::endl;
     } else {
         Fp x_z, y_z;
@@ -252,6 +295,7 @@ void pollard_rho_f(const Point& alpha, const Point& beta, Point& x,
 
     if (x_x.value % 3 == 0) {
         x = beta + x;
+
         b = (b + 1) % order;
     } else if (x_x.value % 3 == 1) {
         x = x * 2;
@@ -260,19 +304,21 @@ void pollard_rho_f(const Point& alpha, const Point& beta, Point& x,
     } else if(x_x.value % 3 == 2) {
         x = alpha + x;
         a = (a + 1) % order;
+
     }
 }
 
 mpz_class pollard_rho_ECDLP(const Point& alpha, const Point& beta, 
         const EllipticCurve& curve, const mpz_class& order) {
+    // beta = [x] * alpha
     mpz_class d = 0;
     mpz_class q_2 = order - 2;
     mpz_class a, b, A, B;
 
     a = 0; b = 0;
     A = 0; B = 0;
-    Point x = curve(0, 1);
-    Point X = curve(0, 1);
+    Point x = curve(0, 1, 0);
+    Point X = curve(0, 1, 0);
     
     for(int i = 0; i < order; i++) {
         pollard_rho_f(alpha, beta, x, a, b, order);
@@ -281,8 +327,7 @@ mpz_class pollard_rho_ECDLP(const Point& alpha, const Point& beta,
 
         if (x == X && !(A == 0 && a == 0 && b == 0 && B == 0)) {
             d = (B - b) % order;
-            mpz_powm_sec(d.get_mpz_t(), d.get_mpz_t(), 
-                    q_2.get_mpz_t(), order.get_mpz_t());
+            mpz_invert(d.get_mpz_t(), d.get_mpz_t(), order.get_mpz_t());
             d = (d * (a - A)) % order;
             if (d < 0) {
                 d = d + order;
