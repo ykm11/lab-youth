@@ -10,6 +10,7 @@ bool isEqual(const Point& P, const Point& Q);
 void add(Point& R, const Point& P, const Point& Q);
 void sub(Point& R, const Point& P, const Point& Q);
 void mul(Point& R, const Point& P, const mpz_class& x); // scalar multiplying
+void dbl(Point& R, const Point& P);
 
 void print(const Point& P);
 
@@ -93,19 +94,19 @@ public:
         mul(z2, z, z);
 
         mul(l, y, y);
-        mul(l, l, z); // z * y^2
+        mul(l, l, z); // Z * Y^2
         mul(r, x, x);
-        mul(r, r, x); // x^3
-        mul(u, a, x); // ax
-        mul(u, u, z2); // ax * z^2
-        add(r, r, u); // x^3 + ax * z^2
+        mul(r, r, x); // X^3
+        mul(u, a, x); // aX
+        mul(u, u, z2); // aX * Z^2
+        add(r, r, u); // X^3 + aX * Z^2
         mul(v, b, z);
-        mul(v, v, z2); // b * z^3
-        add(r, r, v); // x^3 + ax * z^2 + b * z^3
+        mul(v, v, z2); // b * Z^3
+        add(r, r, v); // X^3 + aX * Z^2 + b * Z^3
 
         if (l == r) {
             P = Point(x, y, z);
-        } else { // 曲線に乗らない場合はエラーを返すか例外を投げる
+        } else { 
             throw "Exception: Point does not exist on the curve";
         }
         return P;
@@ -251,17 +252,80 @@ void mul(Point& R, const Point& P, const mpz_class& x) {
 
     mpz_class n = x;
     while (n > 0) {
-        if (n % 2 == 1) {
+        if ((n % 2) == 1) {
             add(k, k, tmp_P);
         }
-        
-        add(tmp_P, tmp_P, tmp_P);
+        //add(tmp_P, tmp_P, tmp_P);
+        dbl(tmp_P, tmp_P);
         n >>= 1;
         
     }
     R.x = k.x;
     R.y = k.y;
     R.z = k.z;
+}
+
+void dbl(Point& R, const Point& P) {
+    Fp eight, four, three, two, one, zero;
+    eight = Fp(8);
+    four = Fp(4);
+    three = Fp(3);
+    two = Fp(2);
+    one = Fp(1);
+    zero = Fp(0);
+
+    if (P.z == zero) {
+        R.x = zero;
+        R.y = one;
+        R.z = zero;
+    } else {
+        Fp Rx, Ry, Rz;
+        Fp u, v, v2, w, s, t;
+
+        mul(s, three, P.x); // 3*X
+        mul(s, s, P.x); // 3*X^2
+        mul(t, EllipticCurve::a, P.z); // a*Z
+        mul(t, t, P.z); // a*Z^2
+        add(u, s, t); // 3*X^2 + a*Z^2
+    
+        mul(v, P.y, P.z); // Y*Z
+
+        mul(s, u, u); // u^2
+        mul(t, eight, P.x); // 8*X
+        mul(t, t, P.y); // 8*X*Y
+        mul(t, t, v); // 8*X*Y*v
+        sub(w, s, t); // u^2 - 8*X*Y*v
+
+        mul(Rx, two, v); // 2*v
+        mul(Rx, Rx, w); // Rx = 2*v*w
+
+        mul(s, four, P.x);
+        mul(s, s, P.y);
+        mul(s, s, v);
+        sub(s, s, w); // 4*X*Y*v - w
+        mul(s, s, u); // u(4*X*Y*v - w)
+
+        mul(v2, v, v); // v^2
+
+        mul(t, P.y, P.y);
+        mul(t, t, v2); // (Yv)^2
+        mul(t, t, eight); // 8(Yv)^2
+
+        sub(Ry, s, t); // Ry = u(4*X*Y*v - w) - 8(Yv)^2
+
+        mul(Rz, eight, v); // 8*v
+        mul(Rz, Rz, v2); // Rz = 8*v^3
+
+        if (Rz == zero) {
+            R.x = zero;    
+            R.y = one;    
+            R.z = zero;    
+        } else {
+            R.x = Rx;
+            R.y = Ry;
+            R.z = Rz;
+        }
+    }
 }
 
 bool isEqual(const Point& P, const Point& Q) {
@@ -310,7 +374,7 @@ void pollard_rho_f(const Point& alpha, const Point& beta, Point& x,
 
 mpz_class pollard_rho_ECDLP(const Point& alpha, const Point& beta, 
         const EllipticCurve& curve, const mpz_class& order) {
-    // beta = [x] * alpha
+    // beta = [d] * alpha
     mpz_class d = 0;
     mpz_class q_2 = order - 2;
     mpz_class a, b, A, B;
