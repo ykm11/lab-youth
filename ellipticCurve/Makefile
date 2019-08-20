@@ -8,7 +8,7 @@ all:
 clean:
 	-rm test
 
-./ec_test: 
+./ec_test: test.cpp FP.h
 	$(CXX) -o ec_test test.cpp $(CXXFLAGS) $(LDFLAGS)  
 
 test: ./ec_test
