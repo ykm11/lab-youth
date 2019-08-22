@@ -5,6 +5,7 @@ class Fp;
 void add(Fp& z, const Fp& x, const Fp& y);
 void sub(Fp& z, const Fp& x, const Fp& y);
 void mul(Fp& z, const Fp& x, const Fp& y);
+void mul(Fp& z, const Fp& x, int scalar);
 void invmod(Fp& r, const Fp& x);
 bool isEq(const Fp& x, const Fp& y);
 
@@ -82,6 +83,11 @@ void mul(Fp& z, const Fp& x, const Fp& y) {
     z.value = (x.value * y.value) % Fp::modulus;
 }
 
+void mul(Fp& z, const Fp& x, int scalar) {
+    z.value = (x.value * scalar);
+    z.value %= Fp::modulus;
+}
+
 void invmod(Fp& r, const Fp& x) { 
     mpz_invert(r.value.get_mpz_t(), x.value.get_mpz_t(), Fp::modulus.get_mpz_t());
 }
@@ -89,4 +95,5 @@ void invmod(Fp& r, const Fp& x) {
 bool isEq(const Fp& x, const Fp& y) {
     return x.value == y.value;
 }
+
 

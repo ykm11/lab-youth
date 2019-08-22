@@ -2,7 +2,7 @@ target=main
 CXXFLAGS=-Wall -Wextra -O3 -std=c++17
 LDFLAGS=-lgmpxx -lgmp
 
-./main: main.cpp
+./main: main.cpp FP.h curve.h
 	$(CXX) -o main main.cpp -lgmpxx -lgmp -std=c++17 
 
 clean:
