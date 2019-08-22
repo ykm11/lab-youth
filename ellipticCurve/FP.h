@@ -56,8 +56,9 @@ public:
         return !isEq(*this, other);
     }
 
-    static void mulInt(Fp& z, const Fp& x, const mpz_class& scalar) {
-        mul(z, x, scalar);
+    static void mulInt(Fp& z, const Fp& x, int scalar) {
+        z.value = x.value * scalar;
+        z.value %= modulus;
     }
 
 };

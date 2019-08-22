@@ -106,6 +106,6 @@ void isEqual_fp_test() {
 int main() {
     //order_test();
     //isEqual_fp_test();
-    //benchmark_fp();
+    benchmark_fp();
     benchmark_ec();
 }
