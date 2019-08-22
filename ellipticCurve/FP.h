@@ -89,12 +89,3 @@ bool isEq(const Fp& x, const Fp& y) {
     return x.value == y.value;
 }
 
-
-/*
-Fp eight = Fp(8);
-Fp four = Fp(4);
-Fp three = Fp(3);
-Fp two = Fp(2);
-Fp one = Fp(1);
-Fp zero = Fp(0);
-*/

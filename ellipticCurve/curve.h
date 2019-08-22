@@ -46,6 +46,10 @@ public:
         return isEqual(*this, other);
     }
 
+    bool operator!=(const Point& other) const {
+        return !isEqual(*this, other);
+    }
+
     void xy(Fp& s, Fp& t) const { // 射影座標からアフィン座標へ
         Fp inv_z;
         invmod(inv_z, z);
@@ -122,6 +126,66 @@ public:
         return P;
     }
 
+    static void dbl(Point& R, const Point& P) {
+        if (P.z.value == 0) {
+            R.x.value = 0;
+            R.y.value = 1;
+            R.z.value = 0;
+        } else {
+            Fp Rx, Ry, Rz;
+            Fp u, v, v2, w, s, t;
+
+            Fp::mulInt(s, P.x, 3);
+            //mul(s, three, P.x); // 3*X
+            mul(s, s, P.x); // 3*X^2
+            mul(t, a, P.z); // a*Z
+            mul(t, t, P.z); // a*Z^2
+            add(u, s, t); // 3*X^2 + a*Z^2
+        
+            mul(v, P.y, P.z); // Y*Z
+
+            mul(s, u, u); // u^2
+            Fp::mulInt(t, P.x, 8);
+            //mul(t, eight, P.x); // 8*X
+            mul(t, t, P.y); // 8*X*Y
+            mul(t, t, v); // 8*X*Y*v
+            sub(w, s, t); // u^2 - 8*X*Y*v
+
+            Fp::mulInt(Rx, v, 2);
+            //mul(Rx, two, v); // 2*v
+            mul(Rx, Rx, w); // Rx = 2*v*w
+
+            Fp::mulInt(s, P.x, 4);
+            //mul(s, four, P.x);
+            mul(s, s, P.y);
+            mul(s, s, v);
+            sub(s, s, w); // 4*X*Y*v - w
+            mul(s, s, u); // u(4*X*Y*v - w)
+
+            mul(v2, v, v); // v^2
+
+            mul(t, P.y, P.y);
+            mul(t, t, v2); // (Yv)^2
+            Fp::mulInt(t, t, 8);
+            //mul(t, t, eight); // 8(Yv)^2
+
+            sub(Ry, s, t); // Ry = u(4*X*Y*v - w) - 8(Yv)^2
+
+            Fp::mulInt(Rz, v, 8);
+            //mul(Rz, eight, v); // 8*v
+            mul(Rz, Rz, v2); // Rz = 8*v^3
+
+            if (Rz.value == 0) {
+                R.x.value = 0;    
+                R.y.value = 1;    
+                R.z.value = 0;    
+            } else {
+                R.x = Rx;
+                R.y = Ry;
+                R.z = Rz;
+            }
+        }
+    }
 
 };
 // static変数をヘッダファイルに置くと, 複数のファイルからincludeされるときにリンクエラーが起きる.
@@ -130,15 +194,6 @@ public:
 
 
 void add(Point& R, const Point& P, const Point& Q) {
-    /*
-    Fp eight, four, three, two, one, zero;
-    eight = Fp(8);
-    four = Fp(4);
-    three = Fp(3);
-    two = Fp(2);
-    one = Fp(1);
-    zero = Fp(0);
-    */
 
     if (P.z.value == 0) {
         R.x = Q.x;
@@ -151,6 +206,9 @@ void add(Point& R, const Point& P, const Point& Q) {
     } else {
         Fp Rx, Ry, Rz;
         if (isEqual(P, Q)) { // if P == Q then Doubling
+#if 1
+            return EllipticCurve::dbl(R, P);
+#else
             Fp u, v, v2, w, s, t;
 
             Fp::mulInt(s, P.x, 3);
@@ -192,7 +250,7 @@ void add(Point& R, const Point& P, const Point& Q) {
             Fp::mulInt(Rz, v, 8);
             //mul(Rz, eight, v); // 8*v
             mul(Rz, Rz, v2); // Rz = 8*v^3
-
+#endif
         } else { // otherwise, Adding
             Fp u, v, v2, v3, w, s, t;
 
@@ -265,74 +323,13 @@ void mul(Point& R, const Point& P, const mpz_class& x) {
             add(k, k, tmp_P);
         }
         //add(tmp_P, tmp_P, tmp_P);
-        dbl(tmp_P, tmp_P);
+        EllipticCurve::dbl(tmp_P, tmp_P);
         n >>= 1;
         
     }
     R.x = k.x;
     R.y = k.y;
     R.z = k.z;
-}
-
-void dbl(Point& R, const Point& P) {
-    if (P.z.value == 0) {
-        R.x.value = 0;
-        R.y.value = 1;
-        R.z.value = 0;
-    } else {
-        Fp Rx, Ry, Rz;
-        Fp u, v, v2, w, s, t;
-
-        Fp::mulInt(s, P.x, 3);
-        //mul(s, three, P.x); // 3*X
-        mul(s, s, P.x); // 3*X^2
-        mul(t, EllipticCurve::a, P.z); // a*Z
-        mul(t, t, P.z); // a*Z^2
-        add(u, s, t); // 3*X^2 + a*Z^2
-    
-        mul(v, P.y, P.z); // Y*Z
-
-        mul(s, u, u); // u^2
-        Fp::mulInt(t, P.x, 8);
-        //mul(t, eight, P.x); // 8*X
-        mul(t, t, P.y); // 8*X*Y
-        mul(t, t, v); // 8*X*Y*v
-        sub(w, s, t); // u^2 - 8*X*Y*v
-
-        Fp::mulInt(Rx, v, 2);
-        //mul(Rx, two, v); // 2*v
-        mul(Rx, Rx, w); // Rx = 2*v*w
-
-        Fp::mulInt(s, P.x, 4);
-        //mul(s, four, P.x);
-        mul(s, s, P.y);
-        mul(s, s, v);
-        sub(s, s, w); // 4*X*Y*v - w
-        mul(s, s, u); // u(4*X*Y*v - w)
-
-        mul(v2, v, v); // v^2
-
-        mul(t, P.y, P.y);
-        mul(t, t, v2); // (Yv)^2
-        Fp::mulInt(t, t, 8);
-        //mul(t, t, eight); // 8(Yv)^2
-
-        sub(Ry, s, t); // Ry = u(4*X*Y*v - w) - 8(Yv)^2
-
-        Fp::mulInt(Rz, v, 8);
-        //mul(Rz, eight, v); // 8*v
-        mul(Rz, Rz, v2); // Rz = 8*v^3
-
-        if (Rz.value == 0) {
-            R.x.value = 0;    
-            R.y.value = 1;    
-            R.z.value = 0;    
-        } else {
-            R.x = Rx;
-            R.y = Ry;
-            R.z = Rz;
-        }
-    }
 }
 
 bool isEqual(const Point& P, const Point& Q) {
