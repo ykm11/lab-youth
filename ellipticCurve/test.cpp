@@ -17,6 +17,8 @@ void benchmark_ec() {
     std::cout << "[*] EC benchmark\n";
     mpz_class a = mpz_class("0", 10);
     mpz_class b = mpz_class("7", 10);
+    mpz_class p = mpz_class("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F", 16);
+    Fp::setModulo(p);
 
     EllipticCurve EC = EllipticCurve(a, b);
     mpz_class q = mpz_class("117289373161954235709850086879078528375642790749043841647", 10);
@@ -25,13 +27,15 @@ void benchmark_ec() {
 
     Point G = EC.point(gx, gy);
     Point R;
-    const int n = 100;
+    add(R, G, G);
+    const int n = 100000;
     time_t begin = clock();
     for(int i = 0; i < n; i++) {
-        mul(R, G, q);
+        //mul(R, G, q);
+        add(R, R, G);
     }
     time_t end = clock();
-    printf("\ttime = %fusec\n", (end - begin) / double(CLOCKS_PER_SEC) / n * 1e3);
+    printf("\ttime = %fusec\n", (end - begin) / double(CLOCKS_PER_SEC) / n * 1e6);
 }
 
 void benchmark_fp() {
@@ -100,8 +104,8 @@ void isEqual_fp_test() {
 }
 
 int main() {
-    order_test();
-    isEqual_fp_test();
-    benchmark_fp();
+    //order_test();
+    //isEqual_fp_test();
+    //benchmark_fp();
     benchmark_ec();
 }

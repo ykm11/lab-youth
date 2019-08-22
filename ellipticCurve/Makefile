@@ -2,11 +2,12 @@ target=main
 CXXFLAGS=-Wall -Wextra -O3 -std=c++17
 LDFLAGS=-lgmpxx -lgmp
 
-all:
-	g++ ${target}.cpp -lgmpxx -lgmp -o $(target) -std=c++17 
+./main: main.cpp
+	$(CXX) -o main main.cpp -lgmpxx -lgmp -std=c++17 
 
 clean:
-	-rm test
+	rm ./ec_test
+	rm ./main
 
 ./ec_test: test.cpp FP.h
 	$(CXX) -o ec_test test.cpp $(CXXFLAGS) $(LDFLAGS)  

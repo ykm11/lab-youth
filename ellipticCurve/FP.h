@@ -8,8 +8,6 @@ void mul(Fp& z, const Fp& x, const Fp& y);
 void invmod(Fp& r, const Fp& x);
 bool isEq(const Fp& x, const Fp& y);
 
-void mod(Fp& r, const Fp& x, const mpz_class& modulus);
-
 
 class Fp {
 public:
@@ -23,7 +21,9 @@ public:
         }
     }
     //Fp(mpz_class v) : value(std::move(v)) { }
-    Fp(const std::string& str, const int base) {
+
+    //Fp(const std::string& str, const int base) {
+    Fp(const std::string& str, int base) { // const はつけなくてよい
         Fp(mpz_class(str, base));
     }
 
@@ -49,17 +49,15 @@ public:
         return z; 
     }
 
-    Fp operator%(const mpz_class& other) const { 
-        Fp z;
-        mod(z, *this, other);
-        return z;
-    }
-
     bool operator==(const Fp& other) const {
         return isEq(*this, other);
     }
     bool operator!=(const Fp& other) const {
         return !isEq(*this, other);
+    }
+
+    static void mulInt(Fp& z, const Fp& x, const mpz_class& scalar) {
+        mul(z, x, scalar);
     }
 
 };
@@ -87,13 +85,10 @@ void invmod(Fp& r, const Fp& x) {
     mpz_invert(r.value.get_mpz_t(), x.value.get_mpz_t(), Fp::modulus.get_mpz_t());
 }
 
-void mod(Fp& z, const mpz_class& modulus) {
-    z.value = z.value % modulus;
-}
-
 bool isEq(const Fp& x, const Fp& y) {
     return x.value == y.value;
 }
+
 
 /*
 Fp eight = Fp(8);

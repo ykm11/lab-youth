@@ -80,7 +80,7 @@ public:
         add(r, r, b); // x^3 + ax + b
 
         if (l == r) {
-            P = Point(x, y, one);
+            P = Point(x, y, Fp(1));
         } else { // 曲線に乗らない場合はエラーを返すか例外を投げる
             throw "Exception: Point does not exist on the curve";
         }
@@ -130,6 +130,7 @@ public:
 
 
 void add(Point& R, const Point& P, const Point& Q) {
+    /*
     Fp eight, four, three, two, one, zero;
     eight = Fp(8);
     four = Fp(4);
@@ -137,12 +138,13 @@ void add(Point& R, const Point& P, const Point& Q) {
     two = Fp(2);
     one = Fp(1);
     zero = Fp(0);
+    */
 
-    if (P.z == zero) {
+    if (P.z.value == 0) {
         R.x = Q.x;
         R.y = Q.y;
         R.z = Q.z;
-    } else if (Q.z == zero) {
+    } else if (Q.z.value == 0) {
         R.x = P.x;
         R.y = P.y;
         R.z = P.z;
@@ -151,7 +153,8 @@ void add(Point& R, const Point& P, const Point& Q) {
         if (isEqual(P, Q)) { // if P == Q then Doubling
             Fp u, v, v2, w, s, t;
 
-            mul(s, three, P.x); // 3*X
+            Fp::mulInt(s, P.x, 3);
+            //mul(s, three, P.x); // 3*X
             mul(s, s, P.x); // 3*X^2
             mul(t, EllipticCurve::a, P.z); // a*Z
             mul(t, t, P.z); // a*Z^2
@@ -160,15 +163,18 @@ void add(Point& R, const Point& P, const Point& Q) {
             mul(v, P.y, P.z); // Y*Z
 
             mul(s, u, u); // u^2
-            mul(t, eight, P.x); // 8*X
+            Fp::mulInt(t, P.x, 8);
+            //mul(t, eight, P.x); // 8*X
             mul(t, t, P.y); // 8*X*Y
             mul(t, t, v); // 8*X*Y*v
             sub(w, s, t); // u^2 - 8*X*Y*v
 
-            mul(Rx, two, v); // 2*v
+            Fp::mulInt(Rx, v, 2);
+            //mul(Rx, two, v); // 2*v
             mul(Rx, Rx, w); // Rx = 2*v*w
 
-            mul(s, four, P.x);
+            Fp::mulInt(s, P.x, 4);
+            //mul(s, four, P.x);
             mul(s, s, P.y);
             mul(s, s, v);
             sub(s, s, w); // 4*X*Y*v - w
@@ -178,11 +184,13 @@ void add(Point& R, const Point& P, const Point& Q) {
 
             mul(t, P.y, P.y);
             mul(t, t, v2); // (Yv)^2
-            mul(t, t, eight); // 8(Yv)^2
+            Fp::mulInt(t, t, 8);
+            //mul(t, t, eight); // 8(Yv)^2
 
             sub(Ry, s, t); // Ry = u(4*X*Y*v - w) - 8(Yv)^2
 
-            mul(Rz, eight, v); // 8*v
+            Fp::mulInt(Rz, v, 8);
+            //mul(Rz, eight, v); // 8*v
             mul(Rz, Rz, v2); // Rz = 8*v^3
 
         } else { // otherwise, Adding
@@ -199,7 +207,8 @@ void add(Point& R, const Point& P, const Point& Q) {
             mul(v2, v, v); // v^2
             mul(v3, v2, v); // v^3
 
-            mul(t, two, v2); // 2 * v^2
+            Fp::mulInt(t, v2, 2);
+            //mul(t, two, v2); // 2 * v^2
             mul(t, t, P.x); // 2 * v^2 * X1
             mul(t, t, Q.z); //  2 * v^2 * X1*Z2
 
@@ -224,10 +233,10 @@ void add(Point& R, const Point& P, const Point& Q) {
             mul(Rz, Rz, Q.z); // Rz = v^3 * Z1 * Z2
         }
 
-        if (Rz == zero) {
-            R.x = zero;    
-            R.y = one;    
-            R.z = zero;    
+        if (Rz.value == 0) {
+            R.x.value = 0;    
+            R.y.value = 1;    
+            R.z.value = 0;    
         } else {
             R.x = Rx;
             R.y = Ry;
@@ -266,23 +275,16 @@ void mul(Point& R, const Point& P, const mpz_class& x) {
 }
 
 void dbl(Point& R, const Point& P) {
-    Fp eight, four, three, two, one, zero;
-    eight = Fp(8);
-    four = Fp(4);
-    three = Fp(3);
-    two = Fp(2);
-    one = Fp(1);
-    zero = Fp(0);
-
-    if (P.z == zero) {
-        R.x = zero;
-        R.y = one;
-        R.z = zero;
+    if (P.z.value == 0) {
+        R.x.value = 0;
+        R.y.value = 1;
+        R.z.value = 0;
     } else {
         Fp Rx, Ry, Rz;
         Fp u, v, v2, w, s, t;
 
-        mul(s, three, P.x); // 3*X
+        Fp::mulInt(s, P.x, 3);
+        //mul(s, three, P.x); // 3*X
         mul(s, s, P.x); // 3*X^2
         mul(t, EllipticCurve::a, P.z); // a*Z
         mul(t, t, P.z); // a*Z^2
@@ -291,15 +293,18 @@ void dbl(Point& R, const Point& P) {
         mul(v, P.y, P.z); // Y*Z
 
         mul(s, u, u); // u^2
-        mul(t, eight, P.x); // 8*X
+        Fp::mulInt(t, P.x, 8);
+        //mul(t, eight, P.x); // 8*X
         mul(t, t, P.y); // 8*X*Y
         mul(t, t, v); // 8*X*Y*v
         sub(w, s, t); // u^2 - 8*X*Y*v
 
-        mul(Rx, two, v); // 2*v
+        Fp::mulInt(Rx, v, 2);
+        //mul(Rx, two, v); // 2*v
         mul(Rx, Rx, w); // Rx = 2*v*w
 
-        mul(s, four, P.x);
+        Fp::mulInt(s, P.x, 4);
+        //mul(s, four, P.x);
         mul(s, s, P.y);
         mul(s, s, v);
         sub(s, s, w); // 4*X*Y*v - w
@@ -309,17 +314,19 @@ void dbl(Point& R, const Point& P) {
 
         mul(t, P.y, P.y);
         mul(t, t, v2); // (Yv)^2
-        mul(t, t, eight); // 8(Yv)^2
+        Fp::mulInt(t, t, 8);
+        //mul(t, t, eight); // 8(Yv)^2
 
         sub(Ry, s, t); // Ry = u(4*X*Y*v - w) - 8(Yv)^2
 
-        mul(Rz, eight, v); // 8*v
+        Fp::mulInt(Rz, v, 8);
+        //mul(Rz, eight, v); // 8*v
         mul(Rz, Rz, v2); // Rz = 8*v^3
 
-        if (Rz == zero) {
-            R.x = zero;    
-            R.y = one;    
-            R.z = zero;    
+        if (Rz.value == 0) {
+            R.x.value = 0;    
+            R.y.value = 1;    
+            R.z.value = 0;    
         } else {
             R.x = Rx;
             R.y = Ry;
@@ -376,7 +383,6 @@ mpz_class pollard_rho_ECDLP(const Point& alpha, const Point& beta,
         const EllipticCurve& curve, const mpz_class& order) {
     // beta = [d] * alpha
     mpz_class d = 0;
-    mpz_class q_2 = order - 2;
     mpz_class a, b, A, B;
 
     a = 0; b = 0;
