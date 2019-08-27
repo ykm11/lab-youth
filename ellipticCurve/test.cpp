@@ -1,6 +1,7 @@
 #include<iostream>
 #include "curve.h"
 #include<time.h>
+#include<mimalloc.h>
 
 #include "FP.h"
 
@@ -28,7 +29,7 @@ void benchmark_ec() {
     Point G = EC.point(gx, gy);
     Point R;
     add(R, G, G);
-    const int n = 100000;
+    const int n = 1000000;
     time_t begin = clock();
     for(int i = 0; i < n; i++) {
         //mul(R, G, q);
@@ -68,11 +69,12 @@ void order_test() {
     mpz_class gx = mpz_class("79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798", 16);
     mpz_class gy = mpz_class("483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8", 16);
 
-    Point G = EllipticCurve::point(gx, gy);
+    Point G = EC(gx, gy);
     Point R;
     R = G*n;
 
-    Point O = EllipticCurve::point(0, 1, 0);
+    //Point O = EllipticCurve::point(0, 1, 0);
+    Point O = EC(0, 1, 0);
     if (R == O) {
         std::cout << "[*] order test: OK" << std::endl;
     } else {
