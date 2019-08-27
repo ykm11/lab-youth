@@ -21,6 +21,7 @@ public:
 
     Point() {}
     Point(const Fp& X, const Fp& Y, const Fp& Z) : x(X), y(Y), z(Z) {}
+    Point(const mpz_class& X, const mpz_class& Y, const mpz_class& Z) : x(X), y(Y), z(Z) {}
     //~Point() = default;
 
 
@@ -71,10 +72,9 @@ public:
     }
     //~EllipticCurve() = default;
 
-    Point point(const mpz_class& x, const mpz_class& y) const {
+    static Point point(const mpz_class& x, const mpz_class& y) {
         Point P;
-        Fp r, l, u, one;
-        one = Fp(1);
+        Fp r, l, u;
 
         mul(l, y, y); // y^2
         mul(r, x, x);
@@ -84,14 +84,15 @@ public:
         add(r, r, b); // x^3 + ax + b
 
         if (l == r) {
-            P = Point(x, y, Fp(1));
+            P = Point(x, y, 1);
+            //P = Point(x, y, Fp(1));
         } else { // 曲線に乗らない場合はエラーを返すか例外を投げる
             throw "Exception: Point does not exist on the curve";
         }
         return P;
     }
 
-    Point point(const mpz_class& x, const mpz_class& y, const mpz_class& z) const {
+    static Point point(const mpz_class& x, const mpz_class& y, const mpz_class& z) {
         Point P;
         Fp r, l, u, v, z2;
 
@@ -117,14 +118,15 @@ public:
     }
  
     Point operator()(const mpz_class& x, const mpz_class& y) const {
-        Point P = point(x, y);
+        Point P = EllipticCurve::point(x, y);
         return P;
     }
 
     Point operator()(const mpz_class& x, const mpz_class& y, const mpz_class& z) const {
-        Point P = point(x, y, z);
+        Point P = EllipticCurve::point(x, y, z);
         return P;
     }
+
 
     static void dbl(Point& R, const Point& P) {
         if (P.z.value == 0) {
@@ -186,7 +188,6 @@ public:
             }
         }
     }
-
 };
 // static変数をヘッダファイルに置くと, 複数のファイルからincludeされるときにリンクエラーが起きる.
 //Fp EllipticCurve::a;
@@ -310,11 +311,15 @@ void sub(Point& R, const Point& P, const Point& Q) {
 }
 
 void mul(Point& R, const Point& P, const mpz_class& x) {
+#if 0
     Fp one, zero;
     one = Fp(1);
     zero = Fp(0);
 
     Point k = Point(zero, one, zero);
+#else
+    Point k = Point(0, 1, 0);
+#endif
     Point tmp_P = P;
 
     mpz_class n = x;

@@ -68,11 +68,11 @@ void order_test() {
     mpz_class gx = mpz_class("79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798", 16);
     mpz_class gy = mpz_class("483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8", 16);
 
-    Point G = EC.point(gx, gy);
+    Point G = EllipticCurve::point(gx, gy);
     Point R;
     R = G*n;
 
-    Point O = EC.point(0, 1, 0);
+    Point O = EllipticCurve::point(0, 1, 0);
     if (R == O) {
         std::cout << "[*] order test: OK" << std::endl;
     } else {
@@ -104,8 +104,8 @@ void isEqual_fp_test() {
 }
 
 int main() {
-    //order_test();
-    //isEqual_fp_test();
+    order_test();
+    isEqual_fp_test();
     benchmark_fp();
     benchmark_ec();
 }

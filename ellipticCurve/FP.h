@@ -23,9 +23,7 @@ public:
     }
     //Fp(mpz_class v) : value(std::move(v)) { }
 
-    //Fp(const std::string& str, const int base) {
-    Fp(const std::string& str, int base) { // const はつけなくてよい
-        Fp(mpz_class(str, base));
+    Fp(const std::string& str, int base) : value(mpz_class(str, base)) { // intにconst はつけなくてよい
     }
 
     static void setModulo(const mpz_class& v) {
