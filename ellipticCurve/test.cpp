@@ -1,7 +1,6 @@
 #include<iostream>
 #include "curve.h"
 #include<time.h>
-#include<mimalloc.h>
 
 #include "FP.h"
 
@@ -29,7 +28,7 @@ void benchmark_ec() {
     Point G = EC.point(gx, gy);
     Point R;
     add(R, G, G);
-    const int n = 1000000;
+    const int n = 100000;
     time_t begin = clock();
     for(int i = 0; i < n; i++) {
         //mul(R, G, q);
