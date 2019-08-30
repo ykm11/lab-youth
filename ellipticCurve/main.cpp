@@ -1,7 +1,6 @@
 #include<iostream>
 #include "curve.h"
 
-
 Fp EllipticCurve::a;
 Fp EllipticCurve::b;
 
@@ -19,7 +18,7 @@ int main() {
 
     mpz_class order = mpz_class("115792089237316195423570985008687907853269984665640564039457584007908834359200", 10);
 
-    mpz_class p_card = mpz_class("2", 10);
+    mpz_class p_card = mpz_class("237140208281", 10);
 
     px = mpz_class("55066263022277343669578718895168534326250603453777594175500187360389116729240", 10);
     py = mpz_class("82420052799988522717532479648954225145345455265426509542622303173620650331589", 10);
@@ -29,6 +28,9 @@ int main() {
     Point P = E(px, py);
     Point Q = E(qx, qy);
 
+    if ( order % p_card != 0) {
+        return 1;
+    }
     mpz_class beta = order / p_card;
 
     Point P_ = P * beta;
