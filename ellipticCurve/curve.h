@@ -189,69 +189,72 @@ void add(Point& R, const Point& P, const Point& Q) {
         R.x = Q.x;
         R.y = Q.y;
         R.z = Q.z;
-    } else if (Q.z.value == 0) {
+        return;
+    } 
+    if (Q.z.value == 0) {
         R.x = P.x;
         R.y = P.y;
         R.z = P.z;
+        return;
+    } 
+    Fp Rx, Ry, Rz;
+    Fp u, v, v2, v3, w, s, t;
+
+    mul(s, Q.y, P.z); // Y2 * Z1
+    mul(t, P.y, Q.z); // Y1 * Z2
+    sub(u, s, t); // Y2 * Z1 - Y1 * Z2
+
+    mul(s, Q.x, P.z); // X2 * Z1
+    mul(t, P.x, Q.z); // X1 * Z2
+    sub(v, s, t); // X2 * Z1 - X1 * Z2
+
+    if (u.value == 0 && v.value == 0) {
+        EllipticCurve::dbl(R, P);
+        return;
+    }
+    // otherwise, Adding
+
+    mul(v2, v, v); // v^2
+    mul(v3, v2, v); // v^3
+
+    Fp::mulInt(t, v2, 2); // 2 * v^2
+    mul(t, t, P.x); // 2 * v^2 * X1
+    mul(t, t, Q.z); //  2 * v^2 * X1*Z2
+
+    mul(s, u, u); // u^2
+    mul(s, s, P.z); // u^2 * Z1
+    mul(s, s, Q.z); // u^2 * Z1 * Z2
+    
+    sub(w, s, t); //  (u^2 * Z1 * Z2) - (2 * v^2 * X1*Z2)
+    sub(w, w, v3); // (u^2 * Z1 * Z2) - v^3 - (2 * v^2 * X1*Z2)
+
+    mul(Rx, v, w); // Rx = v * w
+
+    mul(t, v3, P.y); // v^3 * Y1
+    mul(t, t, Q.z); // v^3 * Y1 * Z2
+    mul(s, v2, P.x); // v^2 * X1
+    mul(s, s, Q.z); // v^2 * X1 * Z2
+    sub(s, s, w); // v^2 * X1 * Z2 - w
+    mul(s, s, u); // u(v^2 * X1 * Z2 - w)
+    sub(Ry, s, t); // Ry = u(v^2 * X1 * Z2 - w) -  v^3 * Y1 * Z2
+
+    mul(Rz, v3, P.z);
+    mul(Rz, Rz, Q.z); // Rz = v^3 * Z1 * Z2
+
+    if (Rz.value == 0) {
+        R.x.value = 0;    
+        R.y.value = 1;    
+        R.z.value = 0;    
     } else {
-        Fp Rx, Ry, Rz;
-        if (isEqual(P, Q)) { // if P == Q then Doubling
-            EllipticCurve::dbl(R, P);
-            // ここにreturnをいれると遅くなる
-        } else { // otherwise, Adding
-            Fp u, v, v2, v3, w, s, t;
-
-            mul(s, Q.y, P.z); // Y2 * Z1
-            mul(t, P.y, Q.z); // Y1 * Z2
-            sub(u, s, t); // Y2 * Z1 - Y1 * Z2
-
-            mul(s, Q.x, P.z); // X2 * Z1
-            mul(t, P.x, Q.z); // X1 * Z2
-            sub(v, s, t); // X2 * Z1 - X1 * Z2
-
-            mul(v2, v, v); // v^2
-            mul(v3, v2, v); // v^3
-
-            Fp::mulInt(t, v2, 2); // 2 * v^2
-            mul(t, t, P.x); // 2 * v^2 * X1
-            mul(t, t, Q.z); //  2 * v^2 * X1*Z2
-
-            mul(s, u, u); // u^2
-            mul(s, s, P.z); // u^2 * Z1
-            mul(s, s, Q.z); // u^2 * Z1 * Z2
-            
-            sub(w, s, t); //  (u^2 * Z1 * Z2) - (2 * v^2 * X1*Z2)
-            sub(w, w, v3); // (u^2 * Z1 * Z2) - v^3 - (2 * v^2 * X1*Z2)
-
-            mul(Rx, v, w); // Rx = v * w
-
-            mul(t, v3, P.y); // v^3 * Y1
-            mul(t, t, Q.z); // v^3 * Y1 * Z2
-            mul(s, v2, P.x); // v^2 * X1
-            mul(s, s, Q.z); // v^2 * X1 * Z2
-            sub(s, s, w); // v^2 * X1 * Z2 - w
-            mul(s, s, u); // u(v^2 * X1 * Z2 - w)
-            sub(Ry, s, t); // Ry = u(v^2 * X1 * Z2 - w) -  v^3 * Y1 * Z2
-
-            mul(Rz, v3, P.z);
-            mul(Rz, Rz, Q.z); // Rz = v^3 * Z1 * Z2
-        }
-
-            if (Rz.value == 0) {
-                R.x.value = 0;    
-                R.y.value = 1;    
-                R.z.value = 0;    
-            } else {
 #if 0
-                R.x = Rx;
-                R.y = Ry;
-                R.z = Rz;
+        R.x = Rx;
+        R.y = Ry;
+        R.z = Rz;
 #else
-                R.x.value = std::move(Rx.value);
-                R.y.value = std::move(Ry.value);
-                R.z.value = std::move(Rz.value);
+        R.x.value = std::move(Rx.value);
+        R.y.value = std::move(Ry.value);
+        R.z.value = std::move(Rz.value);
 #endif
-            }
     }
 }
 

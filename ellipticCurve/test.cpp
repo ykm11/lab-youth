@@ -1,4 +1,4 @@
-#if 1
+#ifdef USE_MIMALLOC
 /*
     g++ -O3 -DNDEBUG -I <mimalloc>/include <mimalloc>/build/libmimalloc.a -lpthread -lgmpxx -lgmp
 */

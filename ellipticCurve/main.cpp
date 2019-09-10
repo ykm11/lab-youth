@@ -1,5 +1,27 @@
+#ifdef USE_MIMALLOC
+/*
+    g++ -O3 -DNDEBUG -I /usr/local/lib/mimalloc/include /usr/local/lib/mimalloc/build/libmimalloc.a -lpthread -lgmpxx -lgmp ./main.cpp
+*/
+#include <gmp.h>
+#include <mimalloc.h>
+static struct UseMiMalloc {
+    static void* mi_realloc_wrapper(void *p, size_t, size_t n)
+    {
+        return mi_realloc(p, n);
+    }
+    static void mi_free_wrapper(void *p, size_t)
+    {
+        mi_free(p);
+    }
+    UseMiMalloc()
+    {
+        puts("set GMP memory functions before using mpz_class");
+        mp_set_memory_functions(mi_malloc, mi_realloc_wrapper, mi_free_wrapper);
+    }
+} g_UseMiMalloc;
+#endif
+
 #include<iostream>
-#include "curve.h"
 #include "attack_curve.h"
 
 mpz_class Fp::modulus;

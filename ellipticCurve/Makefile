@@ -3,7 +3,7 @@ OBJ=$(SRC:.cpp=.o)
 DEP=$(SRC:.cpp=.d)
 
 TARGET=main
-CXXFLAGS=-Wall -Wextra -O3 -std=c++17
+CXXFLAGS=-Wall -Wextra -O3 -std=c++17 -DNDEBUG
 LDFLAGS=-lgmpxx -lgmp
 
 all: $(TARGET)
@@ -26,6 +26,10 @@ clean:
 
 ./ec_test: test.cpp FP.h curve.h
 	$(CXX) -o ec_test test.cpp $(CXXFLAGS) $(LDFLAGS)  
+
+./ec_test_mi: test.cpp FP.h curve.h
+	$(CXX) -o ec_test_mi test.cpp $(CXXFLAGS) $(LDFLAGS) -I /usr/local/lib/mimalloc-1.0/include /usr/local/lib/mimalloc-1.0/libmimalloc.a -DUSE_MIMALLOC
+
 
 test: ./ec_test
 	./ec_test
