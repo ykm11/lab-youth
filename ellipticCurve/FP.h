@@ -16,11 +16,23 @@ public:
     mpz_class value; // 0 <= value < modulus
 
     Fp() { }
+#if 1
     Fp(const mpz_class& v) : value(v % modulus) {
         if(value < 0) {
             value += modulus;
         }
     }
+#else
+    Fp(const mpz_class& v) : value(v) {
+        if(v >= modulus) {
+            value %= modulus;
+        }
+        if(value < 0) {
+            value %= modulus;
+            value += modulus;
+        }
+    }
+#endif
     //Fp(mpz_class v) : value(std::move(v)) { }
 
     Fp(const std::string& str, int base) : value(mpz_class(str, base) % modulus) { // intにconst はつけなくてよい

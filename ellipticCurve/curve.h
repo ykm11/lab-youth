@@ -237,15 +237,21 @@ void add(Point& R, const Point& P, const Point& Q) {
             mul(Rz, Rz, Q.z); // Rz = v^3 * Z1 * Z2
         }
 
-        if (Rz.value == 0) {
-            R.x.value = 0;    
-            R.y.value = 1;    
-            R.z.value = 0;    
-        } else {
-            R.x = Rx;
-            R.y = Ry;
-            R.z = Rz;
-        }
+            if (Rz.value == 0) {
+                R.x.value = 0;    
+                R.y.value = 1;    
+                R.z.value = 0;    
+            } else {
+#if 0
+                R.x = Rx;
+                R.y = Ry;
+                R.z = Rz;
+#else
+                R.x.value = std::move(Rx.value);
+                R.y.value = std::move(Ry.value);
+                R.z.value = std::move(Rz.value);
+#endif
+            }
     }
 }
 

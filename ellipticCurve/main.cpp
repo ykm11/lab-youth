@@ -1,6 +1,8 @@
 #include<iostream>
 #include "curve.h"
+#include "attack_curve.h"
 
+mpz_class Fp::modulus;
 Fp EllipticCurve::a;
 Fp EllipticCurve::b;
 
