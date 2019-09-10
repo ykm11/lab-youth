@@ -23,7 +23,10 @@ public:
     }
     //Fp(mpz_class v) : value(std::move(v)) { }
 
-    Fp(const std::string& str, int base) : value(mpz_class(str, base)) { // intにconst はつけなくてよい
+    Fp(const std::string& str, int base) : value(mpz_class(str, base) % modulus) { // intにconst はつけなくてよい
+        if(value < 0) {
+            value += modulus;
+        }
     }
 
     static void setModulo(const mpz_class& v) {
@@ -61,7 +64,6 @@ public:
     }
 
 };
-mpz_class Fp::modulus;
 
 void add(Fp& z, const Fp& x, const Fp& y) {
     z.value = x.value + y.value;

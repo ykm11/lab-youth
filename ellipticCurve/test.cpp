@@ -5,11 +5,14 @@
 #include "FP.h"
 
 
+void benchmark_ec();
 void benchmark_fp();
 void isEqual_fp_test();
 void order_test();
+void ec_mul_test();
 
 
+mpz_class Fp::modulus;
 Fp EllipticCurve::a;
 Fp EllipticCurve::b;
 
@@ -54,6 +57,33 @@ void benchmark_fp() {
     }
     time_t end = clock();
     printf("\ttime = %fusec\n", (end - begin) / double(CLOCKS_PER_SEC) / n * 1e6);
+}
+
+void ec_mul_test() {
+    mpz_class p = mpz_class("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F", 16);
+    Fp::setModulo(p);
+
+    mpz_class a = mpz_class("0", 10);
+    mpz_class b = mpz_class("7", 10);
+
+    EllipticCurve EC = EllipticCurve(a, b);
+    mpz_class n = mpz_class("5792089237316195423570985008687907852837564279074904382605163141518161494337", 10); 
+    mpz_class gx = mpz_class("79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798", 16);
+    mpz_class gy = mpz_class("483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8", 16);
+
+    Point G = EC(gx, gy);
+    Point R;
+    R = G*n;
+
+    Fp x, y;
+    R.xy(x, y);
+    mpz_class Rx = mpz_class("24468494029366207626986019034967613638108911936555812085751778627749375846788", 10);
+    mpz_class Ry = mpz_class("64452411616332977820528608943388105946346351335284667932071435835634206415910", 10);
+    if (x.value == Rx && y.value == Ry) {
+        std::cout << "[*] EC mul test: OK" << std::endl;
+    } else {
+        std::cout << "[*] EC mul test: FAILED" << std::endl;
+    }
 }
 
 void order_test() {
@@ -106,6 +136,7 @@ void isEqual_fp_test() {
 
 int main() {
     order_test();
+    ec_mul_test();
     isEqual_fp_test();
     benchmark_fp();
     benchmark_ec();

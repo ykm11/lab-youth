@@ -196,51 +196,8 @@ void add(Point& R, const Point& P, const Point& Q) {
     } else {
         Fp Rx, Ry, Rz;
         if (isEqual(P, Q)) { // if P == Q then Doubling
-#if 1
             EllipticCurve::dbl(R, P);
-#else
-            Fp u, v, v2, w, s, t;
-
-            Fp::mulInt(s, P.x, 3);
-            //mul(s, three, P.x); // 3*X
-            mul(s, s, P.x); // 3*X^2
-            mul(t, EllipticCurve::a, P.z); // a*Z
-            mul(t, t, P.z); // a*Z^2
-            add(u, s, t); // 3*X^2 + a*Z^2
-        
-            mul(v, P.y, P.z); // Y*Z
-
-            mul(s, u, u); // u^2
-            Fp::mulInt(t, P.x, 8);
-            //mul(t, eight, P.x); // 8*X
-            mul(t, t, P.y); // 8*X*Y
-            mul(t, t, v); // 8*X*Y*v
-            sub(w, s, t); // u^2 - 8*X*Y*v
-
-            Fp::mulInt(Rx, v, 2);
-            //mul(Rx, two, v); // 2*v
-            mul(Rx, Rx, w); // Rx = 2*v*w
-
-            Fp::mulInt(s, P.x, 4);
-            //mul(s, four, P.x);
-            mul(s, s, P.y);
-            mul(s, s, v);
-            sub(s, s, w); // 4*X*Y*v - w
-            mul(s, s, u); // u(4*X*Y*v - w)
-
-            mul(v2, v, v); // v^2
-
-            mul(t, P.y, P.y);
-            mul(t, t, v2); // (Yv)^2
-            Fp::mulInt(t, t, 8);
-            //mul(t, t, eight); // 8(Yv)^2
-
-            sub(Ry, s, t); // Ry = u(4*X*Y*v - w) - 8(Yv)^2
-
-            Fp::mulInt(Rz, v, 8);
-            //mul(Rz, eight, v); // 8*v
-            mul(Rz, Rz, v2); // Rz = 8*v^3
-#endif
+            // ここにreturnをいれると遅くなる
         } else { // otherwise, Adding
             Fp u, v, v2, v3, w, s, t;
 
@@ -255,8 +212,7 @@ void add(Point& R, const Point& P, const Point& Q) {
             mul(v2, v, v); // v^2
             mul(v3, v2, v); // v^3
 
-            Fp::mulInt(t, v2, 2);
-            //mul(t, two, v2); // 2 * v^2
+            Fp::mulInt(t, v2, 2); // 2 * v^2
             mul(t, t, P.x); // 2 * v^2 * X1
             mul(t, t, Q.z); //  2 * v^2 * X1*Z2
 
