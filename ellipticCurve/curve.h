@@ -127,7 +127,6 @@ public:
         return P;
     }
 
-
     static void dbl(Point& R, const Point& P) {
         if (P.z.value == 0) {
             R.x.value = 0;
@@ -137,8 +136,7 @@ public:
             Fp Rx, Ry, Rz;
             Fp u, v, v2, w, s, t;
 
-            Fp::mulInt(s, P.x, 3);
-            //mul(s, three, P.x); // 3*X
+            Fp::mulInt(s, P.x, 3); // 3*X
             mul(s, s, P.x); // 3*X^2
             mul(t, a, P.z); // a*Z
             mul(t, t, P.z); // a*Z^2
@@ -147,18 +145,15 @@ public:
             mul(v, P.y, P.z); // Y*Z
 
             mul(s, u, u); // u^2
-            Fp::mulInt(t, P.x, 8);
-            //mul(t, eight, P.x); // 8*X
+            Fp::mulInt(t, P.x, 8); // 8*X
             mul(t, t, P.y); // 8*X*Y
             mul(t, t, v); // 8*X*Y*v
             sub(w, s, t); // u^2 - 8*X*Y*v
 
-            Fp::mulInt(Rx, v, 2);
-            //mul(Rx, two, v); // 2*v
+            Fp::mulInt(Rx, v, 2); // 2*v
             mul(Rx, Rx, w); // Rx = 2*v*w
 
             Fp::mulInt(s, P.x, 4);
-            //mul(s, four, P.x);
             mul(s, s, P.y);
             mul(s, s, v);
             sub(s, s, w); // 4*X*Y*v - w
@@ -168,13 +163,11 @@ public:
 
             mul(t, P.y, P.y);
             mul(t, t, v2); // (Yv)^2
-            Fp::mulInt(t, t, 8);
-            //mul(t, t, eight); // 8(Yv)^2
+            Fp::mulInt(t, t, 8); // 8(Yv)^2
 
             sub(Ry, s, t); // Ry = u(4*X*Y*v - w) - 8(Yv)^2
 
-            Fp::mulInt(Rz, v, 8);
-            //mul(Rz, eight, v); // 8*v
+            Fp::mulInt(Rz, v, 8); // 8*v
             mul(Rz, Rz, v2); // Rz = 8*v^3
 
             if (Rz.value == 0) {
@@ -204,7 +197,7 @@ void add(Point& R, const Point& P, const Point& Q) {
         Fp Rx, Ry, Rz;
         if (isEqual(P, Q)) { // if P == Q then Doubling
 #if 1
-            return EllipticCurve::dbl(R, P);
+            EllipticCurve::dbl(R, P);
 #else
             Fp u, v, v2, w, s, t;
 
@@ -320,13 +313,12 @@ void mul(Point& R, const Point& P, const mpz_class& x) {
 
     mpz_class n = x;
     while (n > 0) {
-        if ((n % 2) == 1) {
+        if ((n & 1) == 1) {
             add(k, k, tmp_P);
         }
         //add(tmp_P, tmp_P, tmp_P);
         EllipticCurve::dbl(tmp_P, tmp_P);
         n >>= 1;
-        
     }
     R.x = k.x;
     R.y = k.y;
