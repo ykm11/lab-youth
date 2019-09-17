@@ -108,4 +108,6 @@ bool isEq(const Fp& x, const Fp& y) {
     return x.value == y.value;
 }
 
-
+void sqr(Fp &r, const Fp &x) { // r <- x^2
+    mpz_powm_ui(r.value.get_mpz_t(), x.value.get_mpz_t(), 2, Fp::modulus.get_mpz_t());
+}

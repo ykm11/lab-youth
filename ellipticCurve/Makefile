@@ -31,5 +31,5 @@ clean:
 	$(CXX) -o ec_test_mi test.cpp $(CXXFLAGS) $(LDFLAGS) -I /usr/local/lib/mimalloc-1.0/include /usr/local/lib/mimalloc-1.0/libmimalloc.a -DUSE_MIMALLOC
 
 
-test: ./ec_test
-	./ec_test
+test: ./ec_test_mi
+	./ec_test_mi

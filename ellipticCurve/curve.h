@@ -136,15 +136,20 @@ public:
             Fp Rx, Ry, Rz;
             Fp u, v, v2, w, s, t;
 
-            Fp::mulInt(s, P.x, 3); // 3*X
-            mul(s, s, P.x); // 3*X^2
-            mul(t, a, P.z); // a*Z
-            mul(t, t, P.z); // a*Z^2
+            sqr(s, P.x);
+            Fp::mulInt(s, s, 3);
+            //Fp::mulInt(s, P.x, 3); // 3*X
+            //mul(s, s, P.x); // 3*X^2
+            sqr(t, P.z);
+            mul(t, t, a);
+            //mul(t, a, P.z); // a*Z
+            //mul(t, t, P.z); // a*Z^2
             add(u, s, t); // 3*X^2 + a*Z^2
         
             mul(v, P.y, P.z); // Y*Z
 
-            mul(s, u, u); // u^2
+            //mul(s, u, u); // u^2
+            sqr(s, u);
             Fp::mulInt(t, P.x, 8); // 8*X
             mul(t, t, P.y); // 8*X*Y
             mul(t, t, v); // 8*X*Y*v
@@ -159,9 +164,11 @@ public:
             sub(s, s, w); // 4*X*Y*v - w
             mul(s, s, u); // u(4*X*Y*v - w)
 
-            mul(v2, v, v); // v^2
+            //mul(v2, v, v); // v^2
+            sqr(v2, v);
 
-            mul(t, P.y, P.y);
+            //mul(t, P.y, P.y);
+            sqr(t, P.y);
             mul(t, t, v2); // (Yv)^2
             Fp::mulInt(t, t, 8); // 8(Yv)^2
 
@@ -214,14 +221,16 @@ void add(Point& R, const Point& P, const Point& Q) {
     }
     // otherwise, Adding
 
-    mul(v2, v, v); // v^2
+    //mul(v2, v, v); // v^2
+    sqr(v2, v);
     mul(v3, v2, v); // v^3
 
     Fp::mulInt(t, v2, 2); // 2 * v^2
     mul(t, t, P.x); // 2 * v^2 * X1
     mul(t, t, Q.z); //  2 * v^2 * X1*Z2
 
-    mul(s, u, u); // u^2
+    //mul(s, u, u); // u^2
+    sqr(s, u);
     mul(s, s, P.z); // u^2 * Z1
     mul(s, s, Q.z); // u^2 * Z1 * Z2
     

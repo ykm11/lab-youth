@@ -9,7 +9,7 @@ static int malloc_count;
 static struct UseMiMalloc {
     static void* mi_malloc_wrapper(size_t n)
     {
-        //malloc_count++;
+        malloc_count++;
         return mi_malloc(n);
     }
      static void* mi_realloc_wrapper(void *p, size_t, size_t n)
@@ -166,10 +166,30 @@ void isEqual_fp_test() {
 
 }
 
+void benchmark_sqr() {
+    std::cout << "[*] sqr benchmark\n";
+    mpz_class p = mpz_class("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F", 16);
+    Fp::setModulo(p);
+    Fp x, r;
+
+    x = Fp("115792089237316195423570985008687907852837564279074904382605163141518161494337", 10); 
+
+    const int n = 1000000;
+    time_t begin = clock();
+    for(int i = 0; i < n; i++) {
+        sqr(r, x);
+        //mul(r, x, x);
+    }
+    time_t end = clock();
+    printf("\ttime = %fusec\n", (end - begin) / double(CLOCKS_PER_SEC) / n * 1e6);
+}
+
+
 int main() {
     order_test();
     ec_mul_test();
     isEqual_fp_test();
     benchmark_fp();
+    benchmark_sqr();
     benchmark_ec();
 }
