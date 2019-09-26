@@ -76,8 +76,8 @@ public:
         Point P;
         Fp r, l, u;
 
-        mul(l, y, y); // y^2
-        mul(r, x, x);
+        sqr(l, y); // y^2
+        sqr(r, x);
         mul(r, r, x); // x^3
         mul(u, a, x); // ax
         add(r, r, u); // x^3 + ax 
@@ -96,11 +96,11 @@ public:
         Point P;
         Fp r, l, u, v, z2;
 
-        mul(z2, z, z);
+        sqr(z2, z);
 
-        mul(l, y, y);
+        sqr(l, y);
         mul(l, l, z); // Z * Y^2
-        mul(r, x, x);
+        sqr(r, x);
         mul(r, r, x); // X^3
         mul(u, a, x); // aX
         mul(u, u, z2); // aX * Z^2
