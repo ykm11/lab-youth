@@ -126,7 +126,7 @@ void ec_mul_test() {
 
     Point G = EC(gx, gy);
     Point R;
-    R = G*n;
+    mul(R, G, n);
 
     Fp x, y;
     R.xy(x, y);
@@ -211,6 +211,6 @@ int main() {
     isEqual_fp_test();
     benchmark_fp();
     benchmark_sqr();
-    benchmark_ec_add();
-    //benchmark_ec_mul();
+    //benchmark_ec_add();
+    benchmark_ec_mul();
 }
