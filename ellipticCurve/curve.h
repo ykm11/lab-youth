@@ -267,7 +267,7 @@ void sub(Point& R, const Point& P, const Point& Q) {
     add(R, P, minus_Q); // R <- P + [-1]Q
 }
 
-void mul(Point& R, const Point& P, const mpz_class& x) {
+void mul(Point& R, const Point& P, const mpz_class& x) { // 右向きバイナリ法
     R.x.value = 0;
     R.y.value = 1;
     R.z.value = 0;
@@ -306,3 +306,34 @@ void print(const Point& P) {
     }
 }
 
+/* 
+unsigned int countBits(const mpz_class &x) { // 他のヘッダにおいたほうがいいかも
+    unsigned int cnt = 0;
+
+    mpz_class n = x;
+    while (n > 0) {
+        cnt += 1;
+        n >>= 1;
+    }
+
+    return cnt;
+}
+
+void montgomery_mul(Point &R0, const Point& G, const mpz_class n) {
+    unsigned int k_bits;
+    Point R1;
+    R0 = G;
+    add(R1, G, G);
+
+    k_bits = countBits(n);
+    for (int i = k_bits-2; i >= 0; i--) {
+        if (((n >> i) & 1) == 0) {
+            add(R1, R1, R0);
+            add(R0, R0, R0);
+        } else {
+            add(R0, R0, R1);
+            add(R1, R1, R1);
+        }
+    }
+}
+*/
