@@ -306,7 +306,7 @@ void print(const Point& P) {
     }
 }
 
-/* 
+#if 1
 unsigned int countBits(const mpz_class &x) { // 他のヘッダにおいたほうがいいかも
     unsigned int cnt = 0;
 
@@ -349,4 +349,5 @@ void r_mul(Point &R, const Point& G, const mpz_class n) { // 右向きバイナ�
         }
     }
 }
-*/
+
+#endif
