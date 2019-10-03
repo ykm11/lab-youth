@@ -12,6 +12,7 @@ void Fp::setModulo(const mpz_class& v) {
     modulus = v;
 }
 
+
 void add(Fp& z, const Fp& x, const Fp& y) {
     z.value = x.value + y.value;
     if(z.value >= Fp::modulus) {

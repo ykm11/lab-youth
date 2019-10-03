@@ -44,9 +44,6 @@ void isEqual_fp_test();
 void order_test();
 void ec_mul_test();
 
-Fp EllipticCurve::a;
-Fp EllipticCurve::b;
-
 void benchmark_ec_add() {
     std::cout << "[*] EC add benchmark\n";
     mpz_class a = mpz_class("0", 10);
