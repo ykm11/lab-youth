@@ -198,21 +198,16 @@ void r_mul(Point &R, const Point& G, const mpz_class x) { // 右向きバイナ�
 
 void montgomery_mul(Point &R0, const Point& G, const mpz_class n) { // Montgomery Ladder
     size_t k_bits = mpz_sizeinbase(n.get_mpz_t(), 2);
-    Point R1;
-    R0 = G;
-    EllipticCurve::dbl(R1, G);
-    //add(R1, G, G);
+    Point R1 = G;
+    R0 = Point(0, 1, 0);
 
-    for (int i = k_bits-2; i >= 0; i--) {
-        //if (((n >> i) & 1) == 0) {
+    for (int i = k_bits-1; i >= 0; i--) {
         if (mpz_tstbit(n.get_mpz_t(), i) == 0) {
             add(R1, R1, R0);
             EllipticCurve::dbl(R0, R0);
-            //add(R0, R0, R0);
         } else {
             add(R0, R0, R1);
             EllipticCurve::dbl(R1, R1);
-            //add(R1, R1, R1);
         }
     }
 }

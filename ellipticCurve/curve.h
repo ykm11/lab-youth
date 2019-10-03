@@ -6,6 +6,8 @@
 #include "FP.h"
 
 class Point;
+class EllipticCurve;
+
 bool isEqual(const Point& P, const Point& Q);
 void add(Point& R, const Point& P, const Point& Q);
 void sub(Point& R, const Point& P, const Point& Q);
@@ -13,6 +15,7 @@ void mul(Point& R, const Point& P, const mpz_class& x); // scalar multiplying
 void dbl(Point& R, const Point& P);
 
 void print(const Point& P);
+
 void r_mul(Point &R, const Point& G, const mpz_class x);
 void montgomery_mul(Point &R0, const Point& G, const mpz_class n);
 void window_mul(Point &R, const Point& G, const mpz_class n);
@@ -76,25 +79,7 @@ public:
     //~EllipticCurve() = default;
 
     Point point(const mpz_class& x, const mpz_class& y) const {
-        Point P;
-#if 0
-        Fp r, l, u;
-        sqr(l, y); // y^2
-        sqr(r, x);
-        mul(r, r, x); // x^3
-        mul(u, a, x); // ax
-        add(r, r, u); // x^3 + ax 
-        add(r, r, b); // x^3 + ax + b
-
-        if (l == r) {
-            P = Point(x, y, 1);
-            //P = Point(x, y, Fp(1));
-        } else { // 曲線に乗らない場合はエラーを返すか例外を投げる
-            throw "Exception: Point does not exist on the curve";
-        }
-#else
-        P = point(x, y, 1);
-#endif
+        Point P = point(x, y, 1);
         return P;
     }
 
