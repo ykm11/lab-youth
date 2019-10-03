@@ -1,4 +1,4 @@
-SRC=main.cpp
+SRC=FP.cpp main.cpp
 OBJ=$(SRC:.cpp=.o)
 DEP=$(SRC:.cpp=.d)
 
@@ -27,8 +27,8 @@ clean:
 ./ec_test: test.cpp FP.h curve.h
 	$(CXX) -o ec_test test.cpp $(CXXFLAGS) $(LDFLAGS)  
 
-./ec_test_mi: test.cpp FP.h curve.h
-	$(CXX) -o ec_test_mi test.cpp $(CXXFLAGS) $(LDFLAGS) -I /usr/local/lib/mimalloc-1.0/include /usr/local/lib/mimalloc-1.0/libmimalloc.a -DUSE_MIMALLOC
+./ec_test_mi: test.cpp FP.o curve.h
+	$(CXX) -o ec_test_mi test.cpp FP.o $(CXXFLAGS) $(LDFLAGS) -I /usr/local/lib/mimalloc-1.0/include /usr/local/lib/mimalloc-1.0/libmimalloc.a -DUSE_MIMALLOC
 
 
 test: ./ec_test_mi

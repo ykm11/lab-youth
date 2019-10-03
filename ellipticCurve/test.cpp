@@ -44,8 +44,6 @@ void isEqual_fp_test();
 void order_test();
 void ec_mul_test();
 
-
-mpz_class Fp::modulus;
 Fp EllipticCurve::a;
 Fp EllipticCurve::b;
 
@@ -89,7 +87,10 @@ void benchmark_ec_mul() {
     const int n = 100;
     time_t begin = clock();
     for(int i = 0; i < n; i++) {
-        mul(R, G, q);
+        //mul(R, G, q);
+        //r_mul(R, G, q);
+        //montgomery_mul(R, G, q);
+        window_mul(R, G, q);
     }
     time_t end = clock();
     printf("\ttime = %fusec\n", (end - begin) / double(CLOCKS_PER_SEC) / n * 1e6);
@@ -127,6 +128,9 @@ void ec_mul_test() {
     Point G = EC(gx, gy);
     Point R;
     mul(R, G, n);
+    //r_mul(R, G, n);
+    //montgomery_mul(R, G, n);
+    //window_mul(R, G, n);
 
     Fp x, y;
     R.xy(x, y);
@@ -153,7 +157,10 @@ void order_test() {
 
     Point G = EC(gx, gy);
     Point R;
-    R = G*n;
+    mul(R, G, n);
+    //r_mul(R, G, n);
+    //montgomery_mul(R, G, n);
+    //window_mul(R, G, n);
 
     Point O = EC(0, 1, 0);
     if (R == O) {
@@ -211,6 +218,6 @@ int main() {
     isEqual_fp_test();
     benchmark_fp();
     benchmark_sqr();
-    //benchmark_ec_add();
-    benchmark_ec_mul();
+    benchmark_ec_add();
+    //benchmark_ec_mul();
 }

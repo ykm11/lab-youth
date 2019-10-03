@@ -200,7 +200,7 @@ void add(Point& R, const Point& P, const Point& Q) {
         R.z = P.z;
         return;
     } 
-    Fp u, v, v2, v3, w, s, t;
+    Fp u, v, s, t;
 
     mul(s, Q.y, P.z); // Y2 * Z1
     mul(t, P.y, Q.z); // Y1 * Z2
@@ -215,6 +215,7 @@ void add(Point& R, const Point& P, const Point& Q) {
         return;
     }
     // otherwise, Adding
+    Fp w, v2, v3;
     Fp Rx, Ry, Rz;
 
     sqr(v2, v); // v^2
@@ -248,17 +249,17 @@ void add(Point& R, const Point& P, const Point& Q) {
         R.x.value = 0;    
         R.y.value = 1;    
         R.z.value = 0;    
-    } else {
-#if 0
-        R.x = Rx;
-        R.y = Ry;
-        R.z = Rz;
-#else
-        R.x.value = std::move(Rx.value);
-        R.y.value = std::move(Ry.value);
-        R.z.value = std::move(Rz.value);
-#endif
+        return;
     }
+#if 0
+    R.x = Rx;
+    R.y = Ry;
+    R.z = Rz;
+#else
+    R.x.value = std::move(Rx.value);
+    R.y.value = std::move(Ry.value);
+    R.z.value = std::move(Rz.value);
+#endif
 }
 
 void sub(Point& R, const Point& P, const Point& Q) {
@@ -320,7 +321,7 @@ void r_mul(Point &R, const Point& G, const mpz_class x) { // 右向きバイナ�
     }
 }
 
-void montgomery_mul(Point &R0, const Point& G, const mpz_class n) {
+void montgomery_mul(Point &R0, const Point& G, const mpz_class n) { // Montgomery Ladder
     size_t k_bits = mpz_sizeinbase(n.get_mpz_t(), 2);
     Point R1;
     R0 = G;
@@ -338,6 +339,24 @@ void montgomery_mul(Point &R0, const Point& G, const mpz_class n) {
             EllipticCurve::dbl(R1, R1);
             //add(R1, R1, R1);
         }
+    }
+}
+
+void window_mul(Point &R, const Point& G, const mpz_class n) { // windows method
+    size_t k_bits = mpz_sizeinbase(n.get_mpz_t(), 2);
+    Point P[4];
+
+    P[0] = Point(0, 1, 0);
+    P[1] = G;
+    EllipticCurve::dbl(P[2], G);
+    add(P[3], P[2], G);
+
+    R = P[2*mpz_tstbit(n.get_mpz_t(), k_bits-1) + mpz_tstbit(n.get_mpz_t(), k_bits-2)];
+    for (int i = k_bits-3; i > 0; i=i-2) {
+        EllipticCurve::dbl(R, R); 
+        EllipticCurve::dbl(R, R); // R <- 4R
+
+        add(R, R, P[2*mpz_tstbit(n.get_mpz_t(), i) + mpz_tstbit(n.get_mpz_t(), i-1)]);
     }
 }
 

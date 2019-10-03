@@ -24,7 +24,7 @@ static struct UseMiMalloc {
 #include<iostream>
 #include "attack_curve.h"
 
-mpz_class Fp::modulus;
+//mpz_class Fp::modulus;
 Fp EllipticCurve::a;
 Fp EllipticCurve::b;
 
