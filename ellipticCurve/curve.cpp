@@ -227,5 +227,9 @@ void window_mul(Point &R, const Point& G, const mpz_class n) { // windows method
         EllipticCurve::dbl(R, R); // R <- 4R
 
         add(R, R, P[2*mpz_tstbit(n.get_mpz_t(), i) + mpz_tstbit(n.get_mpz_t(), i-1)]);
+    } 
+    if ((k_bits & 1) == 1) { // nのビット数が奇数のときだけ
+        EllipticCurve::dbl(R, R);
+        add(R, R, P[mpz_tstbit(n.get_mpz_t(), 0)]);
     }
 }

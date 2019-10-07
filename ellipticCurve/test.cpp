@@ -85,9 +85,9 @@ void benchmark_ec_mul() {
     time_t begin = clock();
     for(int i = 0; i < n; i++) {
         //mul(R, G, q);
-        //r_mul(R, G, q);
+        r_mul(R, G, q);
         //montgomery_mul(R, G, q);
-        window_mul(R, G, q);
+        //window_mul(R, G, q);
     }
     time_t end = clock();
     printf("\ttime = %fusec\n", (end - begin) / double(CLOCKS_PER_SEC) / n * 1e6);
@@ -167,6 +167,32 @@ void order_test() {
     }
 }
 
+void ec_muls_test() { // 4つのスカラー倍の計算テスト
+    mpz_class p = mpz_class("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F", 16);
+    Fp::setModulo(p);
+
+    mpz_class a = mpz_class("0", 10);
+    mpz_class b = mpz_class("7", 10);
+
+    EllipticCurve EC = EllipticCurve(a, b);
+    mpz_class n = mpz_class("1154235709850086879078528375642790749043826051631415186137", 10); 
+    mpz_class gx = mpz_class("79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798", 16);
+    mpz_class gy = mpz_class("483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8", 16);
+
+    Point G = EC(gx, gy);
+    Point R1, R2, R3, R4;
+    mul(R1, G, n);
+    r_mul(R2, G, n);
+    montgomery_mul(R3, G, n);
+    window_mul(R4, G, n);
+
+    if (isEqual(R1,R2) && isEqual(R2,R3) && isEqual(R3,R4)) {
+        std::cout << "[*] EC muls test: OK" << std::endl;
+    } else {
+        std::cout << "[*] EC muls test: FAILED" << std::endl;
+    }
+}
+
 void isEqual_fp_test() {
     Fp::setModulo(19);
 
@@ -212,7 +238,9 @@ void benchmark_sqr() {
 int main() {
     order_test();
     ec_mul_test();
+    //ec_muls_test();
     isEqual_fp_test();
+
     benchmark_fp();
     benchmark_sqr();
     benchmark_ec_add();
