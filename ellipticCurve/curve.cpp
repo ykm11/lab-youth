@@ -92,7 +92,7 @@ void add(Point& R, const Point& P, const Point& Q) {
     // otherwise, Adding
     Fp w, v2, v3;
     Fp Rx, Ry, Rz;
-
+#if 0
     sqr(v2, v); // v^2
     mul(v3, v2, v); // v^3
 
@@ -101,6 +101,7 @@ void add(Point& R, const Point& P, const Point& Q) {
     mul(t, t, Q.z); //  2 * v^2 * X1*Z2
 
     sqr(s, u); // u^2
+
     mul(s, s, P.z); // u^2 * Z1
     mul(s, s, Q.z); // u^2 * Z1 * Z2
 
@@ -119,6 +120,31 @@ void add(Point& R, const Point& P, const Point& Q) {
 
     mul(Rz, v3, P.z);
     mul(Rz, Rz, Q.z); // Rz = v^3 * Z1 * Z2
+#else
+    sqr(v2, v); // v^2
+    mul(v3, v2, v); // v^3
+
+    mul(w, P.z, Q.z); // Z1 * Z2
+    mul(Rz, v3, w); // Rz = v^3 * Z1 * Z2
+
+    sqr(s, u); // u^2
+    mul(s, s, w); // u^2 * Z1 * Z2
+
+    Fp::mulInt(w, t, 2); // 2 * X1 * Z2 
+    mul(w, w, v2); // 2 * v^2 * X 1* Z2
+
+    sub(w, s, w); //  (u^2 * Z1 * Z2) - (2 * v^2 * X1*Z2)
+    sub(w, w, v3); // (u^2 * Z1 * Z2) - v^3 - (2 * v^2 * X1*Z2)
+
+    mul(Rx, v, w); // Rx = v * w
+
+    mul(s, v2, t); // v^2 * X1 * Z2
+    mul(t, v3, P.y); // v^3 * Y1
+    mul(t, t, Q.z); // v^3 * Y1 * Z2
+    sub(s, s, w); // v^2 * X1 * Z2 - w
+    mul(s, s, u); // u(v^2 * X1 * Z2 - w)
+    sub(Ry, s, t); // Ry = u(v^2 * X1 * Z2 - w) -  v^3 * Y1 * Z2
+#endif
 
     if (Rz.value == 0) {
         R.x.value = 0;

@@ -155,9 +155,6 @@ void order_test() {
     Point G = EC(gx, gy);
     Point R;
     mul(R, G, n);
-    //r_mul(R, G, n);
-    //montgomery_mul(R, G, n);
-    //window_mul(R, G, n);
 
     Point O = EC(0, 1, 0);
     if (R == O) {
@@ -238,7 +235,7 @@ void benchmark_sqr() {
 int main() {
     order_test();
     ec_mul_test();
-    //ec_muls_test();
+    ec_muls_test();
     isEqual_fp_test();
 
     benchmark_fp();
