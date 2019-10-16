@@ -23,19 +23,19 @@ void EllipticCurve::dbl(Point& R, const Point& P) {
 
         mul(v, P.y, P.z); // Y*Z
 
+        mul(w, P.x, P.y);
+
         sqr(s, u); // u^2
-        Fp::mulInt(t, P.x, 8); // 8*X
-        mul(t, t, P.y); // 8*X*Y
+        Fp::mulInt(t, w, 8); // 8 * X * Y
         mul(t, t, v); // 8*X*Y*v
-        sub(w, s, t); // u^2 - 8*X*Y*v
+        sub(t, s, t); // w := u^2 - 8*X*Y*v
 
         Fp::mulInt(Rx, v, 2); // 2*v
-        mul(Rx, Rx, w); // Rx = 2*v*w
+        mul(Rx, Rx, t); // Rx = 2*v*w
 
-        Fp::mulInt(s, P.x, 4);
-        mul(s, s, P.y);
+        Fp::mulInt(s, w, 4);
         mul(s, s, v);
-        sub(s, s, w); // 4*X*Y*v - w
+        sub(s, s, t); // 4*X*Y*v - w
         mul(s, s, u); // u(4*X*Y*v - w)
 
         sqr(v2, v); // v^2
@@ -131,10 +131,10 @@ void add(Point& R, const Point& P, const Point& Q) {
     mul(s, s, w); // u^2 * Z1 * Z2
 
     Fp::mulInt(w, t, 2); // 2 * X1 * Z2 
-    mul(w, w, v2); // 2 * v^2 * X 1* Z2
+    mul(w, w, v2); // 2 * v^2 * X1 * Z2
 
-    sub(w, s, w); //  (u^2 * Z1 * Z2) - (2 * v^2 * X1*Z2)
-    sub(w, w, v3); // (u^2 * Z1 * Z2) - v^3 - (2 * v^2 * X1*Z2)
+    sub(w, s, w); //  (u^2 * Z1 * Z2) - (2 * v^2 * X1 * Z2)
+    sub(w, w, v3); // (u^2 * Z1 * Z2) - v^3 - (2 * v^2 * X1 * Z2)
 
     mul(Rx, v, w); // Rx = v * w
 
@@ -215,7 +215,6 @@ void r_mul(Point &R, const Point& G, const mpz_class x) { // 右向きバイナ�
     for (int i = k_bits-2; i >= 0; i--) {
         EllipticCurve::dbl(R, R);
 
-        //if (((n >> i) & 1) == 1) {
         if (mpz_tstbit(x.get_mpz_t(), i) == 1) {
             add(R, R, G);
         }
