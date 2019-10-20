@@ -11,54 +11,56 @@ void EllipticCurve::dbl(Point& R, const Point& P) {
         R.x.value = 0;
         R.y.value = 1;
         R.z.value = 0;
-    } else {
-        Fp Rx, Ry, Rz;
-        Fp u, v, v2, w, s, t;
+        return;
+    } 
+    Fp Rx, Ry, Rz;
+    Fp u, v, w, s, t;
 
-        sqr(s, P.x); // X^2
-        Fp::mulInt(s, s, 3); // 3*X^2
-        sqr(t, P.z); // Z^2
-        mul(t, t, a); // a*Z^2
-        add(u, s, t); // 3*X^2 + a*Z^2
+    sqr(s, P.x); // X^2
+    Fp::mulInt(s, s, 3); // 3*X^2
+    sqr(t, P.z); // Z^2
+    mul(t, t, a); // a*Z^2
+    add(u, s, t); // 3*X^2 + a*Z^2
 
-        mul(v, P.y, P.z); // Y*Z
+    mul(v, P.y, P.z); // Y*Z
 
-        mul(w, P.x, P.y);
+    mul(w, P.x, P.y);
 
-        sqr(s, u); // u^2
-        Fp::mulInt(t, w, 8); // 8 * X * Y
-        mul(t, t, v); // 8*X*Y*v
-        sub(t, s, t); // w := u^2 - 8*X*Y*v
+    sqr(s, u); // u^2
+    Fp::mulInt(t, w, 8); // 8 * X * Y
+    mul(t, t, v); // 8*X*Y*v
+    sub(t, s, t); // w := u^2 - 8*X*Y*v
 
-        Fp::mulInt(Rx, v, 2); // 2*v
-        mul(Rx, Rx, t); // Rx = 2*v*w
+    Fp::mulInt(Rx, v, 2); // 2*v
+    mul(Rx, Rx, t); // Rx = 2*v*w
 
-        Fp::mulInt(s, w, 4);
-        mul(s, s, v);
-        sub(s, s, t); // 4*X*Y*v - w
-        mul(s, s, u); // u(4*X*Y*v - w)
+    Fp::mulInt(s, w, 4);
+    mul(s, s, v);
+    sub(s, s, t); // 4*X*Y*v - w
+    mul(s, s, u); // u(4*X*Y*v - w)
 
-        sqr(v2, v); // v^2
 
-        sqr(t, P.y); // Y^2
-        mul(t, t, v2); // (Yv)^2
-        Fp::mulInt(t, t, 8); // 8(Yv)^2
+    sqr(w, v); // v^2
 
-        sub(Ry, s, t); // Ry = u(4*X*Y*v - w) - 8(Yv)^2
+    sqr(t, P.y); // Y^2
+    mul(t, t, w); // (Yv)^2
+    Fp::mulInt(t, t, 8); // 8(Yv)^2
 
-        Fp::mulInt(Rz, v, 8); // 8*v
-        mul(Rz, Rz, v2); // Rz = 8*v^3
+    sub(Ry, s, t); // Ry = u(4*X*Y*v - w) - 8(Yv)^2
 
-        if (Rz.value == 0) {
-            R.x.value = 0;
-            R.y.value = 1;
-            R.z.value = 0;
-        } else {
-            R.x = Rx;
-            R.y = Ry;
-            R.z = Rz;
-        }
-    }
+    Fp::mulInt(Rz, v, 8); // 8*v
+    mul(Rz, Rz, w); // Rz = 8*v^3
+
+    if (Rz.value == 0) {
+        R.x.value = 0;
+        R.y.value = 1;
+        R.z.value = 0;
+        return;
+    } 
+
+    R.x.value = std::move(Rx.value);
+    R.y.value = std::move(Ry.value);
+    R.z.value = std::move(Rz.value);
 }
 
 void add(Point& R, const Point& P, const Point& Q) {
@@ -92,35 +94,7 @@ void add(Point& R, const Point& P, const Point& Q) {
     // otherwise, Adding
     Fp w, v2, v3;
     Fp Rx, Ry, Rz;
-#if 0
-    sqr(v2, v); // v^2
-    mul(v3, v2, v); // v^3
 
-    Fp::mulInt(t, v2, 2); // 2 * v^2
-    mul(t, t, P.x); // 2 * v^2 * X1
-    mul(t, t, Q.z); //  2 * v^2 * X1*Z2
-
-    sqr(s, u); // u^2
-
-    mul(s, s, P.z); // u^2 * Z1
-    mul(s, s, Q.z); // u^2 * Z1 * Z2
-
-    sub(w, s, t); //  (u^2 * Z1 * Z2) - (2 * v^2 * X1*Z2)
-    sub(w, w, v3); // (u^2 * Z1 * Z2) - v^3 - (2 * v^2 * X1*Z2)
-
-    mul(Rx, v, w); // Rx = v * w
-
-    mul(t, v3, P.y); // v^3 * Y1
-    mul(t, t, Q.z); // v^3 * Y1 * Z2
-    mul(s, v2, P.x); // v^2 * X1
-    mul(s, s, Q.z); // v^2 * X1 * Z2
-    sub(s, s, w); // v^2 * X1 * Z2 - w
-    mul(s, s, u); // u(v^2 * X1 * Z2 - w)
-    sub(Ry, s, t); // Ry = u(v^2 * X1 * Z2 - w) -  v^3 * Y1 * Z2
-
-    mul(Rz, v3, P.z);
-    mul(Rz, Rz, Q.z); // Rz = v^3 * Z1 * Z2
-#else
     sqr(v2, v); // v^2
     mul(v3, v2, v); // v^3
 
@@ -144,7 +118,6 @@ void add(Point& R, const Point& P, const Point& Q) {
     sub(s, s, w); // v^2 * X1 * Z2 - w
     mul(s, s, u); // u(v^2 * X1 * Z2 - w)
     sub(Ry, s, t); // Ry = u(v^2 * X1 * Z2 - w) -  v^3 * Y1 * Z2
-#endif
 
     if (Rz.value == 0) {
         R.x.value = 0;
@@ -152,15 +125,10 @@ void add(Point& R, const Point& P, const Point& Q) {
         R.z.value = 0;
         return;
     }
-#if 0
-    R.x = Rx;
-    R.y = Ry;
-    R.z = Rz;
-#else
+
     R.x.value = std::move(Rx.value);
     R.y.value = std::move(Ry.value);
     R.z.value = std::move(Rz.value);
-#endif
 }
 
 void sub(Point& R, const Point& P, const Point& Q) {
@@ -185,9 +153,9 @@ void print(const Point& P) {
     if (P.z.value == 0) {
         std::cout << "(0 : 1 : 0)" << std::endl;
     } else {
-        Fp x_z, y_z;
-        P.xy(x_z, y_z);
-        std::cout << "(" << x_z.value << " : " << y_z.value << " : 1)" << std::endl;
+        Fp x, y;
+        P.xy(x, y);
+        std::cout << "(" << x.value << " : " << y.value << " : 1)" << std::endl;
     }
 }
 

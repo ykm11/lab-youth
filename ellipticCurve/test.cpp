@@ -67,6 +67,32 @@ void benchmark_ec_add() {
     printf("\ttime = %fusec\n", (end - begin) / double(CLOCKS_PER_SEC) / n * 1e6);
 }
 
+void benchmark_ec_dbl() {
+    std::cout << "[*] EC dbl benchmark\n";
+    mpz_class a = mpz_class("0", 10);
+    mpz_class b = mpz_class("7", 10);
+    mpz_class p = mpz_class("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F", 16);
+    Fp::setModulo(p);
+
+    EllipticCurve EC = EllipticCurve(a, b);
+    mpz_class q = mpz_class("117289373161954235709850086879078528375642790749043841647", 10);
+    mpz_class gx = mpz_class("79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798", 16);
+    mpz_class gy = mpz_class("483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8", 16);
+
+    Point G = EC.point(gx, gy);
+    Point R = Point(0, 1, 0);
+    const int n = 100000;
+    time_t begin = clock();
+
+    EllipticCurve::dbl(R, G);
+    for(int i = 0; i < n; i++) {
+        EllipticCurve::dbl(R, R);
+    }
+    time_t end = clock();
+    printf("\ttime = %fusec\n", (end - begin) / double(CLOCKS_PER_SEC) / n * 1e6);
+}
+
+
 void benchmark_ec_mul() {
     std::cout << "[*] EC mul benchmark\n";
     mpz_class a = mpz_class("0", 10);
@@ -241,5 +267,6 @@ int main() {
     benchmark_fp();
     benchmark_sqr();
     benchmark_ec_add();
+    benchmark_ec_dbl();
     //benchmark_ec_mul();
 }
