@@ -11,16 +11,13 @@ void pollard_rho_f(const Point& alpha, const Point& beta, Point& x,
 
     if (x_x.value % 3 == 0) {
         add(x, beta, x);
-        //x = beta + x;
 
         b = (b + 1) % order;
     } else if (x_x.value % 3 == 1) {
         EllipticCurve::dbl(x, x);
-        //x = x * 2;
         a = (a * 2) % order;
         b = (b * 2) % order;
     } else if(x_x.value % 3 == 2) {
-        //x = alpha + x;
         add(x, alpha, x);
         a = (a + 1) % order;
 
