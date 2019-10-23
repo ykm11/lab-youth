@@ -81,10 +81,10 @@ void benchmark_ec_dbl() {
 
     Point G = EC.point(gx, gy);
     Point R = Point(0, 1, 0);
-    const int n = 100000;
-    time_t begin = clock();
-
     EllipticCurve::dbl(R, G);
+    const int n = 100000;
+
+    time_t begin = clock();
     for(int i = 0; i < n; i++) {
         EllipticCurve::dbl(R, R);
     }
