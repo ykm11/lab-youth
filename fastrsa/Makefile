@@ -9,9 +9,15 @@ all: $(TARGET)
 $(TARGET): main.cpp
 	$(CXX) -o $< $(CXXFLAGS) $(LFLAGS)
 
-.PHONY: benchmark
+rsa.o: rsa.cpp rsa.h
+	$(CXX) -o $@ -c $< $(CXXFLAGS)
 
 
-benchmark: test.cpp rsa.h
-	$(CXX) -o ./benchmark test.cpp $(CXXFLAGS) $(LFLAGS)
+.PHONY: benchmark clean
+
+clean:
+	rm *.o
+
+./benchmark: test.cpp rsa.o
+	$(CXX) -o $@ test.cpp rsa.o $(CXXFLAGS) $(LFLAGS)
 	./benchmark
