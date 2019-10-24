@@ -1,19 +1,13 @@
 #pragma once
 #include<gmpxx.h>
 
-class RSA;
-/*
-void RSA::encrypt(mpz_class &c, const mpz_class &m);
-void RSA::decrypt(mpz_class &m, const mpz_class &c);
-void RSA::crt_decrypt(mpz_class &m, const mpz_class &c);
-*/
 
 class RSA {
 public:
     mpz_class n, e;
 
     RSA() { }
-    RSA(mpz_class &p1, mpz_class &p2, mpz_class &exp) :
+    RSA(const mpz_class &p1, const mpz_class &p2, const mpz_class &exp) :
         n(p1*p2), e(exp), p(p1), q(p2) {
         mpz_class t;
 

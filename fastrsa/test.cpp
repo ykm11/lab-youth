@@ -96,8 +96,8 @@ void test_crt_rsa() {
 
 
 int main() {
-    //test_rsa();
-    //test_crt_rsa();
+    test_rsa();
+    test_crt_rsa();
     benchmark_rsa();
     benchmark_crt_rsa();
 }
