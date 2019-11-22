@@ -13,7 +13,8 @@ public:
 
         // GCD(e, p-1) == GCD(e, q-1) == 1のチェックは今のところ無し
         
-        t = (p - 1) * (q - 1); 
+        //t = (p - 1) * (q - 1);
+        t = n - p - q + 1;
         mpz_invert(d.get_mpz_t(), e.get_mpz_t(), t.get_mpz_t()); // for (mod n)
         mpz_invert(inv_q.get_mpz_t(), q.get_mpz_t(), p.get_mpz_t());
 
