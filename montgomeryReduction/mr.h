@@ -96,3 +96,31 @@ void powm(mpz_class &R, const mpz_class &base, const mpz_class &exp, const mpz_c
     }
 #endif
 }
+
+void powm_slide(mpz_class &R, const mpz_class &base, const mpz_class &exp, const mpz_class &N) {
+    size_t e_bits = mpz_sizeinbase(exp.get_mpz_t(), 2);
+    mpz_class R4[4];
+    R4[0] = 1;  // R[0] = 1
+    R4[1] = base;  // R[1] = R
+    mpz_mul(R4[2].get_mpz_t(), base.get_mpz_t(), base.get_mpz_t()); // R[2] = R^2
+    mpz_mod(R4[2].get_mpz_t(), R4[2].get_mpz_t(), N.get_mpz_t()); 
+    mpz_mul(R4[3].get_mpz_t(), R4[2].get_mpz_t(), base.get_mpz_t()); // R[3] = R^3
+    mpz_mod(R4[3].get_mpz_t(), R4[3].get_mpz_t(), N.get_mpz_t()); 
+
+
+    R = R4[2*mpz_tstbit(exp.get_mpz_t(), e_bits-1) + mpz_tstbit(exp.get_mpz_t(), e_bits-2)];
+    for(int i = e_bits - 3; i > 0; i=i-2) {
+        mpz_mul(R.get_mpz_t(), R.get_mpz_t(), R.get_mpz_t());
+        mpz_mul(R.get_mpz_t(), R.get_mpz_t(), R.get_mpz_t()); // R <- R^{4}
+        mpz_mod(R.get_mpz_t(), R.get_mpz_t(), N.get_mpz_t());
+
+        mpz_mul(R.get_mpz_t(), R.get_mpz_t(), 
+                R4[2*mpz_tstbit(exp.get_mpz_t(), i) + mpz_tstbit(exp.get_mpz_t(), i-1)].get_mpz_t());
+    }
+
+    if (e_bits & 1) { // for LSB when e_bits is odd
+        mpz_mul(R.get_mpz_t(), R.get_mpz_t(), R.get_mpz_t());
+        mpz_mul(R.get_mpz_t(), R.get_mpz_t(), R4[e_bits & 1].get_mpz_t());
+    }
+    mpz_mod(R.get_mpz_t(), R.get_mpz_t(), N.get_mpz_t());
+}

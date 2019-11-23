@@ -10,24 +10,27 @@
 
 void test_powm() {
     mpz_class c, m, e;
-    m = 1223191;
+    m = 121;
     e = 65537;
 
-    powm(c, m, e, n);
     std::cout << "n: " << n << std::endl;
+    powm(c, m, e, n);
     std::cout << "pow(m, r, n): " << c << std::endl;
+    powm_slide(c, m, e, n);
+    std::cout << "pow_slide(m, r, n): " << c << std::endl;
 
 }
 
 void benchmark_powm() {
     mpz_class c, m, e;
-    m = 21;
+    m = mpz_class("23723721739113724324729739217", 16);
     e = 65537;
 
     const int N = 500000;
     time_t begin = clock();
     for(int i = 0; i < N; i++) {
-        powm(c, m, e, n);
+        //powm(c, m, e, n);
+        powm_slide(c, m, e, n);
     }
     time_t end = clock();
     puts("[+] pow(m, e, n)");
