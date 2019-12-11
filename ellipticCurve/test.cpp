@@ -257,8 +257,47 @@ void benchmark_sqr() {
     printf("\ttime = %fusec\n", (end - begin) / double(CLOCKS_PER_SEC) / n * 1e6);
 }
 
+void test_fp_squareRoot() {
+    std::cout << "[*] Fp squareRoot test: ";
+    mpz_class p = mpz_class("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F", 16);
+    Fp::setModulo(p);
+    Fp x, r;
+
+    r.value = 0;
+    bool res;
+    for (int i = 0; i < 10; i++) {
+        mpz_random(x.value.get_mpz_t(), 4);
+        res = Fp::squareRoot(r, x);
+        if (res) {
+            assert(x == (r.value*r.value % Fp::modulus));
+        }
+    }
+    std::cout << "OK\n";
+}
+
+void benchmark_fp_sqareRoot() {
+    std::cout << "[*] Fp squareRoot benchmark\n";
+    mpz_class p = mpz_class("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F", 16);
+    Fp::setModulo(p);
+    Fp x, r;
+
+    x = Fp("115792089237316195423570985008687907852837564279074904382605163141518161494337", 10); 
+    assert(Fp::squareRoot(r, x));
+
+    const int n = 10000;
+    time_t begin = clock();
+    for(int i = 0; i < n; i++) {
+        Fp::squareRoot(r, x);
+    }
+    time_t end = clock();
+    printf("\ttime = %fusec\n", (end - begin) / double(CLOCKS_PER_SEC) / n * 1e6);
+}
+
+
 
 int main() {
+    //test_fp_squareRoot();
+
     order_test();
     ec_mul_test();
     ec_muls_test();
@@ -266,7 +305,8 @@ int main() {
 
     benchmark_fp();
     benchmark_sqr();
-    benchmark_ec_add();
-    benchmark_ec_dbl();
+    //benchmark_ec_add();
+    //benchmark_ec_dbl();
     //benchmark_ec_mul();
+    //benchmark_fp_sqareRoot();
 }

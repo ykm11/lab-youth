@@ -9,6 +9,7 @@ void mul(Fp& z, const Fp& x, int scalar);
 void invmod(Fp& r, const Fp& x);
 bool isEq(const Fp& x, const Fp& y);
 void sqr(Fp& r, const Fp& x);
+//bool squareRoot(Fp& r, const Fp& x);
 
 
 class Fp {
@@ -70,6 +71,7 @@ public:
     }
 
     static void mulInt(Fp& z, const Fp& x, int scalar);
+    static bool squareRoot(Fp& r, const Fp& x);
 
 };
 
