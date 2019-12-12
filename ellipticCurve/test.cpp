@@ -264,12 +264,13 @@ void test_fp_squareRoot() {
     Fp x, r;
 
     r.value = 0;
-    bool res;
-    for (int i = 0; i < 10; i++) {
+    for (int i = 0; i < 100; i++) {
         mpz_random(x.value.get_mpz_t(), 4);
-        res = Fp::squareRoot(r, x);
-        if (res) {
-            assert(x == (r.value*r.value % Fp::modulus));
+        if (Fp::squareRoot(r, x)) {
+            if (x.value != (r.value*r.value % Fp::modulus)) {
+                std::cout << "Failed\n";
+                return;
+            }
         }
     }
     std::cout << "OK\n";
@@ -297,16 +298,15 @@ void benchmark_fp_sqareRoot() {
 
 int main() {
     //test_fp_squareRoot();
+    //order_test();
+    //ec_mul_test();
+    //ec_muls_test();
+    //isEqual_fp_test();
 
-    order_test();
-    ec_mul_test();
-    ec_muls_test();
-    isEqual_fp_test();
-
+    //benchmark_fp_sqareRoot();
     benchmark_fp();
     benchmark_sqr();
-    //benchmark_ec_add();
-    //benchmark_ec_dbl();
-    //benchmark_ec_mul();
-    //benchmark_fp_sqareRoot();
+    benchmark_ec_add();
+    benchmark_ec_dbl();
+    benchmark_ec_mul();
 }
