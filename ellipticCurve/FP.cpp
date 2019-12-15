@@ -89,6 +89,9 @@ bool Fp::squareRoot(Fp& r, const Fp& x) {
             r.value = 0;
             return false;
         } else if (t == 1) {
+            if (mpz_tstbit(r.value.get_mpz_t(), 0) == 1) {
+                Fp::neg(r, r);
+            }
             return true;
         }
         z = std::move(t);
