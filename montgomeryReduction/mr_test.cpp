@@ -1,10 +1,7 @@
-// $ g++ mr_test.cpp -lgmpxx -lgmp -O3 -Wall -Wextra
-
 #include "mr.h"
 
 #include<gmpxx.h>
 #include<iostream>
-
 #include<time.h>
 
 
@@ -21,21 +18,52 @@ void test_powm() {
 
 }
 
+void benchmark_mpz_powm() {
+    mpz_class c, m, e;
+    m = mpz_class("23723721739113724324729739217", 16);
+
+    const int N = 50000;
+    time_t begin = clock();
+    for(int i = 0; i < N; i++) {
+        mpz_powm_ui(c.get_mpz_t(), m.get_mpz_t(), 65537, n.get_mpz_t());
+    }
+    time_t end = clock();
+    puts("[+] mpz_powm_ui(m, e, n)");
+    printf("\ttime = %fusec\n", (end - begin) / double(CLOCKS_PER_SEC) / N * 1e6);
+}
+
+
 void benchmark_powm() {
     mpz_class c, m, e;
     m = mpz_class("23723721739113724324729739217", 16);
     e = 65537;
 
-    const int N = 500000;
+    const int N = 50000;
     time_t begin = clock();
     for(int i = 0; i < N; i++) {
-        //powm(c, m, e, n);
-        powm_slide(c, m, e, n);
+        powm(c, m, e, n);
     }
     time_t end = clock();
     puts("[+] pow(m, e, n)");
     printf("\ttime = %fusec\n", (end - begin) / double(CLOCKS_PER_SEC) / N * 1e6);
 }
+
+
+void benchmark_powm_kary() {
+    mpz_class c, m, e;
+    m = mpz_class("23723721739113724324729739217", 16);
+    e = 65537;
+
+    const int N = 50000;
+    time_t begin = clock();
+    for(int i = 0; i < N; i++) {
+        powm_slide(c, m, e, n);
+    }
+    time_t end = clock();
+    puts("[+] pow_k_ary(m, e, n)");
+    printf("\ttime = %fusec\n", (end - begin) / double(CLOCKS_PER_SEC) / N * 1e6);
+}
+
 
 void benchmark_MR() {
     const int N = 1000000;
@@ -72,8 +100,7 @@ void benchmark_Mod1() {
     const int N = 1000000;
     size_t begin = clock();
     for(int i = 0; i < N; i++) {
-        mpz_mul(XY.get_mpz_t(), X.get_mpz_t(), Y.get_mpz_t());
-        mpz_mod(S.get_mpz_t(), XY.get_mpz_t(), n.get_mpz_t());
+        mulMod(XY, X, Y, n);
     }
     size_t end = clock();
     puts("[+] XY \% n");
@@ -81,7 +108,7 @@ void benchmark_Mod1() {
 }
 
 void benchmark_Mod2() {
-    // X*Y mod n の時間かかるやつ
+    // X*Y mod n をmpz_関数を使わずに
     const int N = 1000000;
     size_t begin = clock();
     for(int i = 0; i < N; i++) {
@@ -101,8 +128,9 @@ int main() {
     XY = X*Y;
 
     //test_powm();
+    benchmark_mpz_powm();
     benchmark_powm();
-    return 0;
+    benchmark_powm_kary();
     
     // X*Y mod n の値が出るまでの1サイクルを計測
 
