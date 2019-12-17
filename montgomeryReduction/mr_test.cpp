@@ -11,6 +11,8 @@ void test_powm() {
     e = 65537;
 
     std::cout << "n: " << n << std::endl;
+    powmMont(c, m, e);
+    std::cout << "powMont(m, r, n): " << c << std::endl;
     powm(c, m, e, n);
     std::cout << "pow(m, r, n): " << c << std::endl;
     powm_slide(c, m, e, n);
@@ -29,6 +31,21 @@ void benchmark_mpz_powm() {
     }
     time_t end = clock();
     puts("[+] mpz_powm_ui(m, e, n)");
+    printf("\ttime = %fusec\n", (end - begin) / double(CLOCKS_PER_SEC) / N * 1e6);
+}
+
+void benchmark_powmMont() {
+    mpz_class c, m, e;
+    m = mpz_class("23723721739113724324729739217", 16);
+    e = 65537;
+
+    const int N = 50000;
+    time_t begin = clock();
+    for(int i = 0; i < N; i++) {
+        powmMont(c, m, e);
+    }
+    time_t end = clock();
+    puts("[+] powMont(m, e, n)");
     printf("\ttime = %fusec\n", (end - begin) / double(CLOCKS_PER_SEC) / N * 1e6);
 }
 
@@ -130,6 +147,7 @@ int main() {
     //test_powm();
     benchmark_mpz_powm();
     benchmark_powm();
+    benchmark_powmMont();
     benchmark_powm_kary();
     
     // X*Y mod n の値が出るまでの1サイクルを計測

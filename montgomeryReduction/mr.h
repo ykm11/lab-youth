@@ -15,6 +15,7 @@ void setup();
 void MontRe(mpz_class &S, const mpz_class &XY);
 void MMM(mpz_class &ret, const mpz_class &x, const mpz_class &y);
 void powm(mpz_class &R, const mpz_class &base, const mpz_class &exp, const mpz_class &N);
+void powmMont(mpz_class &R, const mpz_class &base, const mpz_class &exp);
 void powm_slide(mpz_class &R, const mpz_class &base, const mpz_class &exp, const mpz_class &N);
 
 inline void sqrMod(mpz_class &z, const mpz_class x, const mpz_class m) {

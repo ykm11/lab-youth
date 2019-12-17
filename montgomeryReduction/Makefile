@@ -21,5 +21,6 @@ clean:
 	$(RM) -rf $(OBJ) $(TARGET)
 
 benchmark:
+	make clean
 	make 
 	./mr_benchmark

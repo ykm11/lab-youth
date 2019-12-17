@@ -56,6 +56,27 @@ void MMM(mpz_class &ret, const mpz_class &x, const mpz_class &y) { // r <- x*y m
 #endif
 }
 
+void powmMont(mpz_class &R, const mpz_class &base, const mpz_class &exp) {
+    size_t e_bits = mpz_sizeinbase(exp.get_mpz_t(), 2);
+    mpz_class A, tmp;
+    mpz_mul(tmp.get_mpz_t(), base.get_mpz_t(), r2.get_mpz_t()); // base * R2
+    MontRe(A, tmp); // A := MR(base * R2)
+
+    tmp = A;
+    for(int i = e_bits - 2; i >= 0; i--) {
+        mpz_mul(tmp.get_mpz_t(), tmp.get_mpz_t(), tmp.get_mpz_t());
+        MontRe(R, tmp);
+
+        tmp = std::move(R);
+        if (mpz_tstbit(exp.get_mpz_t(), i) == 1) {
+            mpz_mul(tmp.get_mpz_t(), tmp.get_mpz_t(), A.get_mpz_t());
+            MontRe(R, tmp);
+
+            tmp = std::move(R);
+        }
+    }
+    MontRe(R, tmp);
+}
 
 void powm(mpz_class &R, const mpz_class &base, const mpz_class &exp, const mpz_class &N) {
     // R <- base^{exp} mod N
@@ -78,7 +99,6 @@ void powm_slide(mpz_class &R, const mpz_class &base, const mpz_class &exp, const
     R4[1] = std::move(base);
     sqrMod(R4[2], base, N);
     mulMod(R4[3], R4[2], base, N);
-
 
     R = R4[2*mpz_tstbit(exp.get_mpz_t(), e_bits-1) + mpz_tstbit(exp.get_mpz_t(), e_bits-2)];
     for(int i = e_bits - 3; i > 0; i=i-2) {
