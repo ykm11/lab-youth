@@ -156,7 +156,10 @@ public:
 
     static void mulBase(Point &R0, const mpz_class &k) { 
         // TODO p5 Algorithm 1
-        mpz_class k0, k1; // k = k0 + k1 * lmd
+        mpz_class k0, k1; 
+        /* k = k0 + k1 * lmd
+           s.t 0 < k0, k1 < sqrt(|E|)
+        */
         mpz_tdiv_qr(k1.get_mpz_t(), k0.get_mpz_t(), 
                 k.get_mpz_t(), lmd.get_mpz_t()); 
         Point R1;
