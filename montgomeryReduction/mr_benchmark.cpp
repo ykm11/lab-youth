@@ -30,7 +30,7 @@ void benchmark_mpz_powm() {
         mpz_powm_ui(c.get_mpz_t(), m.get_mpz_t(), 65537, n.get_mpz_t());
     }
     time_t end = clock();
-    puts("[+] mpz_powm_ui(m, e, n)");
+    std::cout << "\tmpz_powm_ui:";
     printf("\ttime = %fusec\n", (end - begin) / double(CLOCKS_PER_SEC) / N * 1e6);
 }
 
@@ -45,7 +45,7 @@ void benchmark_powmMont() {
         powmMont(c, m, e);
     }
     time_t end = clock();
-    puts("[+] powMont(m, e, n)");
+    std::cout << "\tpowMont:";
     printf("\ttime = %fusec\n", (end - begin) / double(CLOCKS_PER_SEC) / N * 1e6);
 }
 
@@ -61,7 +61,7 @@ void benchmark_powm() {
         powm(c, m, e, n);
     }
     time_t end = clock();
-    puts("[+] pow(m, e, n)");
+    std::cout << "\tpow:\t";
     printf("\ttime = %fusec\n", (end - begin) / double(CLOCKS_PER_SEC) / N * 1e6);
 }
 
@@ -77,7 +77,7 @@ void benchmark_powm_kary() {
         powm_slide(c, m, e, n);
     }
     time_t end = clock();
-    puts("[+] pow_k_ary(m, e, n)");
+    std::cout << "\tpow_k_ary:";
     printf("\ttime = %fusec\n", (end - begin) / double(CLOCKS_PER_SEC) / N * 1e6);
 }
 
@@ -95,7 +95,7 @@ void benchmark_MR() {
 #endif
     }
     size_t end = clock();
-    puts("[+] MR(X*Y)*R");
+    std::cout << "\tMR(X*Y)*R:";
     printf("\ttime = %fusec\n", (end - begin) / double(CLOCKS_PER_SEC) / N * 1e6);
 }
 
@@ -106,7 +106,7 @@ void benchmark_MMM() {
         MMM(S, X, Y);
     }
     size_t end = clock();
-    puts("[+] MMM(X, Y) = MR(MR(X * Y) * R^{2})");
+    std::cout << "\tMMM(X, Y):";
     printf("\ttime = %fusec\n", (end - begin) / double(CLOCKS_PER_SEC) / N * 1e6);
 
 
@@ -120,7 +120,7 @@ void benchmark_Mod1() {
         mulMod(XY, X, Y, n);
     }
     size_t end = clock();
-    puts("[+] XY \% n");
+    std::cout << "\tXY \% n:\t";
     printf("\ttime = %fusec\n", (end - begin) / double(CLOCKS_PER_SEC) / N * 1e6);
 }
 
@@ -132,7 +132,7 @@ void benchmark_Mod2() {
         S = X*Y % n;
     }
     size_t end = clock();
-    puts("[+] XY \% n (BAD)");
+    std::cout << "\tmpz_ unused:";
     printf("\ttime = %fusec\n", (end - begin) / double(CLOCKS_PER_SEC) / N * 1e6);
 }
 
@@ -145,6 +145,7 @@ int main() {
     XY = X*Y;
 
     //test_powm();
+    std::cout << "[*] Benchmark pow(m, e, m)\n";
     benchmark_mpz_powm();
     benchmark_powm();
     benchmark_powmMont();
@@ -152,6 +153,7 @@ int main() {
     
     // X*Y mod n の値が出るまでの1サイクルを計測
 
+    std::cout << "\n[*] Benchmark X*Y mod N\n";
     // Montgomery Reduction (XY * R^{-1} mod n)
     benchmark_MR();
     
