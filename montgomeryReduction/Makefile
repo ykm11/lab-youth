@@ -1,4 +1,4 @@
-SRC=mr.cpp mr_test.cpp
+SRC=mr.cpp mr_benchmark.cpp
 OBJ=$(SRC:.cpp=.o)
 
 TARGET=mr_benchmark
