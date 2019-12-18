@@ -6,6 +6,11 @@
 Fp EllipticCurve::a;
 Fp EllipticCurve::b;
 
+Fp GLV::rw;
+mpz_class GLV::lmd;
+Point GLV::base;
+Point GLV::base_;
+
 void EllipticCurve::dbl(Point& R, const Point& P) {
     if (P.z.value == 0) {
         R.x.value = 0;

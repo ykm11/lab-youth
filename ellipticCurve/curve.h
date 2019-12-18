@@ -121,3 +121,47 @@ public:
     static void dbl(Point& R, const Point& P);
 };
 
+
+class GLV {
+
+public:
+    static Fp rw; 
+    static mpz_class lmd; 
+    static Point base, base_; 
+
+    static void initForsecp256k1() {
+        Fp::setModulo(mpz_class("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F", 16));
+        Fp::squareRoot(rw, Fp(-3));
+        mpz_add_ui(rw.value.get_mpz_t(), rw.value.get_mpz_t(), 1);
+        Fp::neg(rw, rw); // - (sqrt(-3) + 1)
+        mpz_tdiv_q_2exp(rw.value.get_mpz_t(), rw.value.get_mpz_t(), 1); 
+        // - (sqrt(-3) + 1) / 2
+
+        Fp gx, gy;
+        gx = Fp("79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798", 16);
+        gy = Fp("483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8", 16);
+        base = Point(gx.value, gy.value, 1);
+        mul(base_.x, rw, base.x);
+        base_.y = base.y;
+        base_.z = base.z;
+        //print(base);
+        //print(base_);
+        
+        lmd = mpz_class("5363ad4cc05c30e0a5261c028812645a122e22ea20816678df02967c1b23bd72", 16);
+        /*
+            lmd = 0x5363ad4cc05c30e0a5261c028812645a122e22ea20816678df02967c1b23bd72 
+            [lmd]G = (rw * gx, gy) 
+        */
+    }
+
+    static void mulBase(Point &R0, const mpz_class &k) { 
+        // TODO p5 Algorithm 1
+        mpz_class k0, k1; // k = k0 + k1 * lmd
+        mpz_tdiv_qr(k1.get_mpz_t(), k0.get_mpz_t(), 
+                k.get_mpz_t(), lmd.get_mpz_t()); 
+        Point R1;
+        mul(R1, base_, k1);
+        mul(R0, base, k0);
+        add(R0, R0, R1);
+    }
+};
