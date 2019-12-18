@@ -37,106 +37,8 @@ static struct UseMiMalloc {
 
 #include "FP.h"
 
-void benchmark_ec_add();
-void benchmark_ec_mul();
-void benchmark_fp();
-void isEqual_fp_test();
-void order_test();
-void ec_mul_test();
 
-void benchmark_ec_add() {
-    std::cout << "[*] EC add benchmark\n";
-    mpz_class a = mpz_class("0", 10);
-    mpz_class b = mpz_class("7", 10);
-    mpz_class p = mpz_class("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F", 16);
-    Fp::setModulo(p);
-
-    EllipticCurve EC = EllipticCurve(a, b);
-    mpz_class q = mpz_class("117289373161954235709850086879078528375642790749043841647", 10);
-    mpz_class gx = mpz_class("79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798", 16);
-    mpz_class gy = mpz_class("483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8", 16);
-
-    Point G = EC.point(gx, gy);
-    Point R = Point(0, 1, 0);
-    const int n = 100000;
-    time_t begin = clock();
-    for(int i = 0; i < n; i++) {
-        add(R, R, G);
-    }
-    time_t end = clock();
-    printf("\ttime = %fusec\n", (end - begin) / double(CLOCKS_PER_SEC) / n * 1e6);
-}
-
-void benchmark_ec_dbl() {
-    std::cout << "[*] EC dbl benchmark\n";
-    mpz_class a = mpz_class("0", 10);
-    mpz_class b = mpz_class("7", 10);
-    mpz_class p = mpz_class("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F", 16);
-    Fp::setModulo(p);
-
-    EllipticCurve EC = EllipticCurve(a, b);
-    mpz_class q = mpz_class("117289373161954235709850086879078528375642790749043841647", 10);
-    mpz_class gx = mpz_class("79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798", 16);
-    mpz_class gy = mpz_class("483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8", 16);
-
-    Point G = EC.point(gx, gy);
-    Point R = Point(0, 1, 0);
-    EllipticCurve::dbl(R, G);
-    const int n = 100000;
-
-    time_t begin = clock();
-    for(int i = 0; i < n; i++) {
-        EllipticCurve::dbl(R, R);
-    }
-    time_t end = clock();
-    printf("\ttime = %fusec\n", (end - begin) / double(CLOCKS_PER_SEC) / n * 1e6);
-}
-
-
-void benchmark_ec_mul() {
-    std::cout << "[*] EC mul benchmark\n";
-    mpz_class a = mpz_class("0", 10);
-    mpz_class b = mpz_class("7", 10);
-    mpz_class p = mpz_class("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F", 16);
-    Fp::setModulo(p);
-
-    EllipticCurve EC = EllipticCurve(a, b);
-    mpz_class q = mpz_class("117289373161954235709850086879078528375642790749043841647", 10);
-    mpz_class gx = mpz_class("79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798", 16);
-    mpz_class gy = mpz_class("483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8", 16);
-
-    Point G = EC.point(gx, gy);
-    Point R;
-    const int n = 100;
-    time_t begin = clock();
-    for(int i = 0; i < n; i++) {
-        //mul(R, G, q);
-        r_mul(R, G, q);
-        //montgomery_mul(R, G, q);
-        //window_mul(R, G, q);
-    }
-    time_t end = clock();
-    printf("\ttime = %fusec\n", (end - begin) / double(CLOCKS_PER_SEC) / n * 1e6);
-}
-
-
-void benchmark_fp() {
-    std::cout << "[*] Fp invmod benchmark\n";
-    mpz_class p = mpz_class("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F", 16);
-    Fp::setModulo(p);
-    Fp x, y;
-
-    x = Fp("115792089237316195423570985008687907852837564279074904382605163141518161494337", 10); 
-    const int n = 100000;
-    time_t begin = clock();
-    for(int i = 0; i < n; i++) {
-        invmod(y, x); // x <- y^{-1}
-    }
-    time_t end = clock();
-    printf("\ttime = %fusec\n", (end - begin) / double(CLOCKS_PER_SEC) / n * 1e6);
-}
-
-void ec_mul_test() {
+void test_ec_mul() {
     mpz_class p = mpz_class("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F", 16);
     Fp::setModulo(p);
 
@@ -166,7 +68,7 @@ void ec_mul_test() {
     }
 }
 
-void order_test() {
+void test_ECorder() {
     mpz_class p = mpz_class("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F", 16);
     Fp::setModulo(p);
 
@@ -190,7 +92,7 @@ void order_test() {
     }
 }
 
-void ec_muls_test() { // 4つのスカラー倍の計算テスト
+void test_ec_muls() { // 4つのスカラー倍の計算テスト
     mpz_class p = mpz_class("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F", 16);
     Fp::setModulo(p);
 
@@ -216,7 +118,7 @@ void ec_muls_test() { // 4つのスカラー倍の計算テスト
     }
 }
 
-void isEqual_fp_test() {
+void test_isEqual_fp() {
     Fp::setModulo(19);
 
     Fp x = Fp(12);
@@ -239,24 +141,6 @@ void isEqual_fp_test() {
 
 }
 
-void benchmark_sqr() {
-    std::cout << "[*] sqr benchmark\n";
-    mpz_class p = mpz_class("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F", 16);
-    Fp::setModulo(p);
-    Fp x, r;
-
-    x = Fp("115792089237316195423570985008687907852837564279074904382605163141518161494337", 10); 
-
-    const int n = 1000000;
-    time_t begin = clock();
-    for(int i = 0; i < n; i++) {
-        sqr(r, x);
-        //mul(r, x, x);
-    }
-    time_t end = clock();
-    printf("\ttime = %fusec\n", (end - begin) / double(CLOCKS_PER_SEC) / n * 1e6);
-}
-
 void test_fp_squareRoot() {
     std::cout << "[*] Fp squareRoot test: ";
     mpz_class p = mpz_class("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F", 16);
@@ -276,37 +160,28 @@ void test_fp_squareRoot() {
     std::cout << "OK\n";
 }
 
-void benchmark_fp_sqareRoot() {
-    std::cout << "[*] Fp squareRoot benchmark\n";
-    mpz_class p = mpz_class("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F", 16);
-    Fp::setModulo(p);
-    Fp x, r;
+void test_GLVsecp256k1_baseMul() {
+    GLV::initForsecp256k1();
+    mpz_class k;
+    Point R1, R2;
+    k = mpz_class("132237213321038201388210320131380183201838214891840184028302814104802918301", 16);
+    GLV::mulBase(R1, k);
+    mul(R1, GLV::base, k);
 
-    x = Fp("115792089237316195423570985008687907852837564279074904382605163141518161494337", 10); 
-    assert(Fp::squareRoot(r, x));
-
-    const int n = 10000;
-    time_t begin = clock();
-    for(int i = 0; i < n; i++) {
-        Fp::squareRoot(r, x);
+    std::cout << "[*] GLV base mul test: ";
+    if (R1 == R2) {
+        puts("OK");
+    } else {
+        puts("Failed");
     }
-    time_t end = clock();
-    printf("\ttime = %fusec\n", (end - begin) / double(CLOCKS_PER_SEC) / n * 1e6);
 }
 
-
-
 int main() {
-    //test_fp_squareRoot();
-    //order_test();
-    //ec_mul_test();
-    //ec_muls_test();
-    //isEqual_fp_test();
+    test_GLVsecp256k1_baseMul();
+    test_fp_squareRoot();
+    test_ECorder();
+    test_ec_mul();
+    test_ec_muls();
+    test_isEqual_fp();
 
-    //benchmark_fp_sqareRoot();
-    benchmark_fp();
-    benchmark_sqr();
-    benchmark_ec_add();
-    benchmark_ec_dbl();
-    benchmark_ec_mul();
 }
