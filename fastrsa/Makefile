@@ -1,23 +1,21 @@
-TARGET=fastrsa
+SRC=rsa.cpp benchmark.cpp
+OBJ=$(SRC:.cpp=.o)
+
+TARGET=rsa_benchmark
 CXXFLAGS=-Wall -Wextra -O3 -std=c++17 -DNDEBUG
-LFLAGS=-lgmpxx -lgmp
+LDFLAGS=-lgmpxx -lgmp
 
 
 all: $(TARGET)
 
+%.o: %.cpp
+	$(CXX) -c $< -o $@ $(CXXFLAGS)
 
-$(TARGET): main.cpp
-	$(CXX) -o $< $(CXXFLAGS) $(LFLAGS)
+$(TARGET): $(OBJ)
+	$(CXX) -o $@ $? $(LDFLAGS)
 
-rsa.o: rsa.cpp rsa.h
-	$(CXX) -o $@ -c $< $(CXXFLAGS)
-
-
-.PHONY: benchmark clean
+.PHONY: clean
 
 clean:
-	rm *.o
+	rm *.o $(TARGET)
 
-./benchmark: test.cpp rsa.o
-	$(CXX) -o $@ test.cpp rsa.o $(CXXFLAGS) $(LFLAGS)
-	./benchmark

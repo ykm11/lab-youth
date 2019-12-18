@@ -1,5 +1,5 @@
-#include<gmpxx.h>
 #include "rsa.h"
+#include<gmpxx.h>
 
     
 void RSA::encrypt(mpz_class &c, const mpz_class &m) const { // c <- m^e mod n

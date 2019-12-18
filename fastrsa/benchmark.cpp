@@ -22,7 +22,7 @@ void benchmark_rsa() {
         rsa.decrypt(m, c);
     }
     time_t end = clock();
-    puts("[+] RSA benchmark (mod n)");
+    std::cout << "\tmod n:";
     printf("\ttime = %fusec\n", (end - begin) / double(CLOCKS_PER_SEC) / n * 1e6);
 }
 
@@ -39,14 +39,12 @@ void test_rsa() {
     rsa.encrypt(c, plaintext);
     rsa.decrypt(m, c);
 
-    printf("[+] RSA test (mod n): ");
+    std::cout << "\tmod n: ";
     if (m == plaintext) {
         puts("OK");
     } else {
         puts("FAILED");
     }
-    std::cout << m << std::endl;
-    std::cout << plaintext << std::endl;
 }
 
 void benchmark_crt_rsa() {
@@ -67,7 +65,7 @@ void benchmark_crt_rsa() {
         rsa.crt_decrypt(m, c);
     }
     time_t end = clock();
-    puts("[+] RSA benchmark (CRT)");
+    std::cout << "\tCRT:";
     printf("\ttime = %fusec\n", (end - begin) / double(CLOCKS_PER_SEC) / n * 1e6);
 }
 
@@ -84,20 +82,20 @@ void test_crt_rsa() {
     rsa.encrypt(c, plaintext);
     rsa.crt_decrypt(m, c);
 
-    printf("[+] RSA test (CRT): ");
+    std::cout << "\tCRT: ";
     if (m == plaintext) {
         puts("OK");
     } else {
         puts("FAILED");
     }
-    std::cout << m << std::endl;
-    std::cout << plaintext << std::endl;
 }
 
 
 int main() {
+    std::cout << "[*] RSA test Dec(Enc(m)) = m ?\n";
     test_rsa();
     test_crt_rsa();
+    std::cout << "\n[*] Benchmark decrypt\n";
     benchmark_rsa();
     benchmark_crt_rsa();
 }
