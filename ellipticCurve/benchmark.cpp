@@ -191,8 +191,34 @@ void benchmark_GLVbaseMul() {
     end = clock();
     std::cout << "\tUsual";
     printf("\ttime = %fusec\n", (end - begin) / double(CLOCKS_PER_SEC) / n * 1e6);
-     
 }
+
+void benchmark_MultipleScalarMul() {
+    std::cout << "[*] MultipleMul v.s Mul\n";
+    GLV::initForsecp256k1();
+    Point R;
+    mpz_class k1 = mpz_class("11117289373161954235709850086879078528375642790749043841647", 16);
+    mpz_class k2 = mpz_class("DEADBEEF3921391232134374927392173937137213797392713292193", 16);
+    const int n = 1000;
+
+    time_t begin = clock();
+    for(int i = 0; i < n; i++) {
+        multipleMul(R, GLV::base, k1, GLV::base, k2);
+    }
+    time_t end = clock();
+    std::cout << "\t[k1]Base+[k2}Base";
+    printf("\ttime = %fusec\n", (end - begin) / double(CLOCKS_PER_SEC) / n * 1e6);
+
+    mpz_class k = k1+k2;
+    begin = clock();
+    for(int i = 0; i < n; i++) {
+        mul(R, GLV::base, k); 
+    }
+    end = clock();
+    std::cout << "\t[k1+k2]Base";
+    printf("\t\ttime = %fusec\n", (end - begin) / double(CLOCKS_PER_SEC) / n * 1e6);
+}
+
 
 int main() {
     benchmark_fp_sqareRoot();
@@ -203,5 +229,5 @@ int main() {
     benchmark_ec_mul();
 
     benchmark_GLVbaseMul(); 
-
+    benchmark_MultipleScalarMul();
 }

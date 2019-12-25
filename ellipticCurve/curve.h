@@ -20,6 +20,8 @@ void r_mul(Point &R, const Point& G, const mpz_class x);
 void montgomery_mul(Point &R0, const Point& G, const mpz_class n);
 void window_mul(Point &R, const Point& G, const mpz_class n);
 
+void multipleMul(Point &R, const Point &P, const mpz_class &u, const Point &Q, const mpz_class &v);
+
 
 class Point {
 public:
@@ -167,4 +169,5 @@ public:
         mul(R0, base, k0);
         add(R0, R0, R1);
     }
+
 };

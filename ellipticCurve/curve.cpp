@@ -231,3 +231,41 @@ void window_mul(Point &R, const Point& G, const mpz_class n) { // windows method
         add(R, R, P[mpz_tstbit(n.get_mpz_t(), 0)]);
     }
 }
+
+void multipleMul(Point &R, const Point &P, const mpz_class &u, const Point &Q, const mpz_class &v) {
+    size_t k_bits;
+    Point prePoints[4][4]; // w = 2
+    prePoints[0][0] = Point(0, 1, 0);
+    prePoints[1][0] = P;
+    prePoints[0][1] = Q;
+    EllipticCurve::dbl(prePoints[2][0], P);
+    EllipticCurve::dbl(prePoints[0][2], Q);
+    add(prePoints[3][0], prePoints[2][0], P);
+    add(prePoints[0][3], prePoints[0][2], Q);
+    for (int i = 1; i < 4; i++) {
+        for (int j = 1; j < 4; j++) {
+            add(prePoints[i][j], prePoints[i][0], prePoints[0][j]); // [i]P + [j]Q
+        }
+    }
+    R = prePoints[0][0]; 
+
+    if (mpz_sizeinbase(u.get_mpz_t(), 2) > mpz_sizeinbase(v.get_mpz_t(), 2)) {
+        k_bits = mpz_sizeinbase(u.get_mpz_t(), 2);
+    } else {
+        k_bits = mpz_sizeinbase(v.get_mpz_t(), 2);
+    }
+    for (int i = k_bits-1; i > 0; i=i-2) {
+        EllipticCurve::dbl(R, R);
+        EllipticCurve::dbl(R, R); // R <- [4]R
+        add(R, R, prePoints
+                [2*mpz_tstbit(u.get_mpz_t(), i) + mpz_tstbit(u.get_mpz_t(), i-1)]
+                [2*mpz_tstbit(v.get_mpz_t(), i) + mpz_tstbit(v.get_mpz_t(), i-1)]);
+        // R <- []P + []Q
+    }
+    if ((k_bits & 1) == 1) { // ビット数が奇数のときだけ
+        EllipticCurve::dbl(R, R);
+        add(R, R, prePoints
+                [mpz_tstbit(u.get_mpz_t(), 0)]
+                [mpz_tstbit(v.get_mpz_t(), 0)]);
+    }
+}

@@ -176,8 +176,27 @@ void test_GLVsecp256k1_baseMul() {
     }
 }
 
+void test_MultipleScalarMul() {
+    GLV::initForsecp256k1();
+    mpz_class k1, k2;
+    Point R1, R2;
+    k1 = mpz_class("11117289373161954235709850086879078528375642790749043841647", 16);
+    k2 = mpz_class("DEADBEEF3921391232134374927392173937137213797392713292193", 16);
+    mul(R1, GLV::base, k1 + k2); // R1 = [k+k]Base
+    multipleMul(R2, GLV::base, k1, GLV::base, k2); // [k]Base + [k]Base
+
+    std::cout << "[*] Multiple Scalar Mul test: ";
+    if (R1 == R2) {
+        puts("OK");
+    } else {
+        puts("Failed");
+    }
+}
+
+
 int main() {
     test_GLVsecp256k1_baseMul();
+    test_MultipleScalarMul();
     test_fp_squareRoot();
     test_ECorder();
     test_ec_mul();
