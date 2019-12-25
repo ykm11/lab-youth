@@ -173,7 +173,7 @@ void benchmark_GLVbaseMul() {
     std::cout << "[*] secp256k1 base mul benchmark\n";
     GLV::initForsecp256k1();
     Point R;
-    mpz_class k = mpz_class("11117289373161954235709850086879078528375642790749043841647", 16);
+    mpz_class k = mpz_class("3321038201388210320131380183201838214891840184028302814104802918301", 16);
     const int n = 1000;
 
     time_t begin = clock();

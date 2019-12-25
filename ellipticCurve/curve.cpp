@@ -8,6 +8,7 @@ Fp EllipticCurve::b;
 
 Fp GLV::rw;
 mpz_class GLV::lmd;
+mpz_class GLV::order;
 Point GLV::base;
 Point GLV::base_;
 
@@ -247,8 +248,8 @@ void multipleMul(Point &R, const Point &P, const mpz_class &u, const Point &Q, c
             add(prePoints[i][j], prePoints[i][0], prePoints[0][j]); // [i]P + [j]Q
         }
     }
-    R = prePoints[0][0]; 
 
+    R = prePoints[0][0]; 
     if (mpz_sizeinbase(u.get_mpz_t(), 2) > mpz_sizeinbase(v.get_mpz_t(), 2)) {
         k_bits = mpz_sizeinbase(u.get_mpz_t(), 2);
     } else {
@@ -260,7 +261,7 @@ void multipleMul(Point &R, const Point &P, const mpz_class &u, const Point &Q, c
         add(R, R, prePoints
                 [2*mpz_tstbit(u.get_mpz_t(), i) + mpz_tstbit(u.get_mpz_t(), i-1)]
                 [2*mpz_tstbit(v.get_mpz_t(), i) + mpz_tstbit(v.get_mpz_t(), i-1)]);
-        // R <- []P + []Q
+        // R <- R + ([]P + []Q)
     }
     if ((k_bits & 1) == 1) { // ビット数が奇数のときだけ
         EllipticCurve::dbl(R, R);
@@ -269,3 +270,57 @@ void multipleMul(Point &R, const Point &P, const mpz_class &u, const Point &Q, c
                 [mpz_tstbit(v.get_mpz_t(), 0)]);
     }
 }
+
+void GLV::decomposing_kGLV(mpz_class &k0, mpz_class &k1, const mpz_class k) {
+    // k = k0 + k1*lmd
+    // EEAの過程で見つける.
+    mpz_class s1, s0, t1, t0, n;
+    mpz_class g, q, r, tmp;
+    mpz_class b1, b2;
+
+    s0 = 1; s1 = 0;
+    t0 = 0; t1 = 1;
+    g = GLV::order; n = GLV::lmd;
+    while (n != 0) {
+        mpz_tdiv_qr(q.get_mpz_t(), r.get_mpz_t(), g.get_mpz_t(), n.get_mpz_t());
+        tmp = s1; s1 = s0 - q*s1; s0 = tmp;
+        tmp = t1; t1 = t0 - q*t1; t0 = tmp;
+
+        g = n;
+        n = r;
+        mpz_sqrt(tmp.get_mpz_t(), GLV::order.get_mpz_t());
+        if (g < tmp) {
+            k0 = r; 
+            k1 = -t1;
+            mpz_tdiv_qr(q.get_mpz_t(), r.get_mpz_t(), g.get_mpz_t(), n.get_mpz_t());
+            t1 = q*t1 - t0;
+            break;
+        }
+    }
+    b2 = (k1*k) / (-k0*t1 + r*k1);
+    b1 = -b2*t1/k1;
+
+    s0 = b1*k0 + b2*r; // x
+    s1 = b1*k1 + b2*t1; // y
+
+    k0 = k - s0;
+    k1 = -s1;
+}
+
+void GLV::mulBase(Point &R, const mpz_class &k) { 
+    mpz_class k0, k1; 
+    decomposing_kGLV(k0, k1, k); // k = k0 + k1*lmd
+    multipleMul(R, base, k0, base_, k1);
+}
+
+void GLV::scalarMul(Point &R, const Point &P, const mpz_class &k) { 
+    Point Q;
+    mulMod(Q.x.value, GLV::rw.value, P.x.value, Fp::modulus); // phi(P) = [lmd]P = (beta*x, y) = psi(P)
+    Q.y = P.y;
+    Q.z = P.z;
+    mpz_class k0, k1; 
+    decomposing_kGLV(k0, k1, k); // k = k0 + k1*lmd
+
+    multipleMul(R, P, k0, Q, k1);
+}
+

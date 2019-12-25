@@ -164,10 +164,9 @@ void test_GLVsecp256k1_baseMul() {
     GLV::initForsecp256k1();
     mpz_class k;
     Point R1, R2;
-    k = mpz_class("132237213321038201388210320131380183201838214891840184028302814104802918301", 16);
+    k = mpz_class("3321038201388210320131380183201838214891840184028302814104802918301", 16);
     GLV::mulBase(R1, k);
-    mul(R1, GLV::base, k);
-
+    mul(R2, GLV::base, k);
     std::cout << "[*] GLV base mul test: ";
     if (R1 == R2) {
         puts("OK");
@@ -175,6 +174,23 @@ void test_GLVsecp256k1_baseMul() {
         puts("Failed");
     }
 }
+
+void test_GLVsecp256k1_ScalarMul() {
+    GLV::initForsecp256k1();
+    mpz_class k;
+    Point R, R1, R2;
+    k = mpz_class("3321038201388210320131380183201838214891840184028302814104802918301", 16);
+    mul(R, GLV::base, 382108383); 
+    GLV::scalarMul(R1, R, k);
+    mul(R2, R, k);
+    std::cout << "[*] GLV scalar mul test: ";
+    if (R1 == R2) {
+        puts("OK");
+    } else {
+        puts("Failed");
+    }
+}
+
 
 void test_MultipleScalarMul() {
     GLV::initForsecp256k1();
@@ -196,6 +212,7 @@ void test_MultipleScalarMul() {
 
 int main() {
     test_GLVsecp256k1_baseMul();
+    test_GLVsecp256k1_ScalarMul();
     test_MultipleScalarMul();
     test_fp_squareRoot();
     test_ECorder();

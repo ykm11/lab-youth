@@ -22,7 +22,6 @@ void window_mul(Point &R, const Point& G, const mpz_class n);
 
 void multipleMul(Point &R, const Point &P, const mpz_class &u, const Point &Q, const mpz_class &v);
 
-
 class Point {
 public:
     Fp x, y, z;
@@ -128,7 +127,7 @@ class GLV {
 
 public:
     static Fp rw; 
-    static mpz_class lmd; 
+    static mpz_class lmd, order; 
     static Point base, base_; 
 
     static void initForsecp256k1() {
@@ -146,28 +145,12 @@ public:
         mul(base_.x, rw, base.x);
         base_.y = base.y;
         base_.z = base.z;
-        //print(base);
-        //print(base_);
         
+        order = mpz_class("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141", 16);
         lmd = mpz_class("5363ad4cc05c30e0a5261c028812645a122e22ea20816678df02967c1b23bd72", 16);
-        /*
-            lmd = 0x5363ad4cc05c30e0a5261c028812645a122e22ea20816678df02967c1b23bd72 
-            [lmd]G = (rw * gx, gy) 
-        */
     }
 
-    static void mulBase(Point &R0, const mpz_class &k) { 
-        // TODO p5 Algorithm 1
-        mpz_class k0, k1; 
-        /* k = k0 + k1 * lmd
-           s.t 0 < k0, k1 < sqrt(|E|)
-        */
-        mpz_tdiv_qr(k1.get_mpz_t(), k0.get_mpz_t(), 
-                k.get_mpz_t(), lmd.get_mpz_t()); 
-        Point R1;
-        mul(R1, base_, k1);
-        mul(R0, base, k0);
-        add(R0, R0, R1);
-    }
-
+    static void decomposing_kGLV(mpz_class &k0, mpz_class &k1, const mpz_class k);
+    static void mulBase(Point &R, const mpz_class &k);
+    static void scalarMul(Point &R, const Point &P, const mpz_class &k);
 };
