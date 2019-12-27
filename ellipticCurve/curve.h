@@ -8,17 +8,17 @@
 class Point;
 class EllipticCurve;
 
-bool isEqual(const Point& P, const Point& Q);
-void add(Point& R, const Point& P, const Point& Q);
-void sub(Point& R, const Point& P, const Point& Q);
-void mul(Point& R, const Point& P, const mpz_class& x); // scalar multiplying
-void dbl(Point& R, const Point& P);
+bool isEqual(const Point &P, const Point &Q);
+void add(Point &R, const Point &P, const Point &Q);
+void sub(Point &R, const Point &P, const Point &Q);
+void mul(Point &R, const Point &P, const mpz_class &x); // scalar multiplying
+void dbl(Point &R, const Point &P);
 
-void print(const Point& P);
+void dump(const Point &P);
 
-void r_mul(Point &R, const Point& G, const mpz_class x);
-void montgomery_mul(Point &R0, const Point& G, const mpz_class n);
-void window_mul(Point &R, const Point& G, const mpz_class n);
+void r_mul(Point &R, const Point &G, const mpz_class &x);
+void montgomery_mul(Point &R0, const Point &G, const mpz_class &n);
+void window_mul(Point &R, const Point &G, const mpz_class &n);
 
 void multipleMul(Point &R, const Point &P, const mpz_class &u, const Point &Q, const mpz_class &v);
 
@@ -27,38 +27,38 @@ public:
     Fp x, y, z;
 
     Point() {}
-    Point(const Fp& X, const Fp& Y, const Fp& Z) : x(X), y(Y), z(Z) {}
-    Point(const mpz_class& X, const mpz_class& Y, const mpz_class& Z) : x(X), y(Y), z(Z) {}
+    Point(const Fp &X, const Fp &Y, const Fp &Z) : x(X), y(Y), z(Z) {}
+    Point(const mpz_class &X, const mpz_class &Y, const mpz_class &Z) : x(X), y(Y), z(Z) {}
     //~Point() = default;
 
 
-    Point operator+(const Point& other) const {
+    Point operator+(const Point &other) const {
         Point r;
         add(r, *this, other);
         return r;
     }
 
-    Point operator-(const Point& other) const {
+    Point operator-(const Point &other) const {
         Point r;
         sub(r, *this, other);
         return r;
     }
 
-    Point operator*(const mpz_class& x) const {
+    Point operator*(const mpz_class &x) const {
         Point r;
         mul(r, *this, x);
         return r;
     }
 
-    bool operator==(const Point& other) const {
+    bool operator==(const Point &other) const {
         return isEqual(*this, other);
     }
 
-    bool operator!=(const Point& other) const {
+    bool operator!=(const Point &other) const {
         return !isEqual(*this, other);
     }
 
-    void xy(Fp& s, Fp& t) const { // 射影座標からアフィン座標へ
+    void xy(Fp &s, Fp &t) const { // 射影座標からアフィン座標へ
         Fp inv_z;
         invmod(inv_z, z);
         
@@ -73,18 +73,18 @@ public:
     static Fp a, b;
 
     EllipticCurve() {}
-    EllipticCurve(const mpz_class& A, const mpz_class& B) {
+    EllipticCurve(const mpz_class &A, const mpz_class &B) {
         a = Fp(A);
         b = Fp(B);
     }
     //~EllipticCurve() = default;
 
-    Point point(const mpz_class& x, const mpz_class& y) const {
+    Point point(const mpz_class &x, const mpz_class &y) const {
         Point P = point(x, y, 1);
         return P;
     }
 
-    Point point(const mpz_class& x, const mpz_class& y, const mpz_class& z) const {
+    Point point(const mpz_class &x, const mpz_class &y, const mpz_class &z) const {
         Point P;
         Fp r, l, u, v, z2;
 
@@ -109,17 +109,17 @@ public:
         return P;
     }
  
-    Point operator()(const mpz_class& x, const mpz_class& y) const {
+    Point operator()(const mpz_class &x, const mpz_class &y) const {
         Point P = point(x, y, 1);
         return P;
     }
 
-    Point operator()(const mpz_class& x, const mpz_class& y, const mpz_class& z) const {
+    Point operator()(const mpz_class &x, const mpz_class &y, const mpz_class &z) const {
         Point P = point(x, y, z);
         return P;
     }
 
-    static void dbl(Point& R, const Point& P);
+    static void dbl(Point &R, const Point &P);
 };
 
 
@@ -150,7 +150,7 @@ public:
         lmd = mpz_class("5363ad4cc05c30e0a5261c028812645a122e22ea20816678df02967c1b23bd72", 16);
     }
 
-    static void decomposing_kGLV(mpz_class &k0, mpz_class &k1, const mpz_class k);
+    static void decomposing_kGLV(mpz_class &k0, mpz_class &k1, const mpz_class &k);
     static void mulBase(Point &R, const mpz_class &k);
     static void scalarMul(Point &R, const Point &P, const mpz_class &k);
 };

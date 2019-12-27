@@ -12,7 +12,7 @@ mpz_class GLV::order;
 Point GLV::base;
 Point GLV::base_;
 
-void EllipticCurve::dbl(Point& R, const Point& P) {
+void EllipticCurve::dbl(Point &R, const Point &P) {
     if (P.z.value == 0) {
         R.x.value = 0;
         R.y.value = 1;
@@ -69,7 +69,7 @@ void EllipticCurve::dbl(Point& R, const Point& P) {
     R.z.value = std::move(Rz.value);
 }
 
-void add(Point& R, const Point& P, const Point& Q) {
+void add(Point &R, const Point &P, const Point &Q) {
 
     if (P.z.value == 0) {
         R.x = Q.x;
@@ -137,13 +137,13 @@ void add(Point& R, const Point& P, const Point& Q) {
     R.z.value = std::move(Rz.value);
 }
 
-void sub(Point& R, const Point& P, const Point& Q) {
+void sub(Point &R, const Point &P, const Point &Q) {
     Point minus_Q = Q;
     minus_Q.y.value = (Fp::modulus - minus_Q.y.value); // y <- p-y
     add(R, P, minus_Q); // R <- P + [-1]Q
 }
 
-bool isEqual(const Point& P, const Point& Q) {
+bool isEqual(const Point &P, const Point &Q) {
     Fp s, t, u, v;
 
     mul(s, P.x, Q.y); // X  * Y'
@@ -155,7 +155,7 @@ bool isEqual(const Point& P, const Point& Q) {
     return (s == t) && (u == v);
 }
 
-void print(const Point& P) {
+void dump(const Point &P) {
     if (P.z.value == 0) {
         std::cout << "(0 : 1 : 0)" << std::endl;
     } else {
@@ -165,7 +165,7 @@ void print(const Point& P) {
     }
 }
 
-void mul(Point& R, const Point& P, const mpz_class& x) { // 左向きバイナリ法
+void mul(Point &R, const Point &P, const mpz_class &x) { // 左向きバイナリ法
     R.x.value = 0;
     R.y.value = 1;
     R.z.value = 0;
@@ -182,7 +182,7 @@ void mul(Point& R, const Point& P, const mpz_class& x) { // 左向きバイナ�
     }
 }
 
-void r_mul(Point &R, const Point& G, const mpz_class x) { // 右向きバイナリ法
+void r_mul(Point &R, const Point& G, const mpz_class &x) { // 右向きバイナリ法
     size_t k_bits = mpz_sizeinbase(x.get_mpz_t(), 2);
 
     R = G;
@@ -195,7 +195,7 @@ void r_mul(Point &R, const Point& G, const mpz_class x) { // 右向きバイナ�
     }
 }
 
-void montgomery_mul(Point &R0, const Point& G, const mpz_class n) { // Montgomery Ladder
+void montgomery_mul(Point &R0, const Point &G, const mpz_class &n) { // Montgomery Ladder
     size_t k_bits = mpz_sizeinbase(n.get_mpz_t(), 2);
     Point R1 = G;
     R0 = Point(0, 1, 0);
@@ -211,7 +211,7 @@ void montgomery_mul(Point &R0, const Point& G, const mpz_class n) { // Montgomer
     }
 }
 
-void window_mul(Point &R, const Point& G, const mpz_class n) { // windows method
+void window_mul(Point &R, const Point &G, const mpz_class &n) { // windows method
     size_t k_bits = mpz_sizeinbase(n.get_mpz_t(), 2);
     Point P[4];
 
@@ -271,7 +271,7 @@ void multipleMul(Point &R, const Point &P, const mpz_class &u, const Point &Q, c
     }
 }
 
-void GLV::decomposing_kGLV(mpz_class &k0, mpz_class &k1, const mpz_class k) {
+void GLV::decomposing_kGLV(mpz_class &k0, mpz_class &k1, const mpz_class &k) {
     // k = k0 + k1*lmd
     // EEAの過程で見つける.
     mpz_class s1, s0, t1, t0, n;
