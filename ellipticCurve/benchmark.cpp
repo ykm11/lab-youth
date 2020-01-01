@@ -169,6 +169,21 @@ void benchmark_fp_sqareRoot() {
     printf("\ttime = %fusec\n", (end - begin) / double(CLOCKS_PER_SEC) / n * 1e6);
 }
 
+void benchmark_GLV_decomposing() {
+    std::cout << "[*] GLV decomposing-k secp256k1 benchmark\n";
+    GLV::initForsecp256k1();
+    mpz_class k = mpz_class("3321038201388210320131380183201838214891840184028302814104802918301", 16);
+    mpz_class k0, k1;
+    const int n = 10000;
+
+    time_t begin = clock();
+    for(int i = 0; i < n; i++) {
+        GLV::decomposing_kGLV(k0, k1, k);
+    }
+    time_t end = clock();
+    printf("\ttime = %fusec\n", (end - begin) / double(CLOCKS_PER_SEC) / n * 1e6);
+}
+
 void benchmark_GLVbaseMul() {
     std::cout << "[*] secp256k1 base mul benchmark\n";
     GLV::initForsecp256k1();
@@ -228,6 +243,7 @@ int main() {
     benchmark_ec_dbl();
     benchmark_ec_mul();
 
+    benchmark_GLV_decomposing();
     benchmark_GLVbaseMul(); 
     benchmark_MultipleScalarMul();
 }

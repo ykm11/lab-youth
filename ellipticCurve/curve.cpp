@@ -274,22 +274,20 @@ void multipleMul(Point &R, const Point &P, const mpz_class &u, const Point &Q, c
 void GLV::decomposing_kGLV(mpz_class &k0, mpz_class &k1, const mpz_class &k) {
     // k = k0 + k1*lmd
     // EEAの過程で見つける.
-    mpz_class s1, s0, t1, t0, n;
-    mpz_class g, q, r, tmp;
+    mpz_class t1, t0, n;
+    mpz_class g, q, r;
     mpz_class b1, b2;
 
-    s0 = 1; s1 = 0;
     t0 = 0; t1 = 1;
     g = GLV::order; n = GLV::lmd;
+    mpz_sqrt(b1.get_mpz_t(), GLV::order.get_mpz_t()); // sqrt(|E|)
     while (n != 0) {
         mpz_tdiv_qr(q.get_mpz_t(), r.get_mpz_t(), g.get_mpz_t(), n.get_mpz_t());
-        tmp = s1; s1 = s0 - q*s1; s0 = tmp;
-        tmp = t1; t1 = t0 - q*t1; t0 = tmp;
+        b2 = t1; t1 = t0 - q*t1; t0 = b2;
 
         g = n;
         n = r;
-        mpz_sqrt(tmp.get_mpz_t(), GLV::order.get_mpz_t());
-        if (g < tmp) {
+        if (g < b1) {
             k0 = r; 
             k1 = -t1;
             mpz_tdiv_qr(q.get_mpz_t(), r.get_mpz_t(), g.get_mpz_t(), n.get_mpz_t());
@@ -300,17 +298,17 @@ void GLV::decomposing_kGLV(mpz_class &k0, mpz_class &k1, const mpz_class &k) {
     b2 = (k1*k) / (-k0*t1 + r*k1);
     b1 = -b2*t1/k1;
 
-    s0 = b1*k0 + b2*r; // x
-    s1 = b1*k1 + b2*t1; // y
+    t0 = b1*k0 + b2*r; // x
+    r = b1*k1 + b2*t1; // y
 
-    k0 = k - s0;
-    k1 = -s1;
+    k0 = k - t0;
+    k1 = -r;
 }
 
 void GLV::mulBase(Point &R, const mpz_class &k) { 
     mpz_class k0, k1; 
     decomposing_kGLV(k0, k1, k); // k = k0 + k1*lmd
-    multipleMul(R, base, k0, base_, k1);
+    multipleMul(R, GLV::base, k0, GLV::base_, k1);
 }
 
 void GLV::scalarMul(Point &R, const Point &P, const mpz_class &k) { 

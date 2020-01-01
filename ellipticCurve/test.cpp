@@ -160,6 +160,20 @@ void test_fp_squareRoot() {
     std::cout << "OK\n";
 }
 
+void test_GLV_decomposing() {
+    std::cout << "[*] GLV decomposing-k secp256k1 test: ";
+    GLV::initForsecp256k1();
+    mpz_class k = mpz_class("3321038201388210320131380183201838214891840184028302814104802918301", 16);
+    mpz_class k0, k1;
+
+    GLV::decomposing_kGLV(k0, k1, k);
+    if ((k0 + k1*GLV::lmd) % GLV::order == k % GLV::order) {
+        std::cout << "OK\n";
+    } else {
+        std::cout << "Failed\n";
+    }
+}
+
 void test_GLVsecp256k1_baseMul() {
     GLV::initForsecp256k1();
     mpz_class k;
@@ -211,6 +225,7 @@ void test_MultipleScalarMul() {
 
 
 int main() {
+    test_GLV_decomposing();
     test_GLVsecp256k1_baseMul();
     test_GLVsecp256k1_ScalarMul();
     test_MultipleScalarMul();
