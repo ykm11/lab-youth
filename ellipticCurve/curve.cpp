@@ -305,20 +305,63 @@ void GLV::decomposing_kGLV(mpz_class &k0, mpz_class &k1, const mpz_class &k) {
     k1 = -r;
 }
 
+void GLV::lambdaMul(Point &R, const Point &P) { 
+    mulMod(R.x.value, GLV::rw.value, P.x.value, Fp::modulus); 
+    R.y = P.y;
+    R.z = P.z;
+}
+
 void GLV::mulBase(Point &R, const mpz_class &k) { 
-    mpz_class k0, k1; 
-    decomposing_kGLV(k0, k1, k); // k = k0 + k1*lmd
-    multipleMul(R, GLV::base, k0, GLV::base_, k1);
+    GLV::scalarMul(R, GLV::base, k);
 }
 
 void GLV::scalarMul(Point &R, const Point &P, const mpz_class &k) { 
-    Point Q;
-    mulMod(Q.x.value, GLV::rw.value, P.x.value, Fp::modulus); // phi(P) = [lmd]P = (beta*x, y) = psi(P)
-    Q.y = P.y;
-    Q.z = P.z;
     mpz_class k0, k1; 
     decomposing_kGLV(k0, k1, k); // k = k0 + k1*lmd
-
+#if 0
+    Point Q;
+    GLV::lambdaMul(Q, P);
     multipleMul(R, P, k0, Q, k1);
+#else
+    size_t k_bits;
+    size_t w = 4;
+    Point prePoints[w][w]; // 2^{w_size}
+    prePoints[0][0] = Point(0, 1, 0);
+    prePoints[1][0] = P;
+    EllipticCurve::dbl(prePoints[2][0], P);
+    for (size_t i = 2; i < w-1; i++) {
+        add(prePoints[i+1][0], prePoints[i][0], P);
+    }
+    for (size_t i = 1; i < w; i++) { // Q <- [i * lmd]P
+        GLV::lambdaMul(prePoints[0][i], prePoints[i][0]);
+    }
+    for (size_t i = 1; i < w; i++) {
+        for (size_t j = 1; j < w; j++) {
+            add(prePoints[i][j], prePoints[i][0], prePoints[0][j]); // [i]P + [j]Q
+        }
+    }
+
+    R = prePoints[0][0]; 
+    if (mpz_sizeinbase(k0.get_mpz_t(), 2) > mpz_sizeinbase(k1.get_mpz_t(), 2)) {
+        k_bits = mpz_sizeinbase(k0.get_mpz_t(), 2);
+    } else {
+        k_bits = mpz_sizeinbase(k1.get_mpz_t(), 2);
+    }
+    for (int i = k_bits-1; i > 0; i=i-2) {
+        EllipticCurve::dbl(R, R);
+        EllipticCurve::dbl(R, R); // R <- [4]R
+        add(R, R, prePoints
+                [2*mpz_tstbit(k0.get_mpz_t(), i) + mpz_tstbit(k0.get_mpz_t(), i-1)]
+                [2*mpz_tstbit(k1.get_mpz_t(), i) + mpz_tstbit(k1.get_mpz_t(), i-1)]);
+        // R <- R + ([]P + []Q)
+    }
+
+    if ((k_bits & 1) == 1) { // ビット数が奇数のときだけ
+        EllipticCurve::dbl(R, R);
+        add(R, R, prePoints
+                [mpz_tstbit(k0.get_mpz_t(), 0)]
+                [mpz_tstbit(k1.get_mpz_t(), 0)]);
+    }
+#endif
 }
 

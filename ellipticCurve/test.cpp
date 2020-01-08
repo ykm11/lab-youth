@@ -163,7 +163,7 @@ void test_fp_squareRoot() {
 void test_GLV_decomposing() {
     std::cout << "[*] GLV decomposing-k secp256k1 test: ";
     GLV::initForsecp256k1();
-    mpz_class k = mpz_class("3321038201388210320131380183201838214891840184028302814104802918301", 16);
+    mpz_class k = mpz_class("68db8bac710cb295e9e1b089a0275253db6a70997889e1c902cb5018e8bd5", 16);
     mpz_class k0, k1;
 
     GLV::decomposing_kGLV(k0, k1, k);
@@ -178,7 +178,7 @@ void test_GLVsecp256k1_baseMul() {
     GLV::initForsecp256k1();
     mpz_class k;
     Point R1, R2;
-    k = mpz_class("3321038201388210320131380183201838214891840184028302814104802918301", 16);
+    k = mpz_class("68db8bac710cb295e9e1b089a0275253db6a70997889e1c902cb5018e8bd5", 16);
     GLV::mulBase(R1, k);
     mul(R2, GLV::base, k);
     std::cout << "[*] GLV base mul test: ";

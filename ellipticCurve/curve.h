@@ -152,5 +152,6 @@ public:
 
     static void decomposing_kGLV(mpz_class &k0, mpz_class &k1, const mpz_class &k);
     static void mulBase(Point &R, const mpz_class &k);
+    static void lambdaMul(Point &R, const Point &P);
     static void scalarMul(Point &R, const Point &P, const mpz_class &k);
 };
