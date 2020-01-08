@@ -158,7 +158,6 @@ void benchmark_fp_sqareRoot() {
     Fp x, r;
 
     x = Fp("115792089237316195423570985008687907852837564279074904382605163141518161494337", 10); 
-    assert(Fp::squareRoot(r, x));
 
     const int n = 10000;
     time_t begin = clock();
