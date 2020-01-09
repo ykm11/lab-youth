@@ -76,16 +76,15 @@ public:
 };
 
 
-inline void mulMod(mpz_class& z, const mpz_class& x, const mpz_class& y, const mpz_class& m) {
+static inline void mulMod(mpz_class& z, const mpz_class& x, const mpz_class& y, const mpz_class& m) {
     mpz_mul(z.get_mpz_t(), x.get_mpz_t(), y.get_mpz_t());
     mpz_mod(z.get_mpz_t(), z.get_mpz_t(), m.get_mpz_t());
 }
 
-inline void sqrMod(mpz_class& z, const mpz_class& x, const mpz_class& m) {
+static inline void sqrMod(mpz_class& z, const mpz_class& x, const mpz_class& m) {
     mpz_powm_ui(z.get_mpz_t(), x.get_mpz_t(), 2, m.get_mpz_t());
 }
 
-
-inline void powMod(mpz_class& z, const mpz_class& x, const mpz_class& y, const mpz_class& m) {
+static inline void powMod(mpz_class& z, const mpz_class& x, const mpz_class& y, const mpz_class& m) {
     mpz_powm(z.get_mpz_t(), x.get_mpz_t(), y.get_mpz_t(), m.get_mpz_t());
 }
