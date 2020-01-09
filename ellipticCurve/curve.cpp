@@ -10,7 +10,6 @@ Fp GLV::rw;
 mpz_class GLV::lmd;
 mpz_class GLV::order;
 Point GLV::base;
-Point GLV::base_;
 
 void EllipticCurve::dbl(Point &R, const Point &P) {
     if (P.z.value == 0) {
@@ -271,26 +270,26 @@ void multipleMul(Point &R, const Point &P, const mpz_class &u, const Point &Q, c
     }
 }
 
-void GLV::decomposing_kGLV(mpz_class &k0, mpz_class &k1, const mpz_class &k) {
+void GLV::decomposing_k(mpz_class &k0, mpz_class &k1, const mpz_class &k) {
     // k = k0 + k1*lmd
     // EEAの過程で見つける.
     mpz_class t1, t0, n;
-    mpz_class g, q, r;
+    mpz_class q, r;
     mpz_class b1, b2;
 
     t0 = 0; t1 = 1;
-    g = GLV::order; n = GLV::lmd;
+    b2 = GLV::order; n = GLV::lmd;
     mpz_sqrt(b1.get_mpz_t(), GLV::order.get_mpz_t()); // sqrt(|E|)
     while (n != 0) {
-        mpz_tdiv_qr(q.get_mpz_t(), r.get_mpz_t(), g.get_mpz_t(), n.get_mpz_t());
-        b2 = t1; t1 = t0 - q*t1; t0 = b2;
+        mpz_tdiv_qr(q.get_mpz_t(), r.get_mpz_t(), b2.get_mpz_t(), n.get_mpz_t());
+        k0 = t1; t1 = t0 - q*t1; t0 = k0;
 
-        g = n;
+        b2 = n;
         n = r;
-        if (g < b1) {
+        if (b2 < b1) {
             k0 = r; 
             k1 = -t1;
-            mpz_tdiv_qr(q.get_mpz_t(), r.get_mpz_t(), g.get_mpz_t(), n.get_mpz_t());
+            mpz_tdiv_qr(q.get_mpz_t(), r.get_mpz_t(), b2.get_mpz_t(), n.get_mpz_t());
             t1 = q*t1 - t0;
             break;
         }
@@ -301,8 +300,9 @@ void GLV::decomposing_kGLV(mpz_class &k0, mpz_class &k1, const mpz_class &k) {
     t0 = b1*k0 + b2*r; // x
     r = b1*k1 + b2*t1; // y
 
-    k0 = k - t0;
-    k1 = -r;
+    // (k0, k1) = (k, 0) - (x, y) = (k - x, -y)
+    mpz_sub(k0.get_mpz_t(), k.get_mpz_t(), t0.get_mpz_t());
+    mpz_neg(k1.get_mpz_t(), r.get_mpz_t());
 }
 
 void GLV::lambdaMul(Point &R, const Point &P) { 
@@ -317,26 +317,23 @@ void GLV::mulBase(Point &R, const mpz_class &k) {
 
 void GLV::scalarMul(Point &R, const Point &P, const mpz_class &k) { 
     mpz_class k0, k1; 
-    decomposing_kGLV(k0, k1, k); // k = k0 + k1*lmd
-#if 0
-    Point Q;
-    GLV::lambdaMul(Q, P);
-    multipleMul(R, P, k0, Q, k1);
-#else
+    decomposing_k(k0, k1, k); // k = k0 + k1*lmd
+
     size_t k_bits;
-    size_t w = 4;
-    Point prePoints[w][w]; // 2^{w_size}
+    const size_t w = 2; 
+    const size_t tblSize = 1 << w; // w = 2^{w_size}
+    Point prePoints[tblSize][tblSize]; 
     prePoints[0][0] = Point(0, 1, 0);
     prePoints[1][0] = P;
     EllipticCurve::dbl(prePoints[2][0], P);
-    for (size_t i = 2; i < w-1; i++) {
+    for (size_t i = 2; i < tblSize-1; i++) {
         add(prePoints[i+1][0], prePoints[i][0], P);
     }
-    for (size_t i = 1; i < w; i++) { // Q <- [i * lmd]P
+    for (size_t i = 1; i < tblSize; i++) { // Q <- [i * lmd]P
         GLV::lambdaMul(prePoints[0][i], prePoints[i][0]);
     }
-    for (size_t i = 1; i < w; i++) {
-        for (size_t j = 1; j < w; j++) {
+    for (size_t i = 1; i < tblSize; i++) {
+        for (size_t j = 1; j < tblSize; j++) {
             add(prePoints[i][j], prePoints[i][0], prePoints[0][j]); // [i]P + [j]Q
         }
     }
@@ -362,6 +359,5 @@ void GLV::scalarMul(Point &R, const Point &P, const mpz_class &k) {
                 [mpz_tstbit(k0.get_mpz_t(), 0)]
                 [mpz_tstbit(k1.get_mpz_t(), 0)]);
     }
-#endif
 }
 

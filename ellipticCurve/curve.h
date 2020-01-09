@@ -128,7 +128,7 @@ class GLV {
 public:
     static Fp rw; 
     static mpz_class lmd, order; 
-    static Point base, base_; 
+    static Point base; 
 
     static void initForsecp256k1() {
         Fp::setModulo(mpz_class("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F", 16));
@@ -142,15 +142,12 @@ public:
         gx = Fp("79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798", 16);
         gy = Fp("483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8", 16);
         base = Point(gx.value, gy.value, 1);
-        mul(base_.x, rw, base.x);
-        base_.y = base.y;
-        base_.z = base.z;
         
         order = mpz_class("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141", 16);
         lmd = mpz_class("5363ad4cc05c30e0a5261c028812645a122e22ea20816678df02967c1b23bd72", 16);
     }
 
-    static void decomposing_kGLV(mpz_class &k0, mpz_class &k1, const mpz_class &k);
+    static void decomposing_k(mpz_class &k0, mpz_class &k1, const mpz_class &k);
     static void mulBase(Point &R, const mpz_class &k);
     static void lambdaMul(Point &R, const Point &P);
     static void scalarMul(Point &R, const Point &P, const mpz_class &k);

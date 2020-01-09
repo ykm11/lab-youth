@@ -166,7 +166,7 @@ void test_GLV_decomposing() {
     mpz_class k = mpz_class("68db8bac710cb295e9e1b089a0275253db6a70997889e1c902cb5018e8bd5", 16);
     mpz_class k0, k1;
 
-    GLV::decomposing_kGLV(k0, k1, k);
+    GLV::decomposing_k(k0, k1, k);
     if ((k0 + k1*GLV::lmd) % GLV::order == k % GLV::order) {
         std::cout << "OK\n";
     } else {
@@ -193,7 +193,7 @@ void test_GLVsecp256k1_ScalarMul() {
     GLV::initForsecp256k1();
     mpz_class k;
     Point R, R1, R2;
-    k = mpz_class("3321038201388210320131380183201838214891840184028302814104802918301", 16);
+    k = mpz_class("68db8bac710cb295e9e1b089a0275253db6a70997889e1c902cb5018e8bd5", 16);
     mul(R, GLV::base, 382108383); 
     GLV::scalarMul(R1, R, k);
     mul(R2, R, k);
@@ -205,15 +205,15 @@ void test_GLVsecp256k1_ScalarMul() {
     }
 }
 
-
 void test_MultipleScalarMul() {
     GLV::initForsecp256k1();
     mpz_class k1, k2;
-    Point R1, R2;
+    Point R, R1, R2;
     k1 = mpz_class("11117289373161954235709850086879078528375642790749043841647", 16);
     k2 = mpz_class("DEADBEEF3921391232134374927392173937137213797392713292193", 16);
-    mul(R1, GLV::base, k1 + k2); // R1 = [k+k]Base
-    multipleMul(R2, GLV::base, k1, GLV::base, k2); // [k]Base + [k]Base
+    GLV::mulBase(R, 38210831383); 
+    mul(R1, R, k1 + k2); // R1 = [k+k]Base
+    multipleMul(R2, R, k1, R, k2); // [k]Base + [k]Base
 
     std::cout << "[*] Multiple Scalar Mul test: ";
     if (R1 == R2) {
