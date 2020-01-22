@@ -281,29 +281,15 @@ void naf_mul(Point &R, const Point &P, const mpz_class &x) {
     tbl[0] = Point(0, 1, 0);
     tbl[1] = P;
     
-    int j = 0;
-    mpz_class z, n; 
-    n = x;
-    while (n > 0) {
-        if((n & 1) == 1) {
-            z = 2 - (n & 3);
-            n = n - z;
-        } else {
-            z = 0;
-        }
-        n = n >> 1;
-        naf[j] = mpz_get_si(z.get_mpz_t());
-        j++;
-    }
-
+    getNafArray(naf, x);
     while (naf_size >= 1 && naf[naf_size-1] == 0) {
         naf_size--;
     }
 
     Point Q;
-    R = tbl[0];
+    R = P;
     int8_t t;
-    for (int i = naf_size-1; i >= 0; i--) {
+    for (int i = naf_size-2; i >= 0; i--) {
         EllipticCurve::dbl(R, R);
         t = naf[i]; 
         if (t < 0) {

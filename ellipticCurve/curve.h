@@ -161,3 +161,21 @@ public:
     static void lambdaMul(Point &R, const Point &P);
     static void scalarMul(Point &R, const Point &P, const mpz_class &k);
 };
+
+
+static inline void getNafArray(int8_t naf[], const mpz_class &x) {
+    int j = 0;
+    mpz_class z, n; 
+    n = x;
+    while (n > 0) {
+        if((n & 1) == 1) {
+            z = 2 - (n & 3);
+            n = n - z;
+        } else {
+            z = 0;
+        }
+        n = n >> 1;
+        naf[j] = mpz_get_si(z.get_mpz_t());
+        j++;
+    }
+}
