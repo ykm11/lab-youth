@@ -7,9 +7,10 @@ Fp EllipticCurve::a;
 Fp EllipticCurve::b;
 
 Fp GLV::rw;
+Point GLV::base;
 mpz_class GLV::lmd;
 mpz_class GLV::order;
-Point GLV::base;
+
 
 void EllipticCurve::dbl(Point &R, const Point &P) {
     if (P.z.value == 0) {
@@ -137,9 +138,8 @@ void add(Point &R, const Point &P, const Point &Q) {
 }
 
 void sub(Point &R, const Point &P, const Point &Q) {
-    Point minus_Q = Q;
-    minus_Q.y.value = (Fp::modulus - minus_Q.y.value); // y <- p-y
-    add(R, P, minus_Q); // R <- P + [-1]Q
+    Point::neg(R, Q); // R <- [-1]Q
+    add(R, P, R); // R <- P + [-1]Q
 }
 
 bool isEqual(const Point &P, const Point &Q) {
@@ -219,8 +219,8 @@ void window_mul(Point &R, const Point &G, const mpz_class &n) { // windows metho
     EllipticCurve::dbl(P[2], G);
     add(P[3], P[2], G);
 
-    R = P[2*mpz_tstbit(n.get_mpz_t(), k_bits-1) + mpz_tstbit(n.get_mpz_t(), k_bits-2)];
-    for (int i = k_bits-3; i > 0; i=i-2) {
+    R = P[0];
+    for (int i = k_bits-1; i > 0; i=i-2) {
         EllipticCurve::dbl(R, R);
         EllipticCurve::dbl(R, R); // R <- 4R
 
@@ -270,6 +270,52 @@ void multipleMul(Point &R, const Point &P, const mpz_class &u, const Point &Q, c
     }
 }
 
+void naf_mul(Point &R, const Point &P, const mpz_class &x) {
+    size_t naf_size = mpz_sizeinbase(x.get_mpz_t(), 2) + 1;
+    int8_t naf[naf_size];
+    for (size_t k = 0; k < naf_size; k++) naf[k] = 0;
+
+    size_t w_size = 1;
+    size_t tblSize = 1 << w_size;
+    Point tbl[tblSize];
+    tbl[0] = Point(0, 1, 0);
+    tbl[1] = P;
+    
+    int j = 0;
+    mpz_class z, n; 
+    n = x;
+    while (n > 0) {
+        if((n & 1) == 1) {
+            z = 2 - (n & 3);
+            n = n - z;
+        } else {
+            z = 0;
+        }
+        n = n >> 1;
+        naf[j] = mpz_get_si(z.get_mpz_t());
+        j++;
+    }
+
+    while (naf_size >= 1 && naf[naf_size-1] == 0) {
+        naf_size--;
+    }
+
+    Point Q;
+    R = tbl[0];
+    int8_t t;
+    for (int i = naf_size-1; i >= 0; i--) {
+        EllipticCurve::dbl(R, R);
+        t = naf[i]; 
+        if (t < 0) {
+            Point::neg(Q, tbl[-t]);
+        } else {
+            Q = tbl[t];
+        }
+        add(R, R, Q);
+    }
+}
+
+
 void GLV::decomposing_k(mpz_class &k0, mpz_class &k1, const mpz_class &k) {
     // k = k0 + k1*lmd
     // EEAの過程で見つける.
@@ -300,7 +346,10 @@ void GLV::decomposing_k(mpz_class &k0, mpz_class &k1, const mpz_class &k) {
     t0 = b1*k0 + b2*r; // x
     r = b1*k1 + b2*t1; // y
 
-    // (k0, k1) = (k, 0) - (x, y) = (k - x, -y)
+    /*
+        k0 = k - x
+        k1 = -y
+    */
     mpz_sub(k0.get_mpz_t(), k.get_mpz_t(), t0.get_mpz_t());
     mpz_neg(k1.get_mpz_t(), r.get_mpz_t());
 }
@@ -317,7 +366,11 @@ void GLV::mulBase(Point &R, const mpz_class &k) {
 
 void GLV::scalarMul(Point &R, const Point &P, const mpz_class &k) { 
     mpz_class k0, k1; 
-    decomposing_k(k0, k1, k); // k = k0 + k1*lmd
+
+    /*
+        k = k0 + k1 * lmd
+    */
+    decomposing_k(k0, k1, k); 
 
     size_t k_bits;
     const size_t w = 2; 

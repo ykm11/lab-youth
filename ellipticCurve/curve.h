@@ -22,6 +22,8 @@ void window_mul(Point &R, const Point &G, const mpz_class &n);
 
 void multipleMul(Point &R, const Point &P, const mpz_class &u, const Point &Q, const mpz_class &v);
 
+void naf_mul(Point &R, const Point &G, const mpz_class &x);
+
 class Point {
 public:
     Fp x, y, z;
@@ -64,6 +66,12 @@ public:
         
         mul(s, x, inv_z); // s <- X/Z
         mul(t, y, inv_z); // t <- Y/Z
+    }
+
+    static void neg(Point &R, const Point &P) {
+        R.x = P.x;
+        R.z = P.z;
+        Fp::neg(R.y, P.y); 
     }
 };
 
@@ -145,6 +153,7 @@ public:
         
         order = mpz_class("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141", 16);
         lmd = mpz_class("5363ad4cc05c30e0a5261c028812645a122e22ea20816678df02967c1b23bd72", 16);
+
     }
 
     static void decomposing_k(mpz_class &k0, mpz_class &k1, const mpz_class &k);
