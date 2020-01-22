@@ -104,15 +104,41 @@ void benchmark_ec_mul() {
     Point G = EC.point(gx, gy);
     Point R;
     const int n = 100;
-    time_t begin = clock();
+    time_t begin, end;
+
+    std::cout << "\tRtL Bin";
+    begin = clock();
     for(int i = 0; i < n; i++) {
-        //mul(R, G, q);
+        mul(R, G, q);
+    }
+    end = clock();
+    printf("\t\ttime = %fusec\n", (end - begin) / double(CLOCKS_PER_SEC) / n * 1e6);
+
+    std::cout << "\tLtR Bin";
+    begin = clock();
+    for(int i = 0; i < n; i++) {
         r_mul(R, G, q);
         //montgomery_mul(R, G, q);
         //window_mul(R, G, q);
     }
-    time_t end = clock();
+    end = clock();
+    printf("\t\ttime = %fusec\n", (end - begin) / double(CLOCKS_PER_SEC) / n * 1e6);
+
+    std::cout << "\twin-sli(w=2)";
+    begin = clock();
+    for(int i = 0; i < n; i++) {
+        window_mul(R, G, q);
+    }
+    end = clock();
     printf("\ttime = %fusec\n", (end - begin) / double(CLOCKS_PER_SEC) / n * 1e6);
+
+    std::cout << "\tNaf";
+    begin = clock();
+    for(int i = 0; i < n; i++) {
+        naf_mul(R, G, q);
+    }
+    end = clock();
+    printf("\t\ttime = %fusec\n", (end - begin) / double(CLOCKS_PER_SEC) / n * 1e6);
 }
 
 
@@ -200,7 +226,7 @@ void benchmark_GLVbaseMul() {
 
     begin = clock();
     for(int i = 0; i < n; i++) {
-        mul(R, GLV::base, k);
+        naf_mul(R, GLV::base, k);
     }
     end = clock();
     std::cout << "\tUsual";
@@ -226,7 +252,7 @@ void benchmark_MultipleScalarMul() {
     mpz_class k = k1+k2;
     begin = clock();
     for(int i = 0; i < n; i++) {
-        mul(R, GLV::base, k); 
+        naf_mul(R, GLV::base, k); 
     }
     end = clock();
     std::cout << "\t[k1+k2]Base";

@@ -53,9 +53,6 @@ void test_ec_mul() {
     Point G = EC(gx, gy);
     Point R;
     mul(R, G, n);
-    //r_mul(R, G, n);
-    //montgomery_mul(R, G, n);
-    //window_mul(R, G, n);
 
     Fp x, y;
     R.xy(x, y);
@@ -67,6 +64,33 @@ void test_ec_mul() {
         std::cout << "[*] EC mul test: FAILED" << std::endl;
     }
 }
+
+void test_ec_sub() {
+    mpz_class p = mpz_class("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F", 16);
+    Fp::setModulo(p);
+
+    mpz_class a = mpz_class("0", 10);
+    mpz_class b = mpz_class("7", 10);
+
+    EllipticCurve EC = EllipticCurve(a, b);
+    mpz_class n = mpz_class("5792089237316195423570985008687907852837564279074904382605163141518161494337", 10); 
+    mpz_class gx = mpz_class("79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798", 16);
+    mpz_class gy = mpz_class("483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8", 16);
+
+    Point G = EC(gx, gy);
+    Point R5, R3, R2;
+    r_mul(R2, G, 2);
+    r_mul(R3, G, 3);
+    r_mul(R5, G, 5);
+
+    std::cout << "[*] EC sub test: ";
+    if ((R5 - R2) == R3) {
+        std::cout << "OK\n";
+    } else {
+        std::cout << "FAILED\n";
+    }
+}
+
 
 void test_ECorder() {
     mpz_class p = mpz_class("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F", 16);
@@ -82,7 +106,7 @@ void test_ECorder() {
 
     Point G = EC(gx, gy);
     Point R;
-    mul(R, G, n);
+    r_mul(R, G, n);
 
     Point O = EC(0, 1, 0);
     if (R == O) {
@@ -92,7 +116,7 @@ void test_ECorder() {
     }
 }
 
-void test_ec_muls() { // 4つのスカラー倍の計算テスト
+void test_ec_muls() { 
     mpz_class p = mpz_class("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F", 16);
     Fp::setModulo(p);
 
@@ -105,13 +129,14 @@ void test_ec_muls() { // 4つのスカラー倍の計算テスト
     mpz_class gy = mpz_class("483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8", 16);
 
     Point G = EC(gx, gy);
-    Point R1, R2, R3, R4;
+    Point R1, R2, R3, R4, R5;
     mul(R1, G, n);
     r_mul(R2, G, n);
     montgomery_mul(R3, G, n);
     window_mul(R4, G, n);
+    naf_mul(R5, G, n);
 
-    if (isEqual(R1,R2) && isEqual(R2,R3) && isEqual(R3,R4)) {
+    if (isEqual(R1,R2) && isEqual(R2,R3) && isEqual(R3,R4) && isEqual(R4, R5)) {
         std::cout << "[*] EC muls test: OK" << std::endl;
     } else {
         std::cout << "[*] EC muls test: FAILED" << std::endl;
@@ -180,7 +205,7 @@ void test_GLVsecp256k1_baseMul() {
     Point R1, R2;
     k = mpz_class("68db8bac710cb295e9e1b089a0275253db6a70997889e1c902cb5018e8bd5", 16);
     GLV::mulBase(R1, k);
-    mul(R2, GLV::base, k);
+    r_mul(R2, GLV::base, k);
     std::cout << "[*] GLV base mul test: ";
     if (R1 == R2) {
         puts("OK");
@@ -194,9 +219,9 @@ void test_GLVsecp256k1_ScalarMul() {
     mpz_class k;
     Point R, R1, R2;
     k = mpz_class("68db8bac710cb295e9e1b089a0275253db6a70997889e1c902cb5018e8bd5", 16);
-    mul(R, GLV::base, 382108383); 
+    r_mul(R, GLV::base, 382108383); 
     GLV::scalarMul(R1, R, k);
-    mul(R2, R, k);
+    r_mul(R2, R, k);
     std::cout << "[*] GLV scalar mul test: ";
     if (R1 == R2) {
         puts("OK");
@@ -212,7 +237,7 @@ void test_MultipleScalarMul() {
     k1 = mpz_class("11117289373161954235709850086879078528375642790749043841647", 16);
     k2 = mpz_class("DEADBEEF3921391232134374927392173937137213797392713292193", 16);
     GLV::mulBase(R, 38210831383); 
-    mul(R1, R, k1 + k2); // R1 = [k+k]Base
+    r_mul(R1, R, k1 + k2); // R1 = [k+k]Base
     multipleMul(R2, R, k1, R, k2); // [k]Base + [k]Base
 
     std::cout << "[*] Multiple Scalar Mul test: ";
@@ -231,6 +256,7 @@ int main() {
     test_MultipleScalarMul();
     test_fp_squareRoot();
     test_ECorder();
+    test_ec_sub();
     test_ec_mul();
     test_ec_muls();
     test_isEqual_fp();
