@@ -261,11 +261,11 @@ void benchmark_MultipleScalarMul() {
 
 
 int main() {
-    benchmark_fp_sqareRoot();
-    benchmark_fp();
-    benchmark_sqr();
-    benchmark_ec_add();
-    benchmark_ec_dbl();
+    //benchmark_fp_sqareRoot();
+    //benchmark_fp();
+    //benchmark_sqr();
+    //benchmark_ec_add();
+    //benchmark_ec_dbl();
     benchmark_ec_mul();
 
     benchmark_GLV_decomposing();
