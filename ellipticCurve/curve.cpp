@@ -273,8 +273,8 @@ void multipleMul(Point &R, const Point &P, const mpz_class &u, const Point &Q, c
 void naf_mul(Point &R, const Point &P, const mpz_class &x) {
     size_t naf_size = mpz_sizeinbase(x.get_mpz_t(), 2) + 1;
     int8_t naf[naf_size];
-    for (size_t k = 0; k < naf_size; k++) naf[k] = 0;
-
+    memset(naf, 0, naf_size);
+#if 0
     size_t w_size = 1;
     size_t tblSize = 1 << w_size;
     Point tbl[tblSize];
@@ -299,6 +299,59 @@ void naf_mul(Point &R, const Point &P, const mpz_class &x) {
         }
         add(R, R, Q);
     }
+#else
+    size_t w_size = 3;
+    size_t tblSize = 1 << w_size;
+    Point tbl[tblSize];
+    tbl[0] = Point(0, 1, 0);
+    tbl[1] = P;
+    EllipticCurve::dbl(tbl[2], P);
+    add(tbl[3], tbl[2], P);
+    EllipticCurve::dbl(tbl[4], tbl[2]);
+    add(tbl[5], tbl[4], P);
+    
+    getNafArray(naf, x);
+    while (naf_size >= 1 && naf[naf_size-1] == 0) {
+        naf_size--;
+    }
+
+    Point Q;
+    R = P;
+    int8_t t;
+    int i;
+    for (i = naf_size-2; i >= 2; i=i-3) {
+        EllipticCurve::dbl(R, R);
+        EllipticCurve::dbl(R, R);
+        EllipticCurve::dbl(R, R);
+
+        t = 4*naf[i] + 2*naf[i-1] + naf[i-2]; 
+        if (t < 0) {
+            Point::neg(Q, tbl[-t]);
+        } else {
+            Q = tbl[t];
+        }
+        add(R, R, Q);
+    }
+
+    if (i < 0) {
+        return;
+    }
+
+    t = 0;
+    if (i == 1) {
+        EllipticCurve::dbl(R, R);
+        t = 2*naf[1];
+    }
+    EllipticCurve::dbl(R, R);
+    t = t + naf[0];
+
+    if (t < 0) {
+        Point::neg(Q, tbl[-t]);
+    } else {
+        Q = tbl[t];
+    }
+    add(R, R, Q);
+#endif
 }
 
 
