@@ -170,16 +170,6 @@ void l_mul(Point &R, const Point &P, const mpz_class &x) { // 左向きバイナ
     R.z.value = 0;
 
     Point tmp_P = P;
-#if 0
-    mpz_class n = x;
-    while (n > 0) {
-        if ((n & 1) == 1) {
-            add(R, R, tmp_P);
-        }
-        EllipticCurve::dbl(tmp_P, tmp_P);
-        n >>= 1;
-    }
-#else
     size_t k_bits = mpz_sizeinbase(x.get_mpz_t(), 2)-1;
     for (size_t i = 0; i < k_bits; i++) {
         if ((mpz_tstbit(x.get_mpz_t(), i)) == 1) {
@@ -188,7 +178,6 @@ void l_mul(Point &R, const Point &P, const mpz_class &x) { // 左向きバイナ
         EllipticCurve::dbl(tmp_P, tmp_P);
     }
     add(R, R, tmp_P);
-#endif
 }
 
 void r_mul(Point &R, const Point& G, const mpz_class &x) { // 右向きバイナリ法

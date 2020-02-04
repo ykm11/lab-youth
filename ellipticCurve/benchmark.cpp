@@ -71,7 +71,6 @@ void benchmark_ec_dbl() {
     Fp::setModulo(p);
 
     EllipticCurve EC = EllipticCurve(a, b);
-    mpz_class q = mpz_class("117289373161954235709850086879078528375642790749043841647", 10);
     mpz_class gx = mpz_class("79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798", 16);
     mpz_class gy = mpz_class("483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8", 16);
 
@@ -97,13 +96,13 @@ void benchmark_ec_mul() {
     Fp::setModulo(p);
 
     EllipticCurve EC = EllipticCurve(a, b);
-    mpz_class q = mpz_class("117289373161954235709850086879078528375642790749043841647", 10);
+    mpz_class q = mpz_class("35413290456945547306056027344241947654113124042893875504030834988367514449923", 10);
     mpz_class gx = mpz_class("79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798", 16);
     mpz_class gy = mpz_class("483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8", 16);
 
     Point G = EC.point(gx, gy);
     Point R;
-    const int n = 100;
+    const int n = 1000;
     time_t begin, end;
 
     std::cout << "\tRtL Bin";
@@ -118,8 +117,6 @@ void benchmark_ec_mul() {
     begin = clock();
     for(int i = 0; i < n; i++) {
         r_mul(R, G, q);
-        //montgomery_mul(R, G, q);
-        //window_mul(R, G, q);
     }
     end = clock();
     printf("\t\ttime = %fusec\n", (end - begin) / double(CLOCKS_PER_SEC) / n * 1e6);
