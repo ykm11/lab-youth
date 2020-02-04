@@ -52,7 +52,7 @@ void test_ec_mul() {
 
     Point G = EC(gx, gy);
     Point R;
-    mul(R, G, n);
+    naf_mul(R, G, n);
 
     Fp x, y;
     R.xy(x, y);
@@ -130,7 +130,7 @@ void test_ec_muls() {
 
     Point G = EC(gx, gy);
     Point R1, R2, R3, R4, R5;
-    mul(R1, G, n);
+    l_mul(R1, G, n);
     r_mul(R2, G, n);
     montgomery_mul(R3, G, n);
     window_mul(R4, G, n);

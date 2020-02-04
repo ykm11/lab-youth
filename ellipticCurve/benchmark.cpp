@@ -109,7 +109,7 @@ void benchmark_ec_mul() {
     std::cout << "\tRtL Bin";
     begin = clock();
     for(int i = 0; i < n; i++) {
-        mul(R, G, q);
+        l_mul(R, G, q);
     }
     end = clock();
     printf("\t\ttime = %fusec\n", (end - begin) / double(CLOCKS_PER_SEC) / n * 1e6);
