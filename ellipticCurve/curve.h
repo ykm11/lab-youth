@@ -11,11 +11,11 @@ class EllipticCurve;
 bool isEqual(const Point &P, const Point &Q);
 void add(Point &R, const Point &P, const Point &Q);
 void sub(Point &R, const Point &P, const Point &Q);
-void mul(Point &R, const Point &P, const mpz_class &x); // scalar multiplying
 void dbl(Point &R, const Point &P);
 
 void dump(const Point &P);
 
+void l_mul(Point &R, const Point &P, const mpz_class &x); 
 void r_mul(Point &R, const Point &G, const mpz_class &x);
 void montgomery_mul(Point &R0, const Point &G, const mpz_class &n);
 void window_mul(Point &R, const Point &G, const mpz_class &n);
@@ -48,7 +48,7 @@ public:
 
     Point operator*(const mpz_class &x) const {
         Point r;
-        mul(r, *this, x);
+        naf_mul(r, *this, x);
         return r;
     }
 

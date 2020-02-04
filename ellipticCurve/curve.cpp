@@ -164,13 +164,13 @@ void dump(const Point &P) {
     }
 }
 
-void mul(Point &R, const Point &P, const mpz_class &x) { // 左向きバイナリ法
+void l_mul(Point &R, const Point &P, const mpz_class &x) { // 左向きバイナリ法
     R.x.value = 0;
     R.y.value = 1;
     R.z.value = 0;
 
     Point tmp_P = P;
-
+#if 0
     mpz_class n = x;
     while (n > 0) {
         if ((n & 1) == 1) {
@@ -179,6 +179,16 @@ void mul(Point &R, const Point &P, const mpz_class &x) { // 左向きバイナ�
         EllipticCurve::dbl(tmp_P, tmp_P);
         n >>= 1;
     }
+#else
+    size_t k_bits = mpz_sizeinbase(x.get_mpz_t(), 2)-1;
+    for (size_t i = 0; i < k_bits; i++) {
+        if ((mpz_tstbit(x.get_mpz_t(), i)) == 1) {
+            add(R, R, tmp_P);
+        }
+        EllipticCurve::dbl(tmp_P, tmp_P);
+    }
+    add(R, R, tmp_P);
+#endif
 }
 
 void r_mul(Point &R, const Point& G, const mpz_class &x) { // 右向きバイナリ法
@@ -274,32 +284,7 @@ void naf_mul(Point &R, const Point &P, const mpz_class &x) {
     size_t naf_size = mpz_sizeinbase(x.get_mpz_t(), 2) + 1;
     int8_t naf[naf_size];
     memset(naf, 0, naf_size);
-#if 0
-    size_t w_size = 1;
-    size_t tblSize = 1 << w_size;
-    Point tbl[tblSize];
-    tbl[0] = Point(0, 1, 0);
-    tbl[1] = P;
-    
-    getNafArray(naf, x);
-    while (naf_size >= 1 && naf[naf_size-1] == 0) {
-        naf_size--;
-    }
 
-    Point Q;
-    R = P;
-    int8_t t;
-    for (int i = naf_size-2; i >= 0; i--) {
-        EllipticCurve::dbl(R, R);
-        t = naf[i]; 
-        if (t < 0) {
-            Point::neg(Q, tbl[-t]);
-        } else {
-            Q = tbl[t];
-        }
-        add(R, R, Q);
-    }
-#else
     size_t w_size = 5;
     size_t tblSize = 1 << w_size;
     Point tbl[tblSize];
@@ -353,7 +338,6 @@ void naf_mul(Point &R, const Point &P, const mpz_class &x) {
         Q = tbl[t];
     }
     add(R, R, Q);
-#endif
 }
 
 
