@@ -379,6 +379,7 @@ void GLV::mulBase(Point &R, const mpz_class &k) {
 }
 
 void GLV::scalarMul(Point &R, const Point &P, const mpz_class &k) { 
+#if 1
     mpz_class k0, k1; 
 
     /*
@@ -426,5 +427,119 @@ void GLV::scalarMul(Point &R, const Point &P, const mpz_class &k) {
                 [mpz_tstbit(k0.get_mpz_t(), 0)]
                 [mpz_tstbit(k1.get_mpz_t(), 0)]);
     }
+#else
+    mpz_class k0, k1; 
+
+    /*
+        k = k0 + k1 * lmd
+    */
+    decomposing_k(k0, k1, k); 
+
+    size_t naf0_size = mpz_sizeinbase(k0.get_mpz_t(), 2) + 1;
+    size_t naf1_size = mpz_sizeinbase(k1.get_mpz_t(), 2) + 1;
+    int8_t naf0[naf0_size];
+    int8_t naf1[naf1_size];
+    memset(naf0, 0, naf0_size);
+    memset(naf1, 0, naf1_size);
+
+    const size_t w_size = 5; 
+    const size_t tblSize = 1 << w_size; // w = 2^{w_size}
+
+    Point tbl0[tblSize];
+    Point tbl1[tblSize];
+
+    tbl0[0] = Point(0, 1, 0);
+    tbl0[1] = P;
+    tbl1[0] = tbl0[0];
+    GLV::lambdaMul(tbl1[1], P);
+
+    for (size_t k = 2; k < 21; k=k+2) {
+        EllipticCurve::dbl(tbl0[k], tbl0[k/2]);
+        add(tbl0[k+1], tbl0[k], P);
+
+        GLV::lambdaMul(tbl1[k], tbl0[k]);
+        GLV::lambdaMul(tbl1[k+1], tbl0[k+1]);
+    }
+
+    getNafArray(naf0, k0);
+    getNafArray(naf1, k1);
+
+    Point Q;
+    int8_t t0, t1;
+    R = Point(0, 1, 0);
+    while (naf0_size > naf1_size) {
+        EllipticCurve::dbl(R, R);
+        t0 = naf0[naf0_size-1];
+        if (t0 < 0) {
+            Point::neg(Q, tbl0[-t0]);
+        } else {
+            Q = tbl0[t0];
+        }
+        add(R, R, Q);
+        naf0_size--;
+    }
+    while (naf1_size > naf0_size) {
+        EllipticCurve::dbl(R, R);
+        t0 = naf1[naf1_size-1];
+        if (t0 < 0) {
+            Point::neg(Q, tbl1[-t0]);
+        } else {
+            Q = tbl1[t0];
+        }
+        add(R, R, Q);
+        naf1_size--;
+    }
+
+    int i;
+    for (i = naf1_size-1; i >= int(w_size-1); i=i-w_size) {
+        for (size_t j = 0; j < w_size; j++) {
+            EllipticCurve::dbl(R, R);
+        }
+        t0 = 16*naf0[i] + 8*naf0[i-1] + 4*naf0[i-2] + 2*naf0[i-3] + naf0[i-4]; 
+        if (t0 < 0) {
+            Point::neg(Q, tbl0[-t0]);
+        } else {
+            Q = tbl0[t0];
+        }
+        add(R, R, Q);
+
+        t1 = 16*naf1[i] + 8*naf1[i-1] + 4*naf1[i-2] + 2*naf1[i-3] + naf1[i-4]; 
+        if (t1 < 0) {
+            Point::neg(Q, tbl1[-t1]);
+        } else {
+            Q = tbl1[t1];
+        }
+        add(R, R, Q);
+    }
+
+    if (i < 0) {
+        return;
+    }
+
+    t0 = 0;
+    t1 = 0;
+    while (i > 0) {
+        EllipticCurve::dbl(R, R);
+        t0 = t0 + (1 << i) * naf0[i];
+        t1 = t1 + (1 << i) * naf1[i];
+        i--;
+    }
+    EllipticCurve::dbl(R, R);
+    t0 = t0 + naf0[0];
+    t1 = t1 + naf1[0];
+    if (t0 < 0) {
+        Point::neg(Q, tbl0[-t0]);
+    } else {
+        Q = tbl0[t0];
+    }
+    add(R, R, Q);
+
+    if (t1 < 0) {
+        Point::neg(Q, tbl1[-t1]);
+    } else {
+        Q = tbl1[t1];
+    }
+    add(R, R, Q);
+#endif
 }
 
