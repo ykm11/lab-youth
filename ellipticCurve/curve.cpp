@@ -379,7 +379,7 @@ void GLV::mulBase(Point &R, const mpz_class &k) {
 }
 
 void GLV::scalarMul(Point &R, const Point &P, const mpz_class &k) { 
-#if 1
+#if 0
     mpz_class k0, k1; 
 
     /*
@@ -447,6 +447,25 @@ void GLV::scalarMul(Point &R, const Point &P, const mpz_class &k) {
 
     Point tbl0[tblSize];
     Point tbl1[tblSize];
+
+#if 0
+    Point tbl[tblSize][tblSize][2];
+    for (size_t k = 2; k < 21; k=k+2) {
+        /*
+            Table: [a]P + [b]Q, -[a]P + [b]Q
+        */
+        EllipticCurve::dbl(tbl[0][k][0], tbl[0][k/2][0]);
+        add(tbl[0][k+1][0], tbl[0][k][0], P);
+        GLV::lambdaMul(tbl[k][0][0], tbl[k][0][0]);
+        GLV::lambdaMul(tbl[k+1][0][0], tbl[k+1][0][0]);
+
+        Point::neg(tbl[0][k][1], tbl[0][k][0]);
+        Point::neg(tbl[0][k+1][1], tbl[0][k+1][0]);
+        tbl[k][0][1] = tbl[k][0][0];
+        tbl[k+1][0][1] = tbl[k+1][0][0];
+    }
+    // TODO 
+#endif
 
     tbl0[0] = Point(0, 1, 0);
     tbl0[1] = P;
