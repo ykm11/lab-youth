@@ -393,7 +393,7 @@ void GLV::scalarMul(Point &R, const Point &P, const mpz_class &k) {
     memset(naf0, 0, naf0_size);
     memset(naf1, 0, naf1_size);
 
-#if 1
+#if 0
     const size_t w_size = 5; 
     const size_t tblSize = 1 << w_size; // w = 2^{w_size}
 
@@ -472,7 +472,7 @@ void GLV::scalarMul(Point &R, const Point &P, const mpz_class &k) {
     tbl1[0] = tbl0[0];
     GLV::lambdaMul(tbl1[1], P);
 
-    for (size_t k = 2; k < 16; k++) {
+    for (size_t k = 2; k < 11; k++) {
         add(tbl0[k], tbl0[k-1], P);
         GLV::lambdaMul(tbl1[k], tbl0[k]);
     }
@@ -519,7 +519,7 @@ void GLV::scalarMul(Point &R, const Point &P, const mpz_class &k) {
         }
         add(R, R, Q);
 
-        t1 = 8*naf0[i] + 4*naf0[i-1] + 2*naf0[i-2] + naf0[i-3]; 
+        t1 = 8*naf1[i] + 4*naf1[i-1] + 2*naf1[i-2] + naf1[i-3]; 
         if (t1 < 0) {
             Point::neg(Q, tbl1[-t1]);
         } else {
