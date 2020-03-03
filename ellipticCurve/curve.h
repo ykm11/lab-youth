@@ -174,8 +174,8 @@ static inline void getNafArray(int8_t naf[], const mpz_class &x) {
         } else {
             z = 0;
         }
-        n = n >> 1;
         naf[j] = mpz_get_si(z.get_mpz_t());
+        n = n >> 1;
         j++;
     }
 }

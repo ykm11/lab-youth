@@ -196,7 +196,9 @@ void r_mul(Point &R, const Point& G, const mpz_class &x) { // 右向きバイナ
 void montgomery_mul(Point &R0, const Point &G, const mpz_class &n) { // Montgomery Ladder
     size_t k_bits = mpz_sizeinbase(n.get_mpz_t(), 2);
     Point R1 = G;
-    R0 = Point(0, 1, 0);
+    R0.x.value = 0;
+    R0.y.value = 1;
+    R0.z.value = 0;
 
     for (int i = k_bits-1; i >= 0; i--) {
         if (mpz_tstbit(n.get_mpz_t(), i) == 0) {
@@ -393,74 +395,6 @@ void GLV::scalarMul(Point &R, const Point &P, const mpz_class &k) {
     memset(naf0, 0, naf0_size);
     memset(naf1, 0, naf1_size);
 
-#if 0
-    const size_t w_size = 5; 
-    const size_t tblSize = 1 << w_size; // w = 2^{w_size}
-
-    Point tbl0[tblSize];
-    Point tbl1[tblSize];
-
-    tbl0[0] = Point(0, 1, 0);
-    tbl0[1] = P;
-    tbl1[0] = tbl0[0];
-    GLV::lambdaMul(tbl1[1], P);
-
-    for (size_t k = 2; k < 22; k++) {
-        add(tbl0[k], tbl0[k-1], P);
-        GLV::lambdaMul(tbl1[k], tbl0[k]);
-    }
-
-    getNafArray(naf0, k0);
-    getNafArray(naf1, k1);
-
-    Point Q;
-    int8_t t0, t1;
-    R = Point(0, 1, 0);
-    while (naf0_size > naf1_size) {
-        EllipticCurve::dbl(R, R);
-        t0 = naf0[naf0_size-1];
-        if (t0 < 0) {
-            Point::neg(Q, tbl0[-t0]);
-        } else {
-            Q = tbl0[t0];
-        }
-        add(R, R, Q);
-        naf0_size--;
-    }
-    while (naf1_size > naf0_size) {
-        EllipticCurve::dbl(R, R);
-        t0 = naf1[naf1_size-1];
-        if (t0 < 0) {
-            Point::neg(Q, tbl1[-t0]);
-        } else {
-            Q = tbl1[t0];
-        }
-        add(R, R, Q);
-        naf1_size--;
-    }
-
-    int i;
-    for (i = naf1_size-1; i >= int(w_size-1); i=i-w_size) {
-        for (size_t j = 0; j < w_size; j++) {
-            EllipticCurve::dbl(R, R);
-        }
-        t0 = 16*naf0[i] + 8*naf0[i-1] + 4*naf0[i-2] + 2*naf0[i-3] + naf0[i-4]; 
-        if (t0 < 0) {
-            Point::neg(Q, tbl0[-t0]);
-        } else {
-            Q = tbl0[t0];
-        }
-        add(R, R, Q);
-
-        t1 = 16*naf1[i] + 8*naf1[i-1] + 4*naf1[i-2] + 2*naf1[i-3] + naf1[i-4]; 
-        if (t1 < 0) {
-            Point::neg(Q, tbl1[-t1]);
-        } else {
-            Q = tbl1[t1];
-        }
-        add(R, R, Q);
-    }
-#else
     const size_t w_size = 4; 
     const size_t tblSize = 1 << w_size; // w = 2^{w_size}
 
@@ -482,7 +416,7 @@ void GLV::scalarMul(Point &R, const Point &P, const mpz_class &k) {
 
     Point Q;
     int8_t t0, t1;
-    R = Point(0, 1, 0);
+    R = tbl0[0];
     while (naf0_size > naf1_size) {
         EllipticCurve::dbl(R, R);
         t0 = naf0[naf0_size-1];
@@ -527,7 +461,6 @@ void GLV::scalarMul(Point &R, const Point &P, const mpz_class &k) {
         }
         add(R, R, Q);
     }
-#endif
 
     if (i < 0) {
         return;
