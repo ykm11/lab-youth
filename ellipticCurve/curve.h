@@ -99,9 +99,7 @@ public:
     }
 
     static void neg(jPoint &R, const jPoint &P) {
-        R.x = P.x;
-        R.z = P.z;
-        Fp::neg(R.y, P.y); 
+        // TODO
     }
 };
 

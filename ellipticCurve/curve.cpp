@@ -138,8 +138,74 @@ void add(Point &R, const Point &P, const Point &Q) {
 }
 
 void add(jPoint &R, const jPoint &P, const jPoint &Q) {
+    if (P.z.value == 0) {
+        R.x.value = Q.x.value;
+        R.y.value = Q.y.value;
+        R.z.value = Q.z.value;
+        return;
+    } else if (Q.z.value == 0) {
+        R.x.value = P.x.value;
+        R.y.value = P.y.value;
+        R.z.value = P.z.value;
+        return;
+    }
+    Fp u, v, s, t;
 
+    sqr(s, Q.z); // Z2^{2}
+    sqr(t, P.z); // Z1^{2}
+    
+    mul(u, P.x, s); // X1 * Z2^{2}
+    mul(v, Q.x, t); // X2 * Z1^{2}
+
+    mul(s, s, Q.z); // Z2^{3}
+    mul(t, t, P.z); // Z1^{3}
+
+    mul(s, s, P.y); // Y1 * Z2^{3}
+    mul(t, t, Q.y); // Y2 * Z1^{3}
+
+    sub(v, v, u); // X2 * Z1^{2} - X1 * Z2^{2}
+    sub(t, t, s); // Y2 * Z1^{3} - Y1 * Z2^{3}
+
+    if (v.value == 0) {
+        if (t.value == 0) {
+            dbl(R, P);
+            return;
+        }
+        R.x.value = 1;
+        R.y.value = 1;
+        R.z.value = 0;
+        return;
+    }
+    Fp w, h;
+    mul(R.z, P.z, Q.z); 
+    mul(R.z, R.z, v); // Z3 =  (X2 * Z1^{2} - X1 * Z2^{2}) * Z1 * Z2
+
+    sqr(w, v);
+    mul(u, u, w); // u * (X2 * Z1^{2} - X1 * Z2^{2})^{2}
+    Fp::mulInt(h, u, 2);
+    mul(v, w, v); // (X2 * Z1^{2} - X1 * Z2^{2})^{3}
+
+    sqr(R.x, t); 
+    sub(R.x, R.x, v); // (Y2 * Z1^{3} - Y1 * Z2^{3})^{2} - (X2 * Z1^{2} - X1 * Z2^{2})^{3}
+    sub(R.x, R.x, h);
+
+    sub(R.y, u, R.x);
+    mul(R.y, R.y, t);
+    mul(v, v, s);
+    sub(R.y, R.y, v);
 }
+
+void dbl(jPoint &R, const jPoint &P) {
+
+    if (P.y.value == 0) {
+        R.x.value = 1;
+        R.y.value = 1;
+        R.z.value = 0;
+        return;
+    }
+}
+
+
 
 void sub(Point &R, const Point &P, const Point &Q) {
     Point::neg(R, Q); // R <- [-1]Q

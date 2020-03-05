@@ -92,6 +92,47 @@ void test_ec_sub() {
 }
 
 
+void test_jacobi_ec_add() {
+    mpz_class p = mpz_class("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F", 16);
+    Fp::setModulo(p);
+
+    mpz_class a = mpz_class("0", 10);
+    mpz_class b = mpz_class("7", 10);
+
+    EllipticCurve EC = EllipticCurve(a, b);
+    mpz_class n = mpz_class("5792089237316195423570985008687907852837564279074904382605163141518161494337", 10); 
+    mpz_class gx = mpz_class("79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798", 16);
+    mpz_class gy = mpz_class("483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8", 16);
+
+    jPoint G1 = jPoint(gx, gy, 1);
+
+    Point P = EC(gx, gy);
+    Point P2;
+    EllipticCurve::dbl(P2, P);
+    Fp px, py;
+    P2.xy(px, py);
+    jPoint G2 = jPoint(px.value, py.value, 1);
+
+    jPoint G3, G4;
+    add(G3, G1, G2);
+    add(G4, G3, G1);
+
+    Point P3, P4;
+    add(P3, P2, P);
+    add(P4, P3, P);
+
+    Fp u, v, s, t;
+    G4.xy(u, v);
+    P4.xy(s, t);
+
+    std::cout << "[*] EC(jacobi) add test: ";
+    if (u == s && v == t) {
+        std::cout << "OK\n";
+    } else {
+        std::cout << "FAILED\n";
+    }
+}
+
 void test_ECorder() {
     mpz_class p = mpz_class("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F", 16);
     Fp::setModulo(p);
@@ -260,5 +301,7 @@ int main() {
     test_ec_mul();
     test_ec_muls();
     test_isEqual_fp();
+
+    test_jacobi_ec_add();
 
 }
