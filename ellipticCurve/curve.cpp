@@ -22,11 +22,20 @@ void EllipticCurve::dbl(Point &R, const Point &P) {
     Fp Rx, Ry, Rz;
     Fp u, v, w, s, t;
 
-    sqr(s, P.x); // X^2
-    Fp::mulInt(s, s, 3); // 3*X^2
-    sqr(t, P.z); // Z^2
-    mul(t, t, a); // a*Z^2
-    add(u, s, t); // 3*X^2 + a*Z^2
+    mpz_add_ui(s.value.get_mpz_t(), a.value.get_mpz_t(), 3);
+    if (s.value == Fp::modulus) { // a == -3 ? 
+        // 3 * (X - Z) * (X + Z)
+        sub(s, P.x, P.z); // X - Z
+        add(t, P.x, P.z); // X + Z
+        mul(u, s, t); // (X - Z) * (X + Z)
+        Fp::mulInt(u, u, 3); // 3 * (X - Z) * (X + Z)
+    } else {
+        sqr(s, P.x); // X^2
+        Fp::mulInt(s, s, 3); // 3*X^2
+        sqr(t, P.z); // Z^2
+        mul(t, t, a); // a*Z^2
+        add(u, s, t); // 3*X^2 + a*Z^2
+    }
 
     mul(v, P.y, P.z); // Y*Z
 
