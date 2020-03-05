@@ -99,7 +99,9 @@ public:
     }
 
     static void neg(jPoint &R, const jPoint &P) {
-        // TODO
+        R.x = P.x;
+        R.z = P.z;
+        Fp::neg(R.y, P.y); 
     }
 };
 
@@ -155,6 +157,7 @@ public:
     }
 
     static void dbl(Point &R, const Point &P);
+    static void dbl(jPoint &R, const jPoint &P);
 };
 
 

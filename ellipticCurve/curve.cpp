@@ -168,7 +168,7 @@ void add(jPoint &R, const jPoint &P, const jPoint &Q) {
 
     if (v.value == 0) {
         if (t.value == 0) {
-            dbl(R, P);
+            EllipticCurve::dbl(R, P);
             return;
         }
         R.x.value = 1;
@@ -195,13 +195,16 @@ void add(jPoint &R, const jPoint &P, const jPoint &Q) {
     sub(R.y, R.y, v);
 }
 
-void dbl(jPoint &R, const jPoint &P) {
-
+void EllipticCurve::dbl(jPoint &R, const jPoint &P) {
     if (P.y.value == 0) {
         R.x.value = 1;
         R.y.value = 1;
         R.z.value = 0;
         return;
+    }
+
+    if (a.value == Fp::modulus - 3) {
+    } else {
     }
 }
 
