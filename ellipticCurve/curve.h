@@ -6,14 +6,18 @@
 #include "FP.h"
 
 class Point;
+class jPoint;
 class EllipticCurve;
 
 bool isEqual(const Point &P, const Point &Q);
 void add(Point &R, const Point &P, const Point &Q);
+void add(jPoint &R, const jPoint &P, const jPoint &Q);
 void sub(Point &R, const Point &P, const Point &Q);
 void dbl(Point &R, const Point &P);
+void dbl(jPoint &R, const jPoint &P);
 
 void dump(const Point &P);
+void dump(const jPoint &P);
 
 void l_mul(Point &R, const Point &P, const mpz_class &x); 
 void r_mul(Point &R, const Point &G, const mpz_class &x);
@@ -75,6 +79,31 @@ public:
     }
 };
 
+
+class jPoint { // Jacobian coordinate
+public:
+    Fp x, y, z;
+
+    jPoint() {}
+    jPoint(const Fp &X, const Fp &Y, const Fp &Z) : x(X), y(Y), z(Z) {}
+    jPoint(const mpz_class &X, const mpz_class &Y, const mpz_class &Z) : x(X), y(Y), z(Z) {}
+
+    void xy(Fp &s, Fp &t) const { // ヤコビ座標からアフィン座標へ
+        Fp inv_z;
+        invmod(inv_z, z);
+
+        sqr(t, inv_z); // Z^{2}
+        mul(s, x, t); // X / Z^{2}
+        mul(t, t, inv_z); // Z^{3}
+        mul(t, y, t); // Y / Z^{3}
+    }
+
+    static void neg(jPoint &R, const jPoint &P) {
+        R.x = P.x;
+        R.z = P.z;
+        Fp::neg(R.y, P.y); 
+    }
+};
 
 class EllipticCurve {
 public:

@@ -137,6 +137,10 @@ void add(Point &R, const Point &P, const Point &Q) {
     R.z.value = std::move(Rz.value);
 }
 
+void add(jPoint &R, const jPoint &P, const jPoint &Q) {
+
+}
+
 void sub(Point &R, const Point &P, const Point &Q) {
     Point::neg(R, Q); // R <- [-1]Q
     add(R, P, R); // R <- P + [-1]Q
@@ -157,6 +161,16 @@ bool isEqual(const Point &P, const Point &Q) {
 void dump(const Point &P) {
     if (P.z.value == 0) {
         std::cout << "(0 : 1 : 0)" << std::endl;
+    } else {
+        Fp x, y;
+        P.xy(x, y);
+        std::cout << "(" << x.value << " : " << y.value << " : 1)" << std::endl;
+    }
+}
+
+void dump(const jPoint &P) {
+    if (P.z.value == 0) {
+        std::cout << "(1 : 1 : 0)" << std::endl;
     } else {
         Fp x, y;
         P.xy(x, y);
