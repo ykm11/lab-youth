@@ -111,11 +111,12 @@ void test_jacobi_ec_add() {
     EllipticCurve::dbl(P2, P);
     Fp px, py;
     P2.xy(px, py);
-    jPoint G2 = jPoint(px.value, py.value, 1);
+    jPoint G2;
+    EllipticCurve::dbl(G2, G1);
 
     jPoint G3, G4;
     add(G3, G1, G2);
-    add(G4, G3, G1);
+    EllipticCurve::dbl(G4, G2);
 
     Point P3, P4;
     add(P3, P2, P);

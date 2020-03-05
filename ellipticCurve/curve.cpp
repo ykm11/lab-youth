@@ -203,12 +203,38 @@ void EllipticCurve::dbl(jPoint &R, const jPoint &P) {
         return;
     }
 
+    Fp u, v, s, t;
+    sqr(u, P.y); // Y^{2}
+    mul(s, u, P.x); // X * Y^{2}
+    Fp::mulInt(s, s, 4); // 4 * X * Y^{2}
+    
+    sqr(t, P.z); // Z^{2}
     if (a.value == Fp::modulus - 3) {
+        add(R.x, P.x, t); // (X + Z^2)
+        sub(v, P.x, t); // (X - Z^2)
+        mul(v, v, R.x); // (X + Z^2) * (X - Z^2)
+        Fp::mulInt(v, v, 3); // 3 * (X + Z^2) * (X - Z^2)
     } else {
+        sqr(t, t); // Z^{4}
+        mul(t, t, a); // a * Z^{4}
+        sqr(v, P.x); // X^{2}
+        Fp::mulInt(v, v, 3); // 3 * X^{2}
+        add(v, v, t); // 3 * X^{2} + a * Z^{4}
     }
+
+    sqr(R.x, v); // (3 * X^{2} + a * Z^{4})^2
+    sub(R.x, R.x, s);
+    sub(R.x, R.x, s);
+
+    sub(R.y, s, R.x); // 
+    mul(R.y, R.y, v);
+    sqr(u, u); // Y^{4}
+    Fp::mulInt(u, u, 8); // 8 * Y^{4}
+    sub(R.y, R.y, u); // 
+
+    mul(R.z, P.y, P.z);
+    Fp::mulInt(R.z, R.z, 2);
 }
-
-
 
 void sub(Point &R, const Point &P, const Point &Q) {
     Point::neg(R, Q); // R <- [-1]Q
