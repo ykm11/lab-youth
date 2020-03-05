@@ -64,7 +64,7 @@ void benchmark_ec_add() {
 }
 
 void benchmark_ec_dbl() {
-    std::cout << "[*] EC dbl benchmark\n";
+    std::cout << "[*] EC(a != -3) dbl benchmark\n";
     mpz_class a = mpz_class("0", 10);
     mpz_class b = mpz_class("7", 10);
     mpz_class p = mpz_class("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F", 16);
@@ -74,7 +74,7 @@ void benchmark_ec_dbl() {
     mpz_class gx = mpz_class("79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798", 16);
     mpz_class gy = mpz_class("483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8", 16);
 
-    Point G = EC.point(gx, gy);
+    Point G = Point(gx, gy, 1);
     Point R = Point(0, 1, 0);
     EllipticCurve::dbl(R, G);
     const int n = 100000;
@@ -84,7 +84,51 @@ void benchmark_ec_dbl() {
         EllipticCurve::dbl(R, R);
     }
     time_t end = clock();
-    printf("\ttime = %fusec\n", (end - begin) / double(CLOCKS_PER_SEC) / n * 1e6);
+    printf("\tProjection\t time = %fusec\n", (end - begin) / double(CLOCKS_PER_SEC) / n * 1e6);
+
+    jPoint jG = jPoint(gx, gy, 1);
+    jPoint jR;
+    EllipticCurve::dbl(jR, jG);
+    begin = clock();
+    for(int i = 0; i < n; i++) {
+        EllipticCurve::dbl(jR, jR);
+    }
+    end = clock();
+    printf("\tJacobian\t time = %fusec\n", (end - begin) / double(CLOCKS_PER_SEC) / n * 1e6);
+}
+
+void benchmark_ec_jacobi_dbl() {
+    std::cout << "[*] EC(a == -3) dbl benchmark\n";
+    mpz_class p = mpz_class("FFFFFFFF00000001000000000000000000000000FFFFFFFFFFFFFFFFFFFFFFFF", 16);
+    mpz_class a = mpz_class("FFFFFFFF00000001000000000000000000000000FFFFFFFFFFFFFFFFFFFFFFFC", 16);
+    mpz_class b = mpz_class("5AC635D8AA3A93E7B3EBBD55769886BC651D06B0CC53B0F63BCE3C3E27D2604B", 16);
+    Fp::setModulo(p);
+    EllipticCurve EC = EllipticCurve(a, b);
+
+    mpz_class gx = mpz_class("6B17D1F2E12C4247F8BCE6E563A440F277037D812DEB33A0F4A13945D898C296", 16);
+    mpz_class gy = mpz_class("4FE342E2FE1A7F9B8EE7EB4A7C0F9E162BCE33576B315ECECBB6406837BF51F5", 16);
+
+    Point G = Point(gx, gy, 1);
+    Point R = Point(0, 1, 0);
+    EllipticCurve::dbl(R, G);
+    const int n = 100000;
+
+    time_t begin = clock();
+    for(int i = 0; i < n; i++) {
+        EllipticCurve::dbl(R, R);
+    }
+    time_t end = clock();
+    printf("\tProjection\t time = %fusec\n", (end - begin) / double(CLOCKS_PER_SEC) / n * 1e6);
+
+    jPoint jG = jPoint(gx, gy, 1);
+    jPoint jR;
+    EllipticCurve::dbl(jR, jG);
+    begin = clock();
+    for(int i = 0; i < n; i++) {
+        EllipticCurve::dbl(jR, jR);
+    }
+    end = clock();
+    printf("\tJacobian\t time = %fusec\n", (end - begin) / double(CLOCKS_PER_SEC) / n * 1e6);
 }
 
 
@@ -262,10 +306,11 @@ int main() {
     //benchmark_fp();
     //benchmark_sqr();
     //benchmark_ec_add();
-    //benchmark_ec_dbl();
-    benchmark_ec_mul();
+    benchmark_ec_dbl();
+    benchmark_ec_jacobi_dbl();
+    //benchmark_ec_mul();
 
-    benchmark_GLV_decomposing();
-    benchmark_GLVbaseMul(); 
-    benchmark_MultipleScalarMul();
+    //benchmark_GLV_decomposing();
+    //benchmark_GLVbaseMul(); 
+    //benchmark_MultipleScalarMul();
 }
