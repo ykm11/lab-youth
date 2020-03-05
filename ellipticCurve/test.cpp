@@ -91,6 +91,66 @@ void test_ec_sub() {
     }
 }
 
+void test_jacobi_ec_dbl() {
+    /*
+    p = 0xFFFFFFFF00000001000000000000000000000000FFFFFFFFFFFFFFFFFFFFFFFF
+    a = 0xFFFFFFFF00000001000000000000000000000000FFFFFFFFFFFFFFFFFFFFFFFC
+    b = 0x5AC635D8AA3A93E7B3EBBD55769886BC651D06B0CC53B0F63BCE3C3E27D2604B
+
+    Gx = 6B17D1F2 E12C4247 F8BCE6E5 63A440F2 77037D81 2DEB33A0 F4A13945 D898C296 
+    Gy = 4FE342E2 FE1A7F9B 8EE7EB4A 7C0F9E16 2BCE3357 6B315ECE CBB64068 37BF51F5
+    */
+    mpz_class p = mpz_class("FFFFFFFF00000001000000000000000000000000FFFFFFFFFFFFFFFFFFFFFFFF", 16);
+    Fp::setModulo(p);
+
+    mpz_class a = mpz_class("FFFFFFFF00000001000000000000000000000000FFFFFFFFFFFFFFFFFFFFFFFC", 16);
+    mpz_class b = mpz_class("5AC635D8AA3A93E7B3EBBD55769886BC651D06B0CC53B0F63BCE3C3E27D2604B", 16);
+    EllipticCurve EC = EllipticCurve(a, b);
+
+    mpz_class gx = mpz_class("6B17D1F2E12C4247F8BCE6E563A440F277037D812DEB33A0F4A13945D898C296", 16);
+    mpz_class gy = mpz_class("4FE342E2FE1A7F9B8EE7EB4A7C0F9E162BCE33576B315ECECBB6406837BF51F5", 16);
+    jPoint G, G2;
+    G = jPoint(gx, gy, 1);
+    EllipticCurve::dbl(G2, G);
+
+    Point P, P2;
+    P = Point(gx, gy, 1);
+    EllipticCurve::dbl(P2, P);
+
+    Fp u, v, s, t;
+    G2.xy(u, v);
+    P2.xy(s, t);
+    std::cout << "[*] EC(jacobi) dbl test (a = -3): ";
+    if (u == s && v == t) {
+        std::cout << "OK\n";
+    } else {
+        std::cout << "FAILED\n";
+    }
+
+    p = mpz_class("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F", 16);
+    Fp::setModulo(p);
+
+    a = mpz_class("0", 10);
+    b = mpz_class("7", 10);
+
+    EC = EllipticCurve(a, b);
+    gx = mpz_class("79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798", 16);
+    gy = mpz_class("483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8", 16);
+    G = jPoint(gx, gy, 1);
+    EllipticCurve::dbl(G2, G);
+
+    P = Point(gx, gy, 1);
+    EllipticCurve::dbl(P2, P);
+
+    G2.xy(u, v);
+    P2.xy(s, t);
+    std::cout << "[*] EC(jacobi) dbl test (a != -3): ";
+    if (u == s && v == t) {
+        std::cout << "OK\n";
+    } else {
+        std::cout << "FAILED\n";
+    }
+}
 
 void test_jacobi_ec_add() {
     mpz_class p = mpz_class("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F", 16);
@@ -304,5 +364,6 @@ int main() {
     test_isEqual_fp();
 
     test_jacobi_ec_add();
+    test_jacobi_ec_dbl();
 
 }
