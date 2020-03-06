@@ -149,10 +149,20 @@ void benchmark_ec_mul() {
     const int n = 1000;
     time_t begin, end;
 
-    std::cout << "\tRtL Bin";
+    std::cout << "\tRtL Bin Proj";
     begin = clock();
     for(int i = 0; i < n; i++) {
         l_mul(R, G, q);
+    }
+    end = clock();
+    printf("\t\ttime = %fusec\n", (end - begin) / double(CLOCKS_PER_SEC) / n * 1e6);
+
+    jPoint G1, R1;
+    G1 = jPoint(gx, gy, 1);
+    std::cout << "\tRtL Bin Jacobi";
+    begin = clock();
+    for(int i = 0; i < n; i++) {
+        l_mul(R1, G1, q);
     }
     end = clock();
     printf("\t\ttime = %fusec\n", (end - begin) / double(CLOCKS_PER_SEC) / n * 1e6);
@@ -308,7 +318,7 @@ int main() {
     //benchmark_ec_add();
     benchmark_ec_dbl();
     benchmark_ec_jacobi_dbl();
-    //benchmark_ec_mul();
+    benchmark_ec_mul();
 
     //benchmark_GLV_decomposing();
     //benchmark_GLVbaseMul(); 

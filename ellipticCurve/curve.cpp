@@ -149,6 +149,61 @@ void add(Point &R, const Point &P, const Point &Q) {
 
 }
 
+
+void EllipticCurve::dbl(jPoint &R, const jPoint &P) {
+    if (P.z.value == 0) {
+        R.x.value = 1;
+        R.y.value = 1;
+        R.z.value = 0;
+        return;
+    }
+
+    Fp u, v, s, t;
+    Fp Rx, Ry, Rz;
+    sqr(u, P.y); // Y^{2}
+    mul(s, u, P.x); // X * Y^{2}
+    Fp::mulInt(s, s, 4); // 4 * X * Y^{2}
+    
+    sqr(t, P.z); // Z^{2}
+    mpz_add_ui(v.value.get_mpz_t(), a.value.get_mpz_t(), 3);
+    if (v.value == Fp::modulus) {
+        add(Rx, P.x, t); // (X + Z^2)
+        sub(v, P.x, t); // (X - Z^2)
+        mul(v, v, Rx); // (X + Z^2) * (X - Z^2)
+        Fp::mulInt(v, v, 3); // 3 * (X + Z^2) * (X - Z^2)
+    } else {
+        sqr(t, t); // Z^{4}
+        mul(t, t, a); // a * Z^{4}
+        sqr(v, P.x); // X^{2}
+        Fp::mulInt(v, v, 3); // 3 * X^{2}
+        add(v, v, t); // 3 * X^{2} + a * Z^{4}
+    }
+
+    sqr(Rx, v); // (3 * X^{2} + a * Z^{4})^2
+    sub(Rx, Rx, s);
+    sub(Rx, Rx, s);
+
+    sub(Ry, s, Rx); // 
+    mul(Ry, Ry, v);
+    sqr(u, u); // Y^{4}
+    Fp::mulInt(u, u, 8); // 8 * Y^{4}
+    sub(Ry, Ry, u); // 
+
+    mul(Rz, P.y, P.z);
+    Fp::mulInt(Rz, Rz, 2);
+
+    if (Rz.value == 0) {
+        R.x.value = 1;
+        R.y.value = 1;
+        R.z.value = 0;
+        return;
+    } 
+
+    R.x.value = std::move(Rx.value);
+    R.y.value = std::move(Ry.value);
+    R.z.value = std::move(Rz.value);
+}
+
 void add(jPoint &R, const jPoint &P, const jPoint &Q) {
     if (P.z.value == 0) {
         R.x.value = Q.x.value;
@@ -207,52 +262,12 @@ void add(jPoint &R, const jPoint &P, const jPoint &Q) {
     mul(v, v, s);
     sub(Ry, Ry, v);
 
-    R.x.value = std::move(Rx.value);
-    R.y.value = std::move(Ry.value);
-    R.z.value = std::move(Rz.value);
-}
-
-void EllipticCurve::dbl(jPoint &R, const jPoint &P) {
-    if (P.z.value == 0) {
+    if (Rz.value == 0) {
         R.x.value = 1;
         R.y.value = 1;
         R.z.value = 0;
         return;
-    }
-
-    Fp u, v, s, t;
-    Fp Rx, Ry, Rz;
-    sqr(u, P.y); // Y^{2}
-    mul(s, u, P.x); // X * Y^{2}
-    Fp::mulInt(s, s, 4); // 4 * X * Y^{2}
-    
-    sqr(t, P.z); // Z^{2}
-    mpz_add_ui(v.value.get_mpz_t(), a.value.get_mpz_t(), 3);
-    if (v.value == Fp::modulus) {
-        add(Rx, P.x, t); // (X + Z^2)
-        sub(v, P.x, t); // (X - Z^2)
-        mul(v, v, Rx); // (X + Z^2) * (X - Z^2)
-        Fp::mulInt(v, v, 3); // 3 * (X + Z^2) * (X - Z^2)
-    } else {
-        sqr(t, t); // Z^{4}
-        mul(t, t, a); // a * Z^{4}
-        sqr(v, P.x); // X^{2}
-        Fp::mulInt(v, v, 3); // 3 * X^{2}
-        add(v, v, t); // 3 * X^{2} + a * Z^{4}
-    }
-
-    sqr(Rx, v); // (3 * X^{2} + a * Z^{4})^2
-    sub(Rx, Rx, s);
-    sub(Rx, Rx, s);
-
-    sub(Ry, s, Rx); // 
-    mul(Ry, Ry, v);
-    sqr(u, u); // Y^{4}
-    Fp::mulInt(u, u, 8); // 8 * Y^{4}
-    sub(Ry, Ry, u); // 
-
-    mul(Rz, P.y, P.z);
-    Fp::mulInt(Rz, Rz, 2);
+    } 
 
     R.x.value = std::move(Rx.value);
     R.y.value = std::move(Ry.value);

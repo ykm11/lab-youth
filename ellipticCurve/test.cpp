@@ -233,15 +233,16 @@ void test_jacobi_ec_add() {
 
     Point P = EC(gx, gy);
     Point P2;
-    EllipticCurve::dbl(P2, P);
+    add(P2, P, P);
     Fp px, py;
     P2.xy(px, py);
+
     jPoint G2;
-    EllipticCurve::dbl(G2, G1);
+    add(G2, G1, G1);
 
     jPoint G3, G4;
     add(G3, G1, G2);
-    EllipticCurve::dbl(G4, G2);
+    add(G4, G2, G2);
 
     Point P3, P4;
     add(P3, P2, P);
@@ -415,6 +416,32 @@ void test_MultipleScalarMul() {
     }
 }
 
+void test_jacobi_ec_mul() {
+    mpz_class p = mpz_class("FFFFFFFF00000001000000000000000000000000FFFFFFFFFFFFFFFFFFFFFFFF", 16);
+    Fp::setModulo(p);
+
+    mpz_class a = mpz_class("FFFFFFFF00000001000000000000000000000000FFFFFFFFFFFFFFFFFFFFFFFC", 16);
+    mpz_class b = mpz_class("5AC635D8AA3A93E7B3EBBD55769886BC651D06B0CC53B0F63BCE3C3E27D2604B", 16);
+    EllipticCurve EC = EllipticCurve(a, b);
+    mpz_class n = mpz_class("5792089237316195423570985008687907852837564279074904382605163141518161494337", 10); 
+
+    mpz_class gx = mpz_class("6B17D1F2E12C4247F8BCE6E563A440F277037D812DEB33A0F4A13945D898C296", 16);
+    mpz_class gy = mpz_class("4FE342E2FE1A7F9B8EE7EB4A7C0F9E162BCE33576B315ECECBB6406837BF51F5", 16);
+    jPoint G, G2;
+    G = jPoint(gx, gy, 1);
+    l_mul(G2, G, n);
+
+    Fp x, y;
+    G2.xy(x, y);
+    mpz_class x_act = mpz_class("101953555315098882156052368886371454249375673642774478290527562546096338601484", 10);
+    mpz_class y_act = mpz_class("80205165334072958954338918426448271995337062553457293583809747354402522371549", 10);
+    std::cout << "[*] Multiple Scalar Mul(jacobi) test: ";
+    if (x.value == x_act && y.value == y_act) {
+        puts("OK");
+    } else {
+        puts("Failed");
+    }
+}
 
 int main() {
     test_GLV_decomposing();
@@ -431,5 +458,6 @@ int main() {
     test_jacobi_ec_add();
     test_jacobi_ec_dbl();
     test_ec_dbl();
+    test_jacobi_ec_mul();
 
 }

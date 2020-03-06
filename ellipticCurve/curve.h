@@ -17,7 +17,7 @@ void sub(Point &R, const Point &P, const Point &Q);
 void dump(const Point &P);
 void dump(const jPoint &P);
 
-template<class T> void l_mul(T &R, const T &P, const mpz_class &x); 
+template<class TPoint> void l_mul(TPoint &R, const TPoint &P, const mpz_class &x); 
 void r_mul(Point &R, const Point &G, const mpz_class &x);
 void montgomery_mul(Point &R0, const Point &G, const mpz_class &n);
 void window_mul(Point &R, const Point &G, const mpz_class &n);
