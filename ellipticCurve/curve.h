@@ -13,13 +13,11 @@ bool isEqual(const Point &P, const Point &Q);
 void add(Point &R, const Point &P, const Point &Q);
 void add(jPoint &R, const jPoint &P, const jPoint &Q);
 void sub(Point &R, const Point &P, const Point &Q);
-void dbl(Point &R, const Point &P);
-void dbl(jPoint &R, const jPoint &P);
 
 void dump(const Point &P);
 void dump(const jPoint &P);
 
-void l_mul(Point &R, const Point &P, const mpz_class &x); 
+template<class T> void l_mul(T &R, const T &P, const mpz_class &x); 
 void r_mul(Point &R, const Point &G, const mpz_class &x);
 void montgomery_mul(Point &R0, const Point &G, const mpz_class &n);
 void window_mul(Point &R, const Point &G, const mpz_class &n);

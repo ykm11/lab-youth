@@ -11,6 +11,8 @@ Point GLV::base;
 mpz_class GLV::lmd;
 mpz_class GLV::order;
 
+template void l_mul(Point &R, const Point &P, const mpz_class &x); 
+template void l_mul(jPoint &R, const jPoint &P, const mpz_class &x); 
 
 void EllipticCurve::dbl(Point &R, const Point &P) {
     if (P.z.value == 0) {
@@ -144,6 +146,7 @@ void add(Point &R, const Point &P, const Point &Q) {
     R.x.value = std::move(Rx.value);
     R.y.value = std::move(Ry.value);
     R.z.value = std::move(Rz.value);
+
 }
 
 void add(jPoint &R, const jPoint &P, const jPoint &Q) {
@@ -186,26 +189,31 @@ void add(jPoint &R, const jPoint &P, const jPoint &Q) {
         return;
     }
     Fp w, h;
-    mul(R.z, P.z, Q.z); 
-    mul(R.z, R.z, v); // Z3 =  (X2 * Z1^{2} - X1 * Z2^{2}) * Z1 * Z2
+    Fp Rx, Ry, Rz;
+    mul(Rz, P.z, Q.z); 
+    mul(Rz, Rz, v); // Z3 =  (X2 * Z1^{2} - X1 * Z2^{2}) * Z1 * Z2
 
     sqr(w, v);
     mul(u, u, w); // u * (X2 * Z1^{2} - X1 * Z2^{2})^{2}
     Fp::mulInt(h, u, 2);
     mul(v, w, v); // (X2 * Z1^{2} - X1 * Z2^{2})^{3}
 
-    sqr(R.x, t); 
-    sub(R.x, R.x, v); // (Y2 * Z1^{3} - Y1 * Z2^{3})^{2} - (X2 * Z1^{2} - X1 * Z2^{2})^{3}
-    sub(R.x, R.x, h);
+    sqr(Rx, t); 
+    sub(Rx, Rx, v); // (Y2 * Z1^{3} - Y1 * Z2^{3})^{2} - (X2 * Z1^{2} - X1 * Z2^{2})^{3}
+    sub(Rx, Rx, h);
 
-    sub(R.y, u, R.x);
-    mul(R.y, R.y, t);
+    sub(Ry, u, Rx);
+    mul(Ry, Ry, t);
     mul(v, v, s);
-    sub(R.y, R.y, v);
+    sub(Ry, Ry, v);
+
+    R.x.value = std::move(Rx.value);
+    R.y.value = std::move(Ry.value);
+    R.z.value = std::move(Rz.value);
 }
 
 void EllipticCurve::dbl(jPoint &R, const jPoint &P) {
-    if (P.y.value == 0) {
+    if (P.z.value == 0) {
         R.x.value = 1;
         R.y.value = 1;
         R.z.value = 0;
@@ -213,15 +221,17 @@ void EllipticCurve::dbl(jPoint &R, const jPoint &P) {
     }
 
     Fp u, v, s, t;
+    Fp Rx, Ry, Rz;
     sqr(u, P.y); // Y^{2}
     mul(s, u, P.x); // X * Y^{2}
     Fp::mulInt(s, s, 4); // 4 * X * Y^{2}
     
     sqr(t, P.z); // Z^{2}
-    if (a.value == Fp::modulus - 3) {
-        add(R.x, P.x, t); // (X + Z^2)
+    mpz_add_ui(v.value.get_mpz_t(), a.value.get_mpz_t(), 3);
+    if (v.value == Fp::modulus) {
+        add(Rx, P.x, t); // (X + Z^2)
         sub(v, P.x, t); // (X - Z^2)
-        mul(v, v, R.x); // (X + Z^2) * (X - Z^2)
+        mul(v, v, Rx); // (X + Z^2) * (X - Z^2)
         Fp::mulInt(v, v, 3); // 3 * (X + Z^2) * (X - Z^2)
     } else {
         sqr(t, t); // Z^{4}
@@ -231,18 +241,22 @@ void EllipticCurve::dbl(jPoint &R, const jPoint &P) {
         add(v, v, t); // 3 * X^{2} + a * Z^{4}
     }
 
-    sqr(R.x, v); // (3 * X^{2} + a * Z^{4})^2
-    sub(R.x, R.x, s);
-    sub(R.x, R.x, s);
+    sqr(Rx, v); // (3 * X^{2} + a * Z^{4})^2
+    sub(Rx, Rx, s);
+    sub(Rx, Rx, s);
 
-    sub(R.y, s, R.x); // 
-    mul(R.y, R.y, v);
+    sub(Ry, s, Rx); // 
+    mul(Ry, Ry, v);
     sqr(u, u); // Y^{4}
     Fp::mulInt(u, u, 8); // 8 * Y^{4}
-    sub(R.y, R.y, u); // 
+    sub(Ry, Ry, u); // 
 
-    mul(R.z, P.y, P.z);
-    Fp::mulInt(R.z, R.z, 2);
+    mul(Rz, P.y, P.z);
+    Fp::mulInt(Rz, Rz, 2);
+
+    R.x.value = std::move(Rx.value);
+    R.y.value = std::move(Ry.value);
+    R.z.value = std::move(Rz.value);
 }
 
 void sub(Point &R, const Point &P, const Point &Q) {
@@ -282,12 +296,14 @@ void dump(const jPoint &P) {
     }
 }
 
-void l_mul(Point &R, const Point &P, const mpz_class &x) { // 左向きバイナリ法
+template<class T>
+void l_mul(T &R, const T &P, const mpz_class &x) { // 左向きバイナリ法
     R.x.value = 0;
     R.y.value = 1;
     R.z.value = 0;
 
-    Point tmp_P = P;
+    T tmp_P = P;
+
     size_t k_bits = mpz_sizeinbase(x.get_mpz_t(), 2)-1;
     for (size_t i = 0; i < k_bits; i++) {
         if ((mpz_tstbit(x.get_mpz_t(), i)) == 1) {
