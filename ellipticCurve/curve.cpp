@@ -11,8 +11,6 @@ Point GLV::base;
 mpz_class GLV::lmd;
 mpz_class GLV::order;
 
-template void l_mul(Point &R, const Point &P, const mpz_class &x); 
-template void l_mul(jPoint &R, const jPoint &P, const mpz_class &x); 
 
 void EllipticCurve::dbl(Point &R, const Point &P) {
     if (P.z.value == 0) {
@@ -308,37 +306,6 @@ void dump(const jPoint &P) {
         Fp x, y;
         P.xy(x, y);
         std::cout << "(" << x.value << " : " << y.value << " : 1)" << std::endl;
-    }
-}
-
-template<class T>
-void l_mul(T &R, const T &P, const mpz_class &x) { // 左向きバイナリ法
-    R.x.value = 0;
-    R.y.value = 1;
-    R.z.value = 0;
-
-    T tmp_P = P;
-
-    size_t k_bits = mpz_sizeinbase(x.get_mpz_t(), 2)-1;
-    for (size_t i = 0; i < k_bits; i++) {
-        if ((mpz_tstbit(x.get_mpz_t(), i)) == 1) {
-            add(R, R, tmp_P);
-        }
-        EllipticCurve::dbl(tmp_P, tmp_P);
-    }
-    add(R, R, tmp_P);
-}
-
-void r_mul(Point &R, const Point& G, const mpz_class &x) { // 右向きバイナリ法
-    size_t k_bits = mpz_sizeinbase(x.get_mpz_t(), 2);
-
-    R = G;
-    for (int i = k_bits-2; i >= 0; i--) {
-        EllipticCurve::dbl(R, R);
-
-        if (mpz_tstbit(x.get_mpz_t(), i) == 1) {
-            add(R, R, G);
-        }
     }
 }
 
