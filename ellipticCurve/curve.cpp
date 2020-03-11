@@ -241,19 +241,19 @@ void add(jPoint &R, const jPoint &P, const jPoint &Q) {
         R.z.value = 0;
         return;
     }
-    Fp w, h;
+    Fp w;
     Fp Rx, Ry, Rz;
     mul(Rz, P.z, Q.z); 
     mul(Rz, Rz, v); // Z3 =  (X2 * Z1^{2} - X1 * Z2^{2}) * Z1 * Z2
 
     sqr(w, v);
     mul(u, u, w); // u * (X2 * Z1^{2} - X1 * Z2^{2})^{2}
-    Fp::mulInt(h, u, 2);
+    Fp::mulInt(Ry, u, 2);
     mul(v, w, v); // (X2 * Z1^{2} - X1 * Z2^{2})^{3}
 
     sqr(Rx, t); 
     sub(Rx, Rx, v); // (Y2 * Z1^{3} - Y1 * Z2^{3})^{2} - (X2 * Z1^{2} - X1 * Z2^{2})^{3}
-    sub(Rx, Rx, h);
+    sub(Rx, Rx, Ry);
 
     sub(Ry, u, Rx);
     mul(Ry, Ry, t);

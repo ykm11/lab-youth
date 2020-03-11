@@ -133,7 +133,7 @@ void benchmark_ec_jacobi_dbl() {
 
 
 void benchmark_ec_mul() {
-    std::cout << "[*] EC mul benchmark\n";
+    std::cout << "[*] EC mul benchmark (secp256k1)\n";
     mpz_class a = mpz_class("0", 10);
     mpz_class b = mpz_class("7", 10);
     mpz_class p = mpz_class("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F", 16);
@@ -149,6 +149,7 @@ void benchmark_ec_mul() {
     const int n = 1000;
     time_t begin, end;
 
+    // 左向きバイナリ法
     std::cout << "\tRtL Bin Proj";
     begin = clock();
     for(int i = 0; i < n; i++) {
@@ -167,13 +168,24 @@ void benchmark_ec_mul() {
     end = clock();
     printf("\t\ttime = %fusec\n", (end - begin) / double(CLOCKS_PER_SEC) / n * 1e6);
 
-    std::cout << "\tLtR Bin";
+
+    // 右向きバイナリ法
+    std::cout << "\tLtR Bin Proj";
     begin = clock();
     for(int i = 0; i < n; i++) {
         r_mul(R, G, q);
     }
     end = clock();
     printf("\t\ttime = %fusec\n", (end - begin) / double(CLOCKS_PER_SEC) / n * 1e6);
+
+    std::cout << "\tLtR Bin Jacobi";
+    begin = clock();
+    for(int i = 0; i < n; i++) {
+        r_mul(R1, G1, q);
+    }
+    end = clock();
+    printf("\t\ttime = %fusec\n", (end - begin) / double(CLOCKS_PER_SEC) / n * 1e6);
+
 
     std::cout << "\twin-sli(w=2)";
     begin = clock();
@@ -182,6 +194,7 @@ void benchmark_ec_mul() {
     }
     end = clock();
     printf("\ttime = %fusec\n", (end - begin) / double(CLOCKS_PER_SEC) / n * 1e6);
+
 
     std::cout << "\tNaf";
     begin = clock();
