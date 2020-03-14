@@ -149,8 +149,9 @@ void benchmark_ec_mul() {
     const int n = 1000;
     time_t begin, end;
 
+    std::cout << "\t[Proj]\n";
     // 左向きバイナリ法
-    std::cout << "\tRtL Bin Proj";
+    std::cout << "\tRtL Bin";
     begin = clock();
     for(int i = 0; i < n; i++) {
         l_mul(R, G, q);
@@ -158,34 +159,14 @@ void benchmark_ec_mul() {
     end = clock();
     printf("\t\ttime = %fusec\n", (end - begin) / double(CLOCKS_PER_SEC) / n * 1e6);
 
-    jPoint G1, R1;
-    G1 = jPoint(gx, gy, 1);
-    std::cout << "\tRtL Bin Jacobi";
-    begin = clock();
-    for(int i = 0; i < n; i++) {
-        l_mul(R1, G1, q);
-    }
-    end = clock();
-    printf("\t\ttime = %fusec\n", (end - begin) / double(CLOCKS_PER_SEC) / n * 1e6);
-
-
     // 右向きバイナリ法
-    std::cout << "\tLtR Bin Proj";
+    std::cout << "\tLtR Bin";
     begin = clock();
     for(int i = 0; i < n; i++) {
         r_mul(R, G, q);
     }
     end = clock();
     printf("\t\ttime = %fusec\n", (end - begin) / double(CLOCKS_PER_SEC) / n * 1e6);
-
-    std::cout << "\tLtR Bin Jacobi";
-    begin = clock();
-    for(int i = 0; i < n; i++) {
-        r_mul(R1, G1, q);
-    }
-    end = clock();
-    printf("\t\ttime = %fusec\n", (end - begin) / double(CLOCKS_PER_SEC) / n * 1e6);
-
 
     std::cout << "\twin-sli(w=2)";
     begin = clock();
@@ -195,11 +176,135 @@ void benchmark_ec_mul() {
     end = clock();
     printf("\ttime = %fusec\n", (end - begin) / double(CLOCKS_PER_SEC) / n * 1e6);
 
+    std::cout << "\tNaf";
+    begin = clock();
+    for(int i = 0; i < n; i++) {
+        naf_mul(R, G, q);
+    }
+    end = clock();
+    printf("\t\ttime = %fusec\n", (end - begin) / double(CLOCKS_PER_SEC) / n * 1e6);
+
+    std::cout << "\t[Jacobi]\n";
+    jPoint G1, R1;
+    G1 = jPoint(gx, gy, 1);
+    std::cout << "\tRtL Bin";
+    begin = clock();
+    for(int i = 0; i < n; i++) {
+        l_mul(R1, G1, q);
+    }
+    end = clock();
+    printf("\t\ttime = %fusec\n", (end - begin) / double(CLOCKS_PER_SEC) / n * 1e6);
+
+    std::cout << "\tLtR Bin";
+    begin = clock();
+    for(int i = 0; i < n; i++) {
+        r_mul(R1, G1, q);
+    }
+    end = clock();
+    printf("\t\ttime = %fusec\n", (end - begin) / double(CLOCKS_PER_SEC) / n * 1e6);
+
+    std::cout << "\twin-sli(w=2)";
+    begin = clock();
+    for(int i = 0; i < n; i++) {
+        window_mul(R1, G1, q);
+    }
+    end = clock();
+    printf("\ttime = %fusec\n", (end - begin) / double(CLOCKS_PER_SEC) / n * 1e6);
+
+    std::cout << "\tNaf";
+    begin = clock();
+    for(int i = 0; i < n; i++) {
+        naf_mul(R1, G1, q);
+    }
+    end = clock();
+    printf("\t\ttime = %fusec\n", (end - begin) / double(CLOCKS_PER_SEC) / n * 1e6);
+}
+
+
+void benchmark_ec_mul2() {
+    std::cout << "[*] EC mul benchmark (NIST P256)\n";
+    mpz_class p = mpz_class("FFFFFFFF00000001000000000000000000000000FFFFFFFFFFFFFFFFFFFFFFFF", 16);
+    mpz_class a = mpz_class("FFFFFFFF00000001000000000000000000000000FFFFFFFFFFFFFFFFFFFFFFFC", 16);
+    mpz_class b = mpz_class("5AC635D8AA3A93E7B3EBBD55769886BC651D06B0CC53B0F63BCE3C3E27D2604B", 16);
+    Fp::setModulo(p);
+    EllipticCurve EC = EllipticCurve(a, b);
+
+    mpz_class gx = mpz_class("6B17D1F2E12C4247F8BCE6E563A440F277037D812DEB33A0F4A13945D898C296", 16);
+    mpz_class gy = mpz_class("4FE342E2FE1A7F9B8EE7EB4A7C0F9E162BCE33576B315ECECBB6406837BF51F5", 16);
+
+    mpz_class q = mpz_class("35413290456945547306056027344241947654113124042893875504030834988367514449923", 10);
+
+    Point G = EC.point(gx, gy);
+    Point R;
+    const int n = 1000;
+    time_t begin, end;
+
+    std::cout << "\t[Proj]\n";
+    // 左向きバイナリ法
+    std::cout << "\tRtL Bin";
+    begin = clock();
+    for(int i = 0; i < n; i++) {
+        l_mul(R, G, q);
+    }
+    end = clock();
+    printf("\t\ttime = %fusec\n", (end - begin) / double(CLOCKS_PER_SEC) / n * 1e6);
+
+    // 右向きバイナリ法
+    std::cout << "\tLtR Bin";
+    begin = clock();
+    for(int i = 0; i < n; i++) {
+        r_mul(R, G, q);
+    }
+    end = clock();
+    printf("\t\ttime = %fusec\n", (end - begin) / double(CLOCKS_PER_SEC) / n * 1e6);
+
+    std::cout << "\twin-sli(w=2)";
+    begin = clock();
+    for(int i = 0; i < n; i++) {
+        window_mul(R, G, q);
+    }
+    end = clock();
+    printf("\ttime = %fusec\n", (end - begin) / double(CLOCKS_PER_SEC) / n * 1e6);
 
     std::cout << "\tNaf";
     begin = clock();
     for(int i = 0; i < n; i++) {
         naf_mul(R, G, q);
+    }
+    end = clock();
+    printf("\t\ttime = %fusec\n", (end - begin) / double(CLOCKS_PER_SEC) / n * 1e6);
+
+    std::cout << "\t[Jacobi]\n";
+    jPoint G1, R1;
+    G1 = jPoint(gx, gy, 1);
+    std::cout << "\tRtL Bin";
+    begin = clock();
+    for(int i = 0; i < n; i++) {
+        l_mul(R1, G1, q);
+    }
+    end = clock();
+    printf("\t\ttime = %fusec\n", (end - begin) / double(CLOCKS_PER_SEC) / n * 1e6);
+
+    std::cout << "\tLtR Bin";
+    begin = clock();
+    for(int i = 0; i < n; i++) {
+        r_mul(R1, G1, q);
+    }
+    end = clock();
+    printf("\t\ttime = %fusec\n", (end - begin) / double(CLOCKS_PER_SEC) / n * 1e6);
+
+    std::cout << "\twin-sli(w=2)";
+    begin = clock();
+    for(int i = 0; i < n; i++) {
+        window_mul(R1, G1, q);
+    }
+    end = clock();
+    printf("\ttime = %fusec\n", (end - begin) / double(CLOCKS_PER_SEC) / n * 1e6);
+
+    std::cout << "\tNaf";
+    begin = clock();
+    for(int i = 0; i < n; i++) {
+        naf_mul(R1, G1, q);
     }
     end = clock();
     printf("\t\ttime = %fusec\n", (end - begin) / double(CLOCKS_PER_SEC) / n * 1e6);
@@ -332,6 +437,7 @@ int main() {
     benchmark_ec_dbl();
     benchmark_ec_jacobi_dbl();
     benchmark_ec_mul();
+    benchmark_ec_mul2();
 
     //benchmark_GLV_decomposing();
     //benchmark_GLVbaseMul(); 
