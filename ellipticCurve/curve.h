@@ -12,19 +12,20 @@ class EllipticCurve;
 bool isEqual(const Point &P, const Point &Q);
 void add(Point &R, const Point &P, const Point &Q);
 void add(jPoint &R, const jPoint &P, const jPoint &Q);
-void sub(Point &R, const Point &P, const Point &Q);
+template<class TPoint> void sub(TPoint &R, const TPoint &P, const TPoint &Q);
 
 void dump(const Point &P);
 void dump(const jPoint &P);
 
 template<class TPoint> void l_mul(TPoint &R, const TPoint &P, const mpz_class &x); 
 template<class TPoint> void r_mul(TPoint &R, const TPoint &G, const mpz_class &x);
-void montgomery_mul(Point &R0, const Point &G, const mpz_class &n);
-void window_mul(Point &R, const Point &G, const mpz_class &n);
+template<class TPoint> void montgomery_mul(TPoint &R0, const TPoint &G, const mpz_class &n);
+template<class TPoint> void window_mul(TPoint &R, const TPoint &G, const mpz_class &n);
+template<class TPoint> void naf_mul(TPoint &R, const TPoint &G, const mpz_class &x);
 
 void multipleMul(Point &R, const Point &P, const mpz_class &u, const Point &Q, const mpz_class &v);
 
-void naf_mul(Point &R, const Point &G, const mpz_class &x);
+static inline void getNafArray(int8_t naf[], const mpz_class &x);
 
 class Point {
 public:
@@ -96,6 +97,24 @@ public:
         mul(t, y, t); // Y / Z^{3}
     }
 
+    jPoint operator+(const jPoint &other) const {
+        jPoint r;
+        add(r, *this, other);
+        return r;
+    }
+
+    jPoint operator-(const jPoint &other) const {
+        jPoint r;
+        sub(r, *this, other);
+        return r;
+    }
+
+    jPoint operator*(const mpz_class &x) const {
+        jPoint r;
+        naf_mul(r, *this, x);
+        return r;
+    }
+
     static void neg(jPoint &R, const jPoint &P) {
         R.x = P.x;
         R.z = P.z;
@@ -159,6 +178,12 @@ public:
 };
 
 template<class TPoint>
+void sub(TPoint &R, const TPoint &P, const TPoint &Q) {
+    TPoint::neg(R, Q); // R <- [-1]Q
+    add(R, P, R); // R <- P + [-1]Q
+}
+
+template<class TPoint>
 void l_mul(TPoint &R, const TPoint &P, const mpz_class &x) { // 左向きバイナリ法
     R.x.value = 0;
     R.y.value = 1;
@@ -191,6 +216,110 @@ void r_mul(TPoint &R, const TPoint& G, const mpz_class &x) { // 右向きバイ�
         }
     }
 }
+
+template<class TPoint>
+void montgomery_mul(TPoint &R0, const TPoint &G, const mpz_class &n) { // Montgomery Ladder
+    size_t k_bits = mpz_sizeinbase(n.get_mpz_t(), 2);
+    TPoint R1 = G;
+    R0.x.value = 0;
+    R0.y.value = 1;
+    R0.z.value = 0;
+
+    for (int i = k_bits-1; i >= 0; i--) {
+        if (mpz_tstbit(n.get_mpz_t(), i) == 0) {
+            add(R1, R1, R0);
+            EllipticCurve::dbl(R0, R0);
+        } else {
+            add(R0, R0, R1);
+            EllipticCurve::dbl(R1, R1);
+        }
+    }
+}
+
+template<class TPoint>
+void window_mul(TPoint &R, const TPoint &G, const mpz_class &n) { // windows method
+    size_t k_bits = mpz_sizeinbase(n.get_mpz_t(), 2);
+    TPoint P[4];
+
+    P[0] = TPoint(0, 1, 0);
+    P[1] = G;
+    EllipticCurve::dbl(P[2], G);
+    add(P[3], P[2], G);
+
+    R = P[0];
+    for (int i = k_bits-1; i > 0; i=i-2) {
+        EllipticCurve::dbl(R, R);
+        EllipticCurve::dbl(R, R); // R <- 4R
+
+        add(R, R, P[2*mpz_tstbit(n.get_mpz_t(), i) + mpz_tstbit(n.get_mpz_t(), i-1)]);
+    } 
+    if ((k_bits & 1) == 1) { // nのビット数が奇数のときだけ
+        EllipticCurve::dbl(R, R);
+        add(R, R, P[mpz_tstbit(n.get_mpz_t(), 0)]);
+    }
+}
+
+template<class TPoint>
+void naf_mul(TPoint &R, const TPoint &P, const mpz_class &x) {
+    size_t naf_size = mpz_sizeinbase(x.get_mpz_t(), 2) + 1;
+    int8_t naf[naf_size];
+    memset(naf, 0, naf_size);
+
+    size_t w_size = 5;
+    size_t tblSize = 1 << w_size;
+    TPoint tbl[tblSize];
+    tbl[0] = TPoint(0, 1, 0);
+    tbl[1] = P;
+
+    for (size_t k = 2; k < 21; k=k+2) {
+        EllipticCurve::dbl(tbl[k], tbl[k/2]);
+        add(tbl[k+1], tbl[k], P);
+    }
+    
+    getNafArray(naf, x);
+    while (naf_size >= 1 && naf[naf_size-1] == 0) {
+        naf_size--;
+    }
+
+    TPoint Q;
+    R = P;
+    int8_t t;
+    int i;
+    for (i = naf_size-2; i >= int(w_size-1); i=i-w_size) {
+        for (size_t j = 0; j < w_size; j++) {
+            EllipticCurve::dbl(R, R);
+        }
+
+        t = 16*naf[i] + 8*naf[i-1] + 4*naf[i-2] + 2*naf[i-3] + naf[i-4]; 
+        if (t < 0) {
+            TPoint::neg(Q, tbl[-t]);
+        } else {
+            Q = tbl[t];
+        }
+        add(R, R, Q);
+    }
+
+    if (i < 0) {
+        return;
+    }
+
+    t = 0;
+    while (i > 0) {
+        EllipticCurve::dbl(R, R);
+        t = t + (1 << i) * naf[i];
+        i--;
+    }
+    EllipticCurve::dbl(R, R);
+    t = t + naf[0];
+
+    if (t < 0) {
+        TPoint::neg(Q, tbl[-t]);
+    } else {
+        Q = tbl[t];
+    }
+    add(R, R, Q);
+}
+
 
 class GLV {
 
@@ -240,5 +369,4 @@ static inline void getNafArray(int8_t naf[], const mpz_class &x) {
         j++;
     }
 }
-
 

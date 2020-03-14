@@ -272,11 +272,6 @@ void add(jPoint &R, const jPoint &P, const jPoint &Q) {
     R.z.value = std::move(Rz.value);
 }
 
-void sub(Point &R, const Point &P, const Point &Q) {
-    Point::neg(R, Q); // R <- [-1]Q
-    add(R, P, R); // R <- P + [-1]Q
-}
-
 bool isEqual(const Point &P, const Point &Q) {
     Fp s, t, u, v;
 
@@ -309,45 +304,6 @@ void dump(const jPoint &P) {
     }
 }
 
-void montgomery_mul(Point &R0, const Point &G, const mpz_class &n) { // Montgomery Ladder
-    size_t k_bits = mpz_sizeinbase(n.get_mpz_t(), 2);
-    Point R1 = G;
-    R0.x.value = 0;
-    R0.y.value = 1;
-    R0.z.value = 0;
-
-    for (int i = k_bits-1; i >= 0; i--) {
-        if (mpz_tstbit(n.get_mpz_t(), i) == 0) {
-            add(R1, R1, R0);
-            EllipticCurve::dbl(R0, R0);
-        } else {
-            add(R0, R0, R1);
-            EllipticCurve::dbl(R1, R1);
-        }
-    }
-}
-
-void window_mul(Point &R, const Point &G, const mpz_class &n) { // windows method
-    size_t k_bits = mpz_sizeinbase(n.get_mpz_t(), 2);
-    Point P[4];
-
-    P[0] = Point(0, 1, 0);
-    P[1] = G;
-    EllipticCurve::dbl(P[2], G);
-    add(P[3], P[2], G);
-
-    R = P[0];
-    for (int i = k_bits-1; i > 0; i=i-2) {
-        EllipticCurve::dbl(R, R);
-        EllipticCurve::dbl(R, R); // R <- 4R
-
-        add(R, R, P[2*mpz_tstbit(n.get_mpz_t(), i) + mpz_tstbit(n.get_mpz_t(), i-1)]);
-    } 
-    if ((k_bits & 1) == 1) { // nのビット数が奇数のときだけ
-        EllipticCurve::dbl(R, R);
-        add(R, R, P[mpz_tstbit(n.get_mpz_t(), 0)]);
-    }
-}
 
 void multipleMul(Point &R, const Point &P, const mpz_class &u, const Point &Q, const mpz_class &v) {
     size_t k_bits;
@@ -385,66 +341,6 @@ void multipleMul(Point &R, const Point &P, const mpz_class &u, const Point &Q, c
                 [mpz_tstbit(u.get_mpz_t(), 0)]
                 [mpz_tstbit(v.get_mpz_t(), 0)]);
     }
-}
-
-void naf_mul(Point &R, const Point &P, const mpz_class &x) {
-    size_t naf_size = mpz_sizeinbase(x.get_mpz_t(), 2) + 1;
-    int8_t naf[naf_size];
-    memset(naf, 0, naf_size);
-
-    size_t w_size = 5;
-    size_t tblSize = 1 << w_size;
-    Point tbl[tblSize];
-    tbl[0] = Point(0, 1, 0);
-    tbl[1] = P;
-
-    for (size_t k = 2; k < 21; k=k+2) {
-        EllipticCurve::dbl(tbl[k], tbl[k/2]);
-        add(tbl[k+1], tbl[k], P);
-    }
-    
-    getNafArray(naf, x);
-    while (naf_size >= 1 && naf[naf_size-1] == 0) {
-        naf_size--;
-    }
-
-    Point Q;
-    R = P;
-    int8_t t;
-    int i;
-    for (i = naf_size-2; i >= int(w_size-1); i=i-w_size) {
-        for (size_t j = 0; j < w_size; j++) {
-            EllipticCurve::dbl(R, R);
-        }
-
-        t = 16*naf[i] + 8*naf[i-1] + 4*naf[i-2] + 2*naf[i-3] + naf[i-4]; 
-        if (t < 0) {
-            Point::neg(Q, tbl[-t]);
-        } else {
-            Q = tbl[t];
-        }
-        add(R, R, Q);
-    }
-
-    if (i < 0) {
-        return;
-    }
-
-    t = 0;
-    while (i > 0) {
-        EllipticCurve::dbl(R, R);
-        t = t + (1 << i) * naf[i];
-        i--;
-    }
-    EllipticCurve::dbl(R, R);
-    t = t + naf[0];
-
-    if (t < 0) {
-        Point::neg(Q, tbl[-t]);
-    } else {
-        Q = tbl[t];
-    }
-    add(R, R, Q);
 }
 
 
