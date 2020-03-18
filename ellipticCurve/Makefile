@@ -17,7 +17,7 @@ $(TARGET): $(OBJ)
 	$(CXX) -o $@ $? $(LDFLAGS)
 
 clean:
-	$(RM) -rf $(OBJ) $(DEP) $(TARGET)
+	$(RM) -rf $(OBJ) $(DEP) $(TARGET) ec_*
 
 .PHONY: clean benchmark
 
@@ -43,6 +43,3 @@ test: ./ec_test_mi
 benchmark: ./ec_benchmark_mi
 	./ec_benchmark_mi
 
-
-./test_mpn: FP.o
-	$(CXX) -o ./test_mpn ./mpn_test.cpp $< $(CXXFLAGS) $(LDFLAGS)

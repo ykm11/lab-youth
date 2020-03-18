@@ -234,7 +234,7 @@ void benchmark_ec_mul2() {
 
     mpz_class q = mpz_class("35413290456945547306056027344241947654113124042893875504030834988367514449923", 10);
 
-    Point G = EC.point(gx, gy);
+    Point G = Point(gx, gy, 1);
     Point R;
     const int n = 1000;
     time_t begin, end;
@@ -315,9 +315,9 @@ void benchmark_fp() {
     std::cout << "[*] Fp invmod benchmark\n";
     mpz_class p = mpz_class("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F", 16);
     Fp::setModulo(p);
-    Fp x, y;
+    Fp x(mpz_class("115792089237316195423570985008687907852837564279074904382605163141518161494337", 10));
+    Fp y;
 
-    x = Fp("115792089237316195423570985008687907852837564279074904382605163141518161494337", 10); 
     const int n = 100000;
     time_t begin = clock();
     for(int i = 0; i < n; i++) {
@@ -328,6 +328,7 @@ void benchmark_fp() {
 }
 
 
+#ifndef USE_MPN
 void benchmark_sqr() {
     std::cout << "[*] sqr benchmark\n";
     mpz_class p = mpz_class("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F", 16);
@@ -427,7 +428,7 @@ void benchmark_MultipleScalarMul() {
     std::cout << "\t[k1+k2]Base";
     printf("\t\ttime = %fusec\n", (end - begin) / double(CLOCKS_PER_SEC) / n * 1e6);
 }
-
+#endif
 
 int main() {
     //benchmark_fp_sqareRoot();

@@ -52,13 +52,14 @@ void test_ec_mul() {
 
     Point G = EC(gx, gy);
     Point R;
-    naf_mul(R, G, n);
+    l_mul(R, G, n);
 
     Fp x, y;
     R.xy(x, y);
-    mpz_class Rx = mpz_class("24468494029366207626986019034967613638108911936555812085751778627749375846788", 10);
-    mpz_class Ry = mpz_class("64452411616332977820528608943388105946346351335284667932071435835634206415910", 10);
-    if (x.value == Rx && y.value == Ry) {
+    Fp Rx(mpz_class("24468494029366207626986019034967613638108911936555812085751778627749375846788", 10));
+    Fp Ry(mpz_class("64452411616332977820528608943388105946346351335284667932071435835634206415910", 10));
+
+    if (x == Rx && y == Ry) {
         std::cout << "[*] EC mul test: OK" << std::endl;
     } else {
         std::cout << "[*] EC mul test: FAILED" << std::endl;
@@ -80,8 +81,8 @@ void test_ec_sub() {
     Point G = EC(gx, gy);
     Point R5, R3, R2;
     r_mul(R2, G, 2);
-    r_mul(R3, G, 3);
-    r_mul(R5, G, 5);
+    r_mul(R3, G, 114);
+    r_mul(R5, G, 116);
 
     std::cout << "[*] EC sub test: ";
     if ((R5 - R2) == R3) {
@@ -112,14 +113,13 @@ void test_ec_dbl() {
 
     mpz_class gx = mpz_class("6B17D1F2E12C4247F8BCE6E563A440F277037D812DEB33A0F4A13945D898C296", 16);
     mpz_class gy = mpz_class("4FE342E2FE1A7F9B8EE7EB4A7C0F9E162BCE33576B315ECECBB6406837BF51F5", 16);
-    Point P, P2, G2;
+    Point P, P2;
     P = Point(gx, gy, 1);
     EllipticCurve::dbl(P2, P);
 
 
     mpz_class gx2 = mpz_class("56515219790691171413109057904011688695424810155802929973526481321309856242040", 10);
     mpz_class gy2 = mpz_class("3377031843712258259223711451491452598088675519751548567112458094635497583569", 10);
-    G2 = Point(gx2, gy2, 1);
 
     Fp u, v;
     P2.xy(u, v);
@@ -274,10 +274,10 @@ void test_ECorder() {
 
     Point G = EC(gx, gy);
     Point R;
-    r_mul(R, G, n);
+    naf_mul(R, G, n);
 
     Point O = EC(0, 1, 0);
-    if (R == O) {
+    if (isEqual(R, O)) {
         std::cout << "[*] order test: OK" << std::endl;
     } else {
         std::cout << "[*] order test: FAILED" << std::endl;
@@ -312,14 +312,13 @@ void test_ec_muls() {
 }
 
 void test_isEqual_fp() {
-    Fp::setModulo(19);
-
-    Fp x = Fp(12);
-    Fp y = Fp(12 - 19);
-    Fp z = Fp(-12);
+    Fp::setModulo(mpz_class("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F", 16));
+    Fp x(mpz_class("13382091830740384314730157392173273829173921321313", 16));
+    Fp y(mpz_class("321430274134721937294789216389621894827197492713921", 16));
+    Fp z(mpz_class("c47257a0fb7980226d91eef595cea70126d54c6983aa485bcac77c5eea9c5ca6", 16));
 
     std::cout << "[*] Fp isEq test1: ";
-    if (x == y) {
+    if (x*y == z) {
         std::cout << "OK" << std::endl;
     } else {
         std::cout << "FAILED" << std::endl;
@@ -334,6 +333,7 @@ void test_isEqual_fp() {
 
 }
 
+#ifndef USE_MPN
 void test_fp_squareRoot() {
     std::cout << "[*] Fp squareRoot test: ";
     mpz_class p = mpz_class("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F", 16);
@@ -415,6 +415,7 @@ void test_MultipleScalarMul() {
         puts("Failed");
     }
 }
+#endif
 
 void test_jacobi_ec_mul() {
     mpz_class p = mpz_class("FFFFFFFF00000001000000000000000000000000FFFFFFFFFFFFFFFFFFFFFFFF", 16);
@@ -429,14 +430,15 @@ void test_jacobi_ec_mul() {
     mpz_class gy = mpz_class("4FE342E2FE1A7F9B8EE7EB4A7C0F9E162BCE33576B315ECECBB6406837BF51F5", 16);
     jPoint G, G2;
     G = jPoint(gx, gy, 1);
-    l_mul(G2, G, n);
+    naf_mul(G2, G, n);
 
     Fp x, y;
     G2.xy(x, y);
-    mpz_class x_act = mpz_class("101953555315098882156052368886371454249375673642774478290527562546096338601484", 10);
-    mpz_class y_act = mpz_class("80205165334072958954338918426448271995337062553457293583809747354402522371549", 10);
+    Fp x_act(mpz_class("101953555315098882156052368886371454249375673642774478290527562546096338601484", 10));
+    Fp y_act(mpz_class("80205165334072958954338918426448271995337062553457293583809747354402522371549", 10));
+
     std::cout << "[*] Multiple Scalar Mul(jacobi) test: ";
-    if (x.value == x_act && y.value == y_act) {
+    if (x == x_act && y == y_act) {
         puts("OK");
     } else {
         puts("Failed");
@@ -444,20 +446,22 @@ void test_jacobi_ec_mul() {
 }
 
 int main() {
+#ifndef USE_MPN
     test_GLV_decomposing();
     test_GLVsecp256k1_baseMul();
     test_GLVsecp256k1_ScalarMul();
     test_MultipleScalarMul();
     test_fp_squareRoot();
+#endif
+    test_isEqual_fp();
     test_ECorder();
     test_ec_sub();
     test_ec_mul();
     test_ec_muls();
-    test_isEqual_fp();
 
-    test_jacobi_ec_add();
-    test_jacobi_ec_dbl();
     test_ec_dbl();
+    test_jacobi_ec_dbl();
+    test_jacobi_ec_add();
     test_jacobi_ec_mul();
 
 }
