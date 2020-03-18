@@ -131,6 +131,15 @@ void add(Fp& z, const Fp &x, const Fp &y) {
     }
 }
 
+void add(Fp& z, const Fp& x, uint64_t scalar) {
+    uint64_t y[SIZE] = {0};
+    y[0] = scalar;
+    mpn_add_n((mp_limb_t *)z.value, (const mp_limb_t *)x.value, (const mp_limb_t *)y, SIZE);
+    if (mpn_cmp((const mp_limb_t *)z.value, (const mp_limb_t *)Fp::modulus, SIZE) >= 0) {
+        mpn_sub_n((mp_limb_t *)z.value, (const mp_limb_t *)z.value, (const mp_limb_t *)Fp::modulus, SIZE);
+    }
+}
+
 void sub(Fp& z, const Fp &x, const Fp &y) {
     if (mpn_cmp((const mp_limb_t *)x.value, (const mp_limb_t *)y.value, SIZE) < 0) { // x < y
         mpn_sub_n((mp_limb_t *)z.value, (const mp_limb_t *)y.value, (const mp_limb_t *)x.value, SIZE);
@@ -171,6 +180,23 @@ void Fp::mulInt(Fp &z, const Fp &x, int scalar) {
 
 void Fp::neg(Fp &z, const Fp &x) {
     mpn_sub_n((mp_limb_t *)z.value, (const mp_limb_t *)Fp::modulus, (const mp_limb_t *)x.value, SIZE);
+}
+
+bool isEq(const Fp& x, const Fp& y) {
+    return mpn_cmp((const mp_limb_t*)x.value, (const mp_limb_t*)y.value, SIZE) == 0;
+}
+
+void invmod(Fp& r, const Fp& x) {
+    mpz_t mr, mx, modulus;
+    mpz_init(mr);
+    set_mpz_t(mx, x.value, SIZE);
+    set_mpz_t(modulus, Fp::modulus, SIZE);
+    mpz_invert(mr, mx, modulus);
+
+    for (size_t i = 0; i < SIZE; i++) {
+        r.value[i] = mpz_get_ui(mr);
+        mpz_tdiv_q_2exp(mr, mr, 64);
+    }
 }
 
 #endif

@@ -1,6 +1,8 @@
 #pragma once
 #include<gmpxx.h>
 
+#include <iostream>
+
 class Fp;
 void add(Fp& z, const Fp& x, const Fp& y);
 void sub(Fp& z, const Fp& x, const Fp& y);
@@ -9,9 +11,12 @@ void invmod(Fp& r, const Fp& x);
 bool isEq(const Fp& x, const Fp& y);
 void sqr(Fp& r, const Fp& x);
 
+static inline bool zeroCmp(const Fp &x);
 
 #ifdef USE_MPN
 #define SIZE 4
+
+void add(Fp& z, const Fp& x, uint64_t scalar);
 #endif
 
 class Fp {
@@ -95,6 +100,51 @@ public:
 
 };
 
+
+static inline void move(Fp &z, const Fp &x) {
+#ifndef USE_MPN
+    z.value = x.value;
+#else
+    for (size_t i = 0; i < SIZE; i++) {
+        z.value[i] = x.value[i];
+    }
+#endif
+}
+
+
+static inline bool zeroCmp(const Fp &x) {
+#ifndef USE_MPN
+    return (x.value == 0);
+#else
+    return (mpn_zero_p((const mp_limb_t *)x.value, SIZE) == 1);
+#endif
+}
+
+
+#ifdef USE_MPN
+static inline int cmp(const uint64_t x[SIZE], const uint64_t y[SIZE]) {
+    return mpn_cmp((const mp_limb_t *)x, (const mp_limb_t *)y, SIZE);
+}
+
+
+static inline void set_mpz_t(mpz_t& z, const uint64_t* p, int n) {
+    int s = n;
+    while (s > 0) {
+        if (p[s - 1]) break;
+        s--;
+    }
+    z->_mp_alloc = n;
+    z->_mp_size = s;
+    z->_mp_d = (mp_limb_t*)const_cast<uint64_t*>(p);
+}
+
+static inline void dump(const Fp &x) {
+    mpz_t mx;
+    set_mpz_t(mx, x.value, SIZE);
+    std::cout << mx << std::endl;
+}
+
+#endif
 
 static inline void mulMod(mpz_class& z, const mpz_class& x, const mpz_class& y, const mpz_class& m) {
     mpz_mul(z.get_mpz_t(), x.get_mpz_t(), y.get_mpz_t());
