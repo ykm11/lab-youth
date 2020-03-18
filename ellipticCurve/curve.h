@@ -26,6 +26,7 @@ template<class TPoint> void naf_mul(TPoint &R, const TPoint &G, const mpz_class 
 void multipleMul(Point &R, const Point &P, const mpz_class &u, const Point &Q, const mpz_class &v);
 
 static inline void getNafArray(int8_t naf[], const mpz_class &x);
+template <class TPoint> static inline void setPoint(TPoint &R, const Fp &Rx, const Fp &Ry, const Fp &Rz);
 
 class Point {
 public:
@@ -185,11 +186,8 @@ void sub(TPoint &R, const TPoint &P, const TPoint &Q) {
 
 template<class TPoint>
 void l_mul(TPoint &R, const TPoint &P, const mpz_class &x) { // 左向きバイナリ法
-    R.x.value = 0;
-    R.y.value = 1;
-    R.z.value = 0;
-
     TPoint tmp_P = P;
+    setInfPoint(R);
 
     size_t k_bits = mpz_sizeinbase(x.get_mpz_t(), 2)-1;
     for (size_t i = 0; i < k_bits; i++) {
@@ -204,9 +202,7 @@ void l_mul(TPoint &R, const TPoint &P, const mpz_class &x) { // 左向きバイ�
 template<class TPoint>
 void r_mul(TPoint &R, const TPoint& G, const mpz_class &x) { // 右向きバイナリ法
     size_t k_bits = mpz_sizeinbase(x.get_mpz_t(), 2);
-    R.x.value = G.x.value;
-    R.y.value = G.y.value;
-    R.z.value = G.z.value;
+    setPoint(R, G.x, G.y, G.z);
 
     for (int i = k_bits-2; i >= 0; i--) {
         EllipticCurve::dbl(R, R);
@@ -221,10 +217,8 @@ template<class TPoint>
 void montgomery_mul(TPoint &R0, const TPoint &G, const mpz_class &n) { // Montgomery Ladder
     size_t k_bits = mpz_sizeinbase(n.get_mpz_t(), 2);
     TPoint R1 = G;
-    R0.x.value = 0;
-    R0.y.value = 1;
-    R0.z.value = 0;
 
+    setInfPoint(R0);
     for (int i = k_bits-1; i >= 0; i--) {
         if (mpz_tstbit(n.get_mpz_t(), i) == 0) {
             add(R1, R1, R0);
@@ -321,6 +315,7 @@ void naf_mul(TPoint &R, const TPoint &P, const mpz_class &x) {
 }
 
 
+#ifndef USE_MPN
 class GLV {
 
 public:
@@ -352,6 +347,67 @@ public:
     static void scalarMul(Point &R, const Point &P, const mpz_class &k);
 };
 
+#endif
+
+static inline void setInfPoint(Point &R) {
+#ifndef USE_MPN
+    R.x.value = 0;
+    R.y.value = 1;
+    R.z.value = 0;
+#else
+    R.x.value[0] = 0;
+    R.x.value[1] = 0;
+    R.x.value[2] = 0;
+    R.x.value[3] = 0;
+
+    R.y.value[0] = 1;
+    R.y.value[1] = 0;
+    R.y.value[2] = 0;
+    R.y.value[3] = 0;
+
+    R.z.value[0] = 0;
+    R.z.value[1] = 0;
+    R.z.value[2] = 0;
+    R.z.value[3] = 0;
+#endif
+}
+
+static inline void setInfPoint(jPoint &R) {
+#ifndef USE_MPN
+    R.x.value = 1;
+    R.y.value = 1;
+    R.z.value = 0;
+#else
+    R.x.value[0] = 1;
+    R.x.value[1] = 0;
+    R.x.value[2] = 0;
+    R.x.value[3] = 0;
+
+    R.y.value[0] = 1;
+    R.y.value[1] = 0;
+    R.y.value[2] = 0;
+    R.y.value[3] = 0;
+
+    R.z.value[0] = 0;
+    R.z.value[1] = 0;
+    R.z.value[2] = 0;
+    R.z.value[3] = 0;
+#endif
+}
+
+template <class TPoint> static inline void setPoint(TPoint &R, const Fp &Rx, const Fp &Ry, const Fp &Rz) {
+#ifndef USE_MPN
+    R.x.value = Rx.value;
+    R.y.value = Ry.value;
+    R.z.value = Rz.value;
+#else
+    for (size_t i = 0; i < SIZE; i++) {
+        R.x.value[i] = Rx.value[i];
+        R.y.value[i] = Ry.value[i];
+        R.z.value[i] = Rz.value[i];
+    }
+#endif
+}
 
 static inline void getNafArray(int8_t naf[], const mpz_class &x) {
     int j = 0;

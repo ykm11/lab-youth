@@ -6,24 +6,21 @@
 Fp EllipticCurve::a;
 Fp EllipticCurve::b;
 
-Fp GLV::rw;
-Point GLV::base;
-mpz_class GLV::lmd;
-mpz_class GLV::order;
-
-
 void EllipticCurve::dbl(Point &R, const Point &P) {
-    if (P.z.value == 0) {
-        R.x.value = 0;
-        R.y.value = 1;
-        R.z.value = 0;
+    if (zeroCmp(P.z)) {
+        setInfPoint(R);
         return;
     } 
     Fp Rx, Ry, Rz;
     Fp u, v, w, s, t;
 
+#ifndef USE_MPN
     mpz_add_ui(s.value.get_mpz_t(), a.value.get_mpz_t(), 3);
     if (s.value == Fp::modulus) { // a == -3 ? 
+#else
+    add(s, a, 3);
+    if (zeroCmp(s)) { // a == -3 ? 
+#endif
         // 3 * (X - Z) * (X + Z)
         sub(s, P.x, P.z); // X - Z
         add(t, P.x, P.z); // X + Z
@@ -66,30 +63,21 @@ void EllipticCurve::dbl(Point &R, const Point &P) {
     Fp::mulInt(Rz, v, 8); // 8*v
     mul(Rz, Rz, w); // Rz = 8*v^3
 
-    if (Rz.value == 0) {
-        R.x.value = 0;
-        R.y.value = 1;
-        R.z.value = 0;
+    if (zeroCmp(Rz)) {
+        setInfPoint(R);
         return;
     } 
 
-    R.x.value = std::move(Rx.value);
-    R.y.value = std::move(Ry.value);
-    R.z.value = std::move(Rz.value);
+    setPoint(R, Rx, Ry, Rz);
 }
 
 void add(Point &R, const Point &P, const Point &Q) {
 
-    if (P.z.value == 0) {
-        R.x = Q.x;
-        R.y = Q.y;
-        R.z = Q.z;
+    if (zeroCmp(P.z)) {
+        setPoint(R, Q.x, Q.y, Q.z);
         return;
-    }
-    if (Q.z.value == 0) {
-        R.x = P.x;
-        R.y = P.y;
-        R.z = P.z;
+    } else if (zeroCmp(Q.z)) {
+        setPoint(R, P.x, P.y, P.z);
         return;
     }
     Fp u, v, s, t;
@@ -102,7 +90,7 @@ void add(Point &R, const Point &P, const Point &Q) {
     mul(t, P.x, Q.z); // X1 * Z2
     sub(v, s, t); // X2 * Z1 - X1 * Z2
 
-    if (u.value == 0 && v.value == 0) {
+    if (zeroCmp(u) && zeroCmp(v)) {
         EllipticCurve::dbl(R, P);
         return;
     }
@@ -134,25 +122,18 @@ void add(Point &R, const Point &P, const Point &Q) {
     mul(s, s, u); // u(v^2 * X1 * Z2 - w)
     sub(Ry, s, t); // Ry = u(v^2 * X1 * Z2 - w) -  v^3 * Y1 * Z2
 
-    if (Rz.value == 0) {
-        R.x.value = 0;
-        R.y.value = 1;
-        R.z.value = 0;
+    if (zeroCmp(Rz)) {
+        setInfPoint(R);
         return;
     }
 
-    R.x.value = std::move(Rx.value);
-    R.y.value = std::move(Ry.value);
-    R.z.value = std::move(Rz.value);
-
+    setPoint(R, Rx, Ry, Rz);
 }
 
 
 void EllipticCurve::dbl(jPoint &R, const jPoint &P) {
-    if (P.z.value == 0) {
-        R.x.value = 1;
-        R.y.value = 1;
-        R.z.value = 0;
+    if (zeroCmp(P.z)) {
+        setInfPoint(R);
         return;
     }
 
@@ -163,8 +144,14 @@ void EllipticCurve::dbl(jPoint &R, const jPoint &P) {
     Fp::mulInt(s, s, 4); // 4 * X * Y^{2}
     
     sqr(t, P.z); // Z^{2}
+
+#ifndef USE_MPN
     mpz_add_ui(v.value.get_mpz_t(), a.value.get_mpz_t(), 3);
     if (v.value == Fp::modulus) {
+#else
+    add(v, a, 3);
+    if (zeroCmp(v)) { // a == -3 ? 
+#endif
         add(Rx, P.x, t); // (X + Z^2)
         sub(v, P.x, t); // (X - Z^2)
         mul(v, v, Rx); // (X + Z^2) * (X - Z^2)
@@ -190,28 +177,20 @@ void EllipticCurve::dbl(jPoint &R, const jPoint &P) {
     mul(Rz, P.y, P.z);
     Fp::mulInt(Rz, Rz, 2);
 
-    if (Rz.value == 0) {
-        R.x.value = 1;
-        R.y.value = 1;
-        R.z.value = 0;
+    if (zeroCmp(Rz)) {
+        setInfPoint(R);
         return;
     } 
 
-    R.x.value = std::move(Rx.value);
-    R.y.value = std::move(Ry.value);
-    R.z.value = std::move(Rz.value);
+    setPoint(R, Rx, Ry, Rz);
 }
 
 void add(jPoint &R, const jPoint &P, const jPoint &Q) {
-    if (P.z.value == 0) {
-        R.x.value = Q.x.value;
-        R.y.value = Q.y.value;
-        R.z.value = Q.z.value;
+    if (zeroCmp(P.z)) {
+        setPoint(R, Q.x, Q.y, Q.z);
         return;
-    } else if (Q.z.value == 0) {
-        R.x.value = P.x.value;
-        R.y.value = P.y.value;
-        R.z.value = P.z.value;
+    } else if (zeroCmp(Q.z)) {
+        setPoint(R, P.x, P.y, P.z);
         return;
     }
     Fp u, v, s, t;
@@ -231,14 +210,12 @@ void add(jPoint &R, const jPoint &P, const jPoint &Q) {
     sub(v, v, u); // X2 * Z1^{2} - X1 * Z2^{2}
     sub(t, t, s); // Y2 * Z1^{3} - Y1 * Z2^{3}
 
-    if (v.value == 0) {
-        if (t.value == 0) {
+    if (zeroCmp(v)) {
+        if (zeroCmp(t)) {
             EllipticCurve::dbl(R, P);
             return;
         }
-        R.x.value = 1;
-        R.y.value = 1;
-        R.z.value = 0;
+        setInfPoint(R);
         return;
     }
     Fp w;
@@ -260,16 +237,12 @@ void add(jPoint &R, const jPoint &P, const jPoint &Q) {
     mul(v, v, s);
     sub(Ry, Ry, v);
 
-    if (Rz.value == 0) {
-        R.x.value = 1;
-        R.y.value = 1;
-        R.z.value = 0;
+    if (zeroCmp(Rz)) {
+        setInfPoint(R);
         return;
     } 
 
-    R.x.value = std::move(Rx.value);
-    R.y.value = std::move(Ry.value);
-    R.z.value = std::move(Rz.value);
+    setPoint(R, Rx, Ry, Rz);
 }
 
 bool isEqual(const Point &P, const Point &Q) {
@@ -285,7 +258,7 @@ bool isEqual(const Point &P, const Point &Q) {
 }
 
 void dump(const Point &P) {
-    if (P.z.value == 0) {
+    if (zeroCmp(P.z)) {
         std::cout << "(0 : 1 : 0)" << std::endl;
     } else {
         Fp x, y;
@@ -295,7 +268,7 @@ void dump(const Point &P) {
 }
 
 void dump(const jPoint &P) {
-    if (P.z.value == 0) {
+    if (zeroCmp(P.z)) {
         std::cout << "(1 : 1 : 0)" << std::endl;
     } else {
         Fp x, y;
@@ -343,6 +316,12 @@ void multipleMul(Point &R, const Point &P, const mpz_class &u, const Point &Q, c
     }
 }
 
+
+#ifndef USE_MPN
+Fp GLV::rw;
+Point GLV::base;
+mpz_class GLV::lmd;
+mpz_class GLV::order;
 
 void GLV::decomposing_k(mpz_class &k0, mpz_class &k1, const mpz_class &k) {
     // k = k0 + k1*lmd
@@ -503,4 +482,4 @@ void GLV::scalarMul(Point &R, const Point &P, const mpz_class &k) {
     }
     add(R, R, Q);
 }
-
+#endif
