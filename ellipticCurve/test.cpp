@@ -50,9 +50,9 @@ void test_ec_mul() {
     mpz_class gx = mpz_class("79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798", 16);
     mpz_class gy = mpz_class("483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8", 16);
 
-    Point G = EC(gx, gy);
-    Point R;
-    l_mul(R, G, n);
+    jPoint G(gx, gy, 1);
+    jPoint R;
+    naf_mul(R, G, n);
 
     Fp x, y;
     R.xy(x, y);
@@ -116,10 +116,10 @@ void test_ec_dbl() {
     Point P, P2;
     P = Point(gx, gy, 1);
     EllipticCurve::dbl(P2, P);
+    EllipticCurve::dbl(P2, P2);
 
-
-    mpz_class gx2 = mpz_class("56515219790691171413109057904011688695424810155802929973526481321309856242040", 10);
-    mpz_class gy2 = mpz_class("3377031843712258259223711451491452598088675519751548567112458094635497583569", 10);
+    mpz_class gx2 = mpz_class("102369864249653057322725350723741461599905180004905897298779971437827381725266", 10);
+    mpz_class gy2 = mpz_class("101744491111635190512325668403432589740384530506764148840112137220732283181254", 10);
 
     Fp u, v;
     P2.xy(u, v);
@@ -140,11 +140,12 @@ void test_ec_dbl() {
     gx = mpz_class("79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798", 16);
     gy = mpz_class("483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8", 16);
 
-    gx2 = mpz_class("89565891926547004231252920425935692360644145829622209833684329913297188986597", 10);
-    gy2 = mpz_class("12158399299693830322967808612713398636155367887041628176798871954788371653930", 10);
-
+    gx2 = mpz_class("21262057306151627953595685090280431278183829487175876377991189246716355947009", 10);
+    gy2 = mpz_class("41749993296225487051377864631615517161996906063147759678534462689479575333124", 10);
     P = Point(gx, gy, 1);
     EllipticCurve::dbl(P2, P);
+    EllipticCurve::dbl(P2, P2);
+    EllipticCurve::dbl(P2, P2);
 
     P2.xy(u, v);
     std::cout << "[*] EC(proj) dbl test (a != -3): ";
@@ -177,14 +178,18 @@ void test_jacobi_ec_dbl() {
     jPoint G, G2;
     G = jPoint(gx, gy, 1);
     EllipticCurve::dbl(G2, G);
+    EllipticCurve::dbl(G2, G2);
 
     Point P, P2;
     P = Point(gx, gy, 1);
     EllipticCurve::dbl(P2, P);
+    EllipticCurve::dbl(P2, P2);
 
     Fp u, v, s, t;
     G2.xy(u, v);
     P2.xy(s, t);
+
+
     std::cout << "[*] EC(jacobi) dbl test (a = -3): ";
     if (u == s && v == t) {
         std::cout << "OK\n";
@@ -202,10 +207,17 @@ void test_jacobi_ec_dbl() {
     gx = mpz_class("79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798", 16);
     gy = mpz_class("483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8", 16);
     G = jPoint(gx, gy, 1);
+
     EllipticCurve::dbl(G2, G);
+    EllipticCurve::dbl(G2, G2);
+    EllipticCurve::dbl(G2, G2);
+    EllipticCurve::dbl(G2, G2);
 
     P = Point(gx, gy, 1);
     EllipticCurve::dbl(P2, P);
+    EllipticCurve::dbl(P2, P2);
+    EllipticCurve::dbl(P2, P2);
+    EllipticCurve::dbl(P2, P2);
 
     G2.xy(u, v);
     P2.xy(s, t);
@@ -272,11 +284,11 @@ void test_ECorder() {
     mpz_class gx = mpz_class("79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798", 16);
     mpz_class gy = mpz_class("483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8", 16);
 
-    Point G = EC(gx, gy);
-    Point R;
+    jPoint G(gx, gy, 1);
+    jPoint R;
     naf_mul(R, G, n);
 
-    Point O = EC(0, 1, 0);
+    jPoint O(1, 1, 0);
     if (isEqual(R, O)) {
         std::cout << "[*] order test: OK" << std::endl;
     } else {
@@ -424,20 +436,29 @@ void test_jacobi_ec_mul() {
     mpz_class a = mpz_class("FFFFFFFF00000001000000000000000000000000FFFFFFFFFFFFFFFFFFFFFFFC", 16);
     mpz_class b = mpz_class("5AC635D8AA3A93E7B3EBBD55769886BC651D06B0CC53B0F63BCE3C3E27D2604B", 16);
     EllipticCurve EC = EllipticCurve(a, b);
-    mpz_class n = mpz_class("5792089237316195423570985008687907852837564279074904382605163141518161494337", 10); 
+    mpz_class n = mpz_class("232174027402174921083291830240217370147291830283920183012", 10); 
 
     mpz_class gx = mpz_class("6B17D1F2E12C4247F8BCE6E563A440F277037D812DEB33A0F4A13945D898C296", 16);
     mpz_class gy = mpz_class("4FE342E2FE1A7F9B8EE7EB4A7C0F9E162BCE33576B315ECECBB6406837BF51F5", 16);
     jPoint G, G2;
     G = jPoint(gx, gy, 1);
-    naf_mul(G2, G, n);
-
+    l_mul(G2, G, n);
+    
     Fp x, y;
     G2.xy(x, y);
-    Fp x_act(mpz_class("101953555315098882156052368886371454249375673642774478290527562546096338601484", 10));
-    Fp y_act(mpz_class("80205165334072958954338918426448271995337062553457293583809747354402522371549", 10));
+    Fp x_act(mpz_class("56211179279306407341341547087962210221839510884414928207011005830731439440712", 10));
+    Fp y_act(mpz_class("7524695754030086561785468037162087940328259849488784115597324775332344225662", 10));
 
-    std::cout << "[*] Multiple Scalar Mul(jacobi) test: ";
+    /*
+    std::cout << "p = " << p << std::endl;
+    std::cout << "a = " << a << std::endl;
+    std::cout << "b = " << b << std::endl;
+    std::cout << "gx = " << gx << std::endl;
+    std::cout << "gy = " << gy << std::endl;
+    std::cout << "n = " << n << std::endl;
+    */
+
+    std::cout << "[*] Scalar Mul(jacobi) test: ";
     if (x == x_act && y == y_act) {
         puts("OK");
     } else {
