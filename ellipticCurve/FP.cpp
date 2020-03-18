@@ -1,6 +1,8 @@
 #include "FP.h"
 #include <gmpxx.h>
+#include <iostream>
 
+#ifndef USE_MPN
 mpz_class Fp::modulus;
 
 void Fp::mulInt(Fp& z, const Fp& x, int scalar) {
@@ -32,11 +34,6 @@ void sub(Fp& z, const Fp& x, const Fp& y) {
 
 void mul(Fp& z, const Fp& x, const Fp& y) {
     z.value = (x.value * y.value) % Fp::modulus;
-}
-
-void mul(Fp& z, const Fp& x, int scalar) {
-    z.value = (x.value * scalar);
-    z.value %= Fp::modulus;
 }
 
 void invmod(Fp& r, const Fp& x) {
@@ -109,3 +106,71 @@ bool Fp::squareRoot(Fp& r, const Fp& x) {
     }
 }
 
+#else
+
+#define SIZE 4
+uint64_t Fp::modulus[SIZE];
+void Fp::setModulo(const uint64_t p[SIZE]) {
+    for (size_t i = 0; i < SIZE; ++i) {
+        modulus[i] = p[i];
+    }
+}
+
+void Fp::setModulo(const mpz_class& v) {
+    mpz_class x = v;
+    for (size_t i = 0; i < SIZE; i++) {
+        modulus[i] = mpz_get_ui(x.get_mpz_t());
+        mpz_tdiv_q_2exp(x.get_mpz_t(), x.get_mpz_t(), 64);
+    }
+}
+
+void add(Fp& z, const Fp &x, const Fp &y) {
+    mpn_add_n((mp_limb_t *)z.value, (const mp_limb_t *)x.value, (const mp_limb_t *)y.value, SIZE);
+    if (mpn_cmp((const mp_limb_t *)z.value, (const mp_limb_t *)Fp::modulus, SIZE) >= 0) {
+        mpn_sub_n((mp_limb_t *)z.value, (const mp_limb_t *)z.value, (const mp_limb_t *)Fp::modulus, SIZE);
+    }
+}
+
+void sub(Fp& z, const Fp &x, const Fp &y) {
+    if (mpn_cmp((const mp_limb_t *)x.value, (const mp_limb_t *)y.value, SIZE) < 0) { // x < y
+        mpn_sub_n((mp_limb_t *)z.value, (const mp_limb_t *)y.value, (const mp_limb_t *)x.value, SIZE);
+        mpn_sub_n((mp_limb_t *)z.value, (const mp_limb_t *)Fp::modulus, (const mp_limb_t *)z.value, SIZE);
+        return;
+    }
+    mpn_sub_n((mp_limb_t *)z.value, (const mp_limb_t *)x.value, (const mp_limb_t *)y.value, SIZE);
+}
+
+void mul(Fp& z, const Fp &x, const Fp &y) {
+    mp_limb_t tmp_z[SIZE * 2] = {0};
+    mp_limb_t q[SIZE + 1] = {0};
+
+    mpn_mul_n(tmp_z, (const mp_limb_t *)x.value, (const mp_limb_t *)y.value, SIZE);
+    mpn_tdiv_qr(q, (mp_limb_t *)z.value, 0,
+            tmp_z, SIZE*2, (const mp_limb_t *)Fp::modulus, SIZE);
+
+}
+
+void sqr(Fp& z, const Fp &x) {
+    mp_limb_t tmp_z[SIZE * 2] = {0};
+    mp_limb_t q[SIZE + 1] = {0};
+
+    mpn_sqr(tmp_z, (const mp_limb_t *)x.value, SIZE);
+    mpn_tdiv_qr(q, (mp_limb_t *)z.value, 0,
+            tmp_z, SIZE*2, (const mp_limb_t *)Fp::modulus, SIZE);
+}
+
+void Fp::mulInt(Fp &z, const Fp &x, int scalar) {
+    mp_limb_t tmp_z[SIZE * 2] = {0};
+    mp_limb_t q[SIZE + 1] = {0};
+    mp_limb_t m_[SIZE] = {static_cast<mp_limb_t>(scalar), 0, 0, 0};
+
+    mpn_mul_n(tmp_z, (const mp_limb_t *)x.value, m_, SIZE);
+    mpn_tdiv_qr(q, (mp_limb_t *)z.value, 0,
+            tmp_z, SIZE*2, (const mp_limb_t *)Fp::modulus, SIZE);
+}
+
+void Fp::neg(Fp &z, const Fp &x) {
+    mpn_sub_n((mp_limb_t *)z.value, (const mp_limb_t *)Fp::modulus, (const mp_limb_t *)x.value, SIZE);
+}
+
+#endif

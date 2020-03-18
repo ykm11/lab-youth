@@ -3,7 +3,7 @@ OBJ=$(SRC:.cpp=.o)
 DEP=$(SRC:.cpp=.d)
 
 TARGET=main
-CXXFLAGS=-Wall -Wextra -O3 -std=c++17 -DNDEBUG
+CXXFLAGS=-Wall -Wextra -O3 -std=c++17 -DNDEBUG -DUSE_MPN
 LDFLAGS=-lgmpxx -lgmp -lpthread
 
 all: $(TARGET)
@@ -42,3 +42,7 @@ test: ./ec_test_mi
 
 benchmark: ./ec_benchmark_mi
 	./ec_benchmark_mi
+
+
+./test_mpn: FP.o
+	$(CXX) -o ./test_mpn ./mpn_test.cpp $< $(CXXFLAGS) $(LDFLAGS)
