@@ -45,9 +45,7 @@ public:
 
     Fp() { }
     Fp(uint64_t v[SIZE]){
-        for (size_t i = 0; i < SIZE; ++i) {
-            value[i] = v[i];
-        }
+        mpn_copyi((mp_limb_t *)value, (const mp_limb_t *)v, SIZE);
         if (mpn_cmp((const mp_limb_t *)value, (const mp_limb_t *)modulus, SIZE) >= 0) {
             mpn_sub_n((mp_limb_t *)value, (const mp_limb_t *)value, (const mp_limb_t *)Fp::modulus, SIZE);
         }
@@ -105,9 +103,7 @@ static inline void move(Fp &z, const Fp &x) {
 #ifndef USE_MPN
     z.value = x.value;
 #else
-    for (size_t i = 0; i < SIZE; i++) {
-        z.value[i] = x.value[i];
-    }
+    mpn_copyi((mp_limb_t *)z.value, (const mp_limb_t *)x.value, SIZE);
 #endif
 }
 
@@ -170,5 +166,4 @@ static inline void sqrMod(mpz_class& z, const mpz_class& x, const mpz_class& m) 
 static inline void powMod(mpz_class& z, const mpz_class& x, const mpz_class& y, const mpz_class& m) {
     mpz_powm(z.get_mpz_t(), x.get_mpz_t(), y.get_mpz_t(), m.get_mpz_t());
 }
-
 

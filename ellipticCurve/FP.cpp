@@ -111,9 +111,7 @@ bool Fp::squareRoot(Fp& r, const Fp& x) {
 #define SIZE 4
 uint64_t Fp::modulus[SIZE];
 void Fp::setModulo(const uint64_t p[SIZE]) {
-    for (size_t i = 0; i < SIZE; ++i) {
-        modulus[i] = p[i];
-    }
+    mpn_copyi((mp_limb_t *)modulus, (const mp_limb_t *)p, SIZE);
 }
 
 void Fp::setModulo(const mpz_class& v) {
@@ -130,14 +128,11 @@ void add(Fp& z, const Fp &x, const Fp &y) {
         mp_limb_t r[SIZE+1] = {0};
         mp_limb_t p[SIZE+1] = {0};
         r[SIZE] = 1;
-        for ( size_t i = 0; i < SIZE; i++) {
-            r[i] = z.value[i];
-            p[i] = Fp::modulus[i];
-        }
+
+        mpn_copyi(r, (const mp_limb_t *)z.value, SIZE);
+        mpn_copyi(p, (const mp_limb_t *)Fp::modulus, SIZE);
         mpn_sub_n(r, (const mp_limb_t *)r, (const mp_limb_t *)p, SIZE+1);
-        for ( size_t i = 0; i < SIZE; i++) {
-            z.value[i] = r[i];
-        }        
+        mpn_copyi((mp_limb_t *)z.value, (const mp_limb_t *)r, SIZE);
         return;
     }
 
@@ -183,9 +178,7 @@ void sqr(Fp& z, const Fp &x) {
 void Fp::mulInt(Fp &z, const Fp &x, int scalar) {
     mp_limb_t tmp_z[SIZE + 1] = {0};
     mp_limb_t q[2] = {0};
-    for (size_t i = 0; i < SIZE; i++) {
-        tmp_z[i] = x.value[i];
-    }
+    mpn_copyi((mp_limb_t *)tmp_z, (const mp_limb_t *)x.value, SIZE);
 
     mpn_mul_1(tmp_z, (const mp_limb_t *)tmp_z, SIZE + 1, (mp_limb_t)scalar);
     mpn_tdiv_qr(q, (mp_limb_t *)z.value, 0,

@@ -356,15 +356,12 @@ static inline void setInfPoint(Point &R) {
     R.y.value = 1;
     R.z.value = 0;
 #else
-    R.x.value[0] = 0;
+    mpn_zero((mp_limb_t *)R.x.value, SIZE);
+    mpn_zero((mp_limb_t *)R.y.value, SIZE);
+    mpn_zero((mp_limb_t *)R.z.value, SIZE);
+    //R.x.value[0] = 0;
     R.y.value[0] = 1;
-    R.z.value[0] = 0;
-
-    for (size_t i = 1; i < SIZE; i++) {
-        R.x.value[i] = 0;
-        R.y.value[i] = 0;
-        R.z.value[i] = 0;
-    }
+    //R.z.value[0] = 0;
 #endif
 }
 
@@ -374,15 +371,12 @@ static inline void setInfPoint(jPoint &R) {
     R.y.value = 1;
     R.z.value = 0;
 #else
+    mpn_zero((mp_limb_t *)R.x.value, SIZE);
+    mpn_zero((mp_limb_t *)R.y.value, SIZE);
+    mpn_zero((mp_limb_t *)R.z.value, SIZE);
     R.x.value[0] = 1;
     R.y.value[0] = 1;
-    R.z.value[0] = 0;
-
-    for (size_t i = 1; i < SIZE; i++) {
-        R.x.value[i] = 0;
-        R.y.value[i] = 0;
-        R.z.value[i] = 0;
-    }
+    //R.z.value[0] = 0;
 #endif
 }
 
@@ -392,11 +386,9 @@ template <class TPoint> static inline void setPoint(TPoint &R, const Fp &Rx, con
     R.y.value = Ry.value;
     R.z.value = Rz.value;
 #else
-    for (size_t i = 0; i < SIZE; i++) {
-        R.x.value[i] = Rx.value[i];
-        R.y.value[i] = Ry.value[i];
-        R.z.value[i] = Rz.value[i];
-    }
+    mpn_copyi((mp_limb_t *)R.x.value, (const mp_limb_t *)Rx.value, SIZE);
+    mpn_copyi((mp_limb_t *)R.y.value, (const mp_limb_t *)Ry.value, SIZE);
+    mpn_copyi((mp_limb_t *)R.z.value, (const mp_limb_t *)Rz.value, SIZE);
 #endif
 }
 
