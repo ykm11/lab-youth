@@ -442,21 +442,12 @@ void test_jacobi_ec_mul() {
     mpz_class gy = mpz_class("4FE342E2FE1A7F9B8EE7EB4A7C0F9E162BCE33576B315ECECBB6406837BF51F5", 16);
     jPoint G, G2;
     G = jPoint(gx, gy, 1);
-    l_mul(G2, G, n);
+    naf_mul(G2, G, n);
     
     Fp x, y;
     G2.xy(x, y);
     Fp x_act(mpz_class("56211179279306407341341547087962210221839510884414928207011005830731439440712", 10));
     Fp y_act(mpz_class("7524695754030086561785468037162087940328259849488784115597324775332344225662", 10));
-
-    /*
-    std::cout << "p = " << p << std::endl;
-    std::cout << "a = " << a << std::endl;
-    std::cout << "b = " << b << std::endl;
-    std::cout << "gx = " << gx << std::endl;
-    std::cout << "gy = " << gy << std::endl;
-    std::cout << "n = " << n << std::endl;
-    */
 
     std::cout << "[*] Scalar Mul(jacobi) test: ";
     if (x == x_act && y == y_act) {

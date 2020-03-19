@@ -282,7 +282,14 @@ void dump(const Point &P) {
     } else {
         Fp x, y;
         P.xy(x, y);
+#ifndef USE_MPN
         std::cout << "(" << x.value << " : " << y.value << " : 1)" << std::endl;
+#else
+        mpz_t mx, my;
+        set_mpz_t(mx, x.value, SIZE);
+        set_mpz_t(my, y.value, SIZE);
+        std::cout << "(" << mx << " : " << my << " : 1)" << std::endl;
+#endif
     }
 }
 
@@ -292,7 +299,14 @@ void dump(const jPoint &P) {
     } else {
         Fp x, y;
         P.xy(x, y);
+#ifndef USE_MPN
         std::cout << "(" << x.value << " : " << y.value << " : 1)" << std::endl;
+#else
+        mpz_t mx, my;
+        set_mpz_t(mx, x.value, SIZE);
+        set_mpz_t(my, y.value, SIZE);
+        std::cout << "(" << mx << " : " << my << " : 1)" << std::endl;
+#endif
     }
 }
 
@@ -300,7 +314,7 @@ void dump(const jPoint &P) {
 void multipleMul(Point &R, const Point &P, const mpz_class &u, const Point &Q, const mpz_class &v) {
     size_t k_bits;
     Point prePoints[4][4]; // w = 2
-    prePoints[0][0] = Point(0, 1, 0);
+    setInfPoint(prePoints[0][0]);
     prePoints[1][0] = P;
     prePoints[0][1] = Q;
     EllipticCurve::dbl(prePoints[2][0], P);

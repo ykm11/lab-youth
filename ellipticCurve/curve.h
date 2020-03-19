@@ -357,19 +357,14 @@ static inline void setInfPoint(Point &R) {
     R.z.value = 0;
 #else
     R.x.value[0] = 0;
-    R.x.value[1] = 0;
-    R.x.value[2] = 0;
-    R.x.value[3] = 0;
-
     R.y.value[0] = 1;
-    R.y.value[1] = 0;
-    R.y.value[2] = 0;
-    R.y.value[3] = 0;
-
     R.z.value[0] = 0;
-    R.z.value[1] = 0;
-    R.z.value[2] = 0;
-    R.z.value[3] = 0;
+
+    for (size_t i = 1; i < SIZE; i++) {
+        R.x.value[i] = 0;
+        R.y.value[i] = 0;
+        R.z.value[i] = 0;
+    }
 #endif
 }
 
@@ -380,19 +375,14 @@ static inline void setInfPoint(jPoint &R) {
     R.z.value = 0;
 #else
     R.x.value[0] = 1;
-    R.x.value[1] = 0;
-    R.x.value[2] = 0;
-    R.x.value[3] = 0;
-
     R.y.value[0] = 1;
-    R.y.value[1] = 0;
-    R.y.value[2] = 0;
-    R.y.value[3] = 0;
-
     R.z.value[0] = 0;
-    R.z.value[1] = 0;
-    R.z.value[2] = 0;
-    R.z.value[3] = 0;
+
+    for (size_t i = 1; i < SIZE; i++) {
+        R.x.value[i] = 0;
+        R.y.value[i] = 0;
+        R.z.value[i] = 0;
+    }
 #endif
 }
 

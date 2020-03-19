@@ -41,7 +41,7 @@ public:
     static void setModulo(const mpz_class& v);
 #else
     static uint64_t modulus[SIZE];
-    uint64_t value[SIZE] = {0};
+    uint64_t value[SIZE];
 
     Fp() { }
     Fp(uint64_t v[SIZE]){

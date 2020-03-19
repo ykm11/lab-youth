@@ -147,9 +147,7 @@ void add(Fp& z, const Fp &x, const Fp &y) {
 }
 
 void add(Fp& z, const Fp& x, uint64_t scalar) {
-    uint64_t y[SIZE] = {0};
-    y[0] = scalar;
-    mpn_add_n((mp_limb_t *)z.value, (const mp_limb_t *)x.value, (const mp_limb_t *)y, SIZE);
+    mpn_add_1((mp_limb_t *)z.value, (const mp_limb_t *)x.value, (mp_limb_t)scalar, SIZE);
     if (mpn_cmp((const mp_limb_t *)z.value, (const mp_limb_t *)Fp::modulus, SIZE) >= 0) {
         mpn_sub_n((mp_limb_t *)z.value, (const mp_limb_t *)z.value, (const mp_limb_t *)Fp::modulus, SIZE);
     }
@@ -171,7 +169,6 @@ void mul(Fp& z, const Fp &x, const Fp &y) {
     mpn_mul_n(tmp_z, (const mp_limb_t *)x.value, (const mp_limb_t *)y.value, SIZE);
     mpn_tdiv_qr(q, (mp_limb_t *)z.value, 0,
             tmp_z, SIZE*2, (const mp_limb_t *)Fp::modulus, SIZE);
-
 }
 
 void sqr(Fp& z, const Fp &x) {
@@ -184,6 +181,7 @@ void sqr(Fp& z, const Fp &x) {
 }
 
 void Fp::mulInt(Fp &z, const Fp &x, int scalar) {
+#if 0
     mp_limb_t tmp_z[SIZE * 2] = {0};
     mp_limb_t q[SIZE + 1] = {0};
     mp_limb_t m_[SIZE] = {0};
@@ -192,6 +190,17 @@ void Fp::mulInt(Fp &z, const Fp &x, int scalar) {
     mpn_mul_n(tmp_z, (const mp_limb_t *)x.value, m_, SIZE);
     mpn_tdiv_qr(q, (mp_limb_t *)z.value, 0,
             tmp_z, SIZE*2, (const mp_limb_t *)Fp::modulus, SIZE);
+#else
+    mp_limb_t tmp_z[SIZE + 1] = {0};
+    mp_limb_t q[2] = {0};
+    for (size_t i = 0; i < SIZE; i++) {
+        tmp_z[i] = x.value[i];
+    }
+
+    mpn_mul_1(tmp_z, (const mp_limb_t *)tmp_z, SIZE + 1, (mp_limb_t)scalar);
+    mpn_tdiv_qr(q, (mp_limb_t *)z.value, 0,
+            tmp_z, SIZE + 1, (const mp_limb_t *)Fp::modulus, SIZE);
+#endif
 }
 
 void Fp::neg(Fp &z, const Fp &x) {
