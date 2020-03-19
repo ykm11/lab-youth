@@ -10,6 +10,7 @@ class jPoint;
 class EllipticCurve;
 
 bool isEqual(const Point &P, const Point &Q);
+bool isEqual(const jPoint &P, const jPoint &Q);
 void add(Point &R, const Point &P, const Point &Q);
 void add(jPoint &R, const jPoint &P, const jPoint &Q);
 template<class TPoint> void sub(TPoint &R, const TPoint &P, const TPoint &Q);

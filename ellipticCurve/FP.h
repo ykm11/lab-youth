@@ -41,9 +41,9 @@ public:
     static void setModulo(const mpz_class& v);
 #else
     static uint64_t modulus[SIZE];
-    uint64_t value[SIZE];
+    uint64_t value[SIZE] = {0};
 
-    Fp() {}
+    Fp() { }
     Fp(uint64_t v[SIZE]){
         for (size_t i = 0; i < SIZE; ++i) {
             value[i] = v[i];
@@ -138,13 +138,25 @@ static inline void set_mpz_t(mpz_t& z, const uint64_t* p, int n) {
     z->_mp_d = (mp_limb_t*)const_cast<uint64_t*>(p);
 }
 
-static inline void dump(const Fp &x) {
+static inline void dump(const mp_limb_t x[SIZE]) {
     mpz_t mx;
-    set_mpz_t(mx, x.value, SIZE);
+    set_mpz_t(mx, (const uint64_t*)x, SIZE+1);
     std::cout << mx << std::endl;
 }
 
 #endif
+
+static inline void dump(const Fp &x) {
+#ifdef USE_MPN
+    mpz_t mx;
+    set_mpz_t(mx, x.value, SIZE);
+    std::cout << mx << std::endl;
+#else
+    std::cout << x.value << std::endl;
+#endif
+}
+
+
 
 static inline void mulMod(mpz_class& z, const mpz_class& x, const mpz_class& y, const mpz_class& m) {
     mpz_mul(z.get_mpz_t(), x.get_mpz_t(), y.get_mpz_t());

@@ -21,7 +21,6 @@ void EllipticCurve::dbl(Point &R, const Point &P) {
     add(s, a, 3);
     if (zeroCmp(s)) { // a == -3 ? 
 #endif
-        // 3 * (X - Z) * (X + Z)
         sub(s, P.x, P.z); // X - Z
         add(t, P.x, P.z); // X + Z
         mul(u, s, t); // (X - Z) * (X + Z)
@@ -132,7 +131,7 @@ void add(Point &R, const Point &P, const Point &Q) {
 
 
 void EllipticCurve::dbl(jPoint &R, const jPoint &P) {
-    if (zeroCmp(P.z)) {
+    if (zeroCmp(P.y)) {
         setInfPoint(R);
         return;
     }
@@ -255,6 +254,26 @@ bool isEqual(const Point &P, const Point &Q) {
     mul(v, Q.x, P.z); // X' * Z
 
     return (s == t) && (u == v);
+}
+
+bool isEqual(const jPoint &P, const jPoint &Q) {
+    Fp s, t, u, v;
+    sqr(s, Q.z); // Z2^{2}
+    sqr(t, P.z); // Z1^{2}
+    
+    mul(u, P.x, s); // X1 * Z2^{2}
+    mul(v, Q.x, t); // X2 * Z1^{2}
+
+    mul(s, s, Q.z); // Z2^{3}
+    mul(t, t, P.z); // Z1^{3}
+
+    mul(s, s, P.y); // Y1 * Z2^{3}
+    mul(t, t, Q.y); // Y2 * Z1^{3}
+
+    sub(v, v, u); // X2 * Z1^{2} - X1 * Z2^{2}
+    sub(t, t, s); // Y2 * Z1^{3} - Y1 * Z2^{3}
+
+    return (zeroCmp(v) && zeroCmp(t));
 }
 
 void dump(const Point &P) {

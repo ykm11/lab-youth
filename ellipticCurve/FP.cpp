@@ -125,7 +125,22 @@ void Fp::setModulo(const mpz_class& v) {
 }
 
 void add(Fp& z, const Fp &x, const Fp &y) {
-    mpn_add_n((mp_limb_t *)z.value, (const mp_limb_t *)x.value, (const mp_limb_t *)y.value, SIZE);
+    mp_limb_t carry = mpn_add_n((mp_limb_t *)z.value, (const mp_limb_t *)x.value, (const mp_limb_t *)y.value, SIZE);
+    if (carry == 1) {
+        mp_limb_t r[SIZE+1] = {0};
+        mp_limb_t p[SIZE+1] = {0};
+        r[SIZE] = 1;
+        for ( size_t i = 0; i < SIZE; i++) {
+            r[i] = z.value[i];
+            p[i] = Fp::modulus[i];
+        }
+        mpn_sub_n(r, (const mp_limb_t *)r, (const mp_limb_t *)p, SIZE+1);
+        for ( size_t i = 0; i < SIZE; i++) {
+            z.value[i] = r[i];
+        }        
+        return;
+    }
+
     if (mpn_cmp((const mp_limb_t *)z.value, (const mp_limb_t *)Fp::modulus, SIZE) >= 0) {
         mpn_sub_n((mp_limb_t *)z.value, (const mp_limb_t *)z.value, (const mp_limb_t *)Fp::modulus, SIZE);
     }
@@ -171,7 +186,8 @@ void sqr(Fp& z, const Fp &x) {
 void Fp::mulInt(Fp &z, const Fp &x, int scalar) {
     mp_limb_t tmp_z[SIZE * 2] = {0};
     mp_limb_t q[SIZE + 1] = {0};
-    mp_limb_t m_[SIZE] = {static_cast<mp_limb_t>(scalar), 0, 0, 0};
+    mp_limb_t m_[SIZE] = {0};
+    m_[0] = scalar;
 
     mpn_mul_n(tmp_z, (const mp_limb_t *)x.value, m_, SIZE);
     mpn_tdiv_qr(q, (mp_limb_t *)z.value, 0,
