@@ -5,6 +5,7 @@ DEP=$(SRC:.cpp=.d)
 TARGET=main
 CXXFLAGS=-Wall -Wextra -O3 -std=c++17 -DNDEBUG -DUSE_MPN
 LDFLAGS=-lgmpxx -lgmp -lpthread
+INCLUDE=-I /usr/local/lib/mimalloc-1.6/include /usr/local/lib/mimalloc-1.6/libmimalloc.a 
 
 all: $(TARGET)
 
@@ -28,17 +29,17 @@ clean:
 	$(CXX) -o ec_test test.cpp FP.o curve.o $(CXXFLAGS) $(LDFLAGS)  
 
 ./ec_test_mi: test.cpp FP.o curve.o
-	$(CXX) -o ec_test_mi test.cpp FP.o curve.o $(CXXFLAGS) $(LDFLAGS) -I /usr/local/lib/mimalloc-1.6/include /usr/local/lib/mimalloc-1.6/libmimalloc.a -DUSE_MIMALLOC
+	$(CXX) -o ec_test_mi test.cpp FP.o curve.o $(CXXFLAGS) $(LDFLAGS) $(INCLUDE) -DUSE_MIMALLOC
 
 test: ./ec_test_mi
 	./ec_test_mi
 
 
-./ec_benchmark: test.cpp FP.o curve.o
-	$(CXX) -o ec_benchmark benchmark.cpp FP.o curve.o $(CXXFLAGS) $(LDFLAGS)  
+./ec_benchmark: benchmark.cpp FP.o curve.o
+	$(CXX) -o ec_benchmark $? $(CXXFLAGS) $(LDFLAGS)  
 
-./ec_benchmark_mi: test.cpp FP.o curve.o
-	$(CXX) -o ec_benchmark_mi benchmark.cpp FP.o curve.o $(CXXFLAGS) $(LDFLAGS) -I /usr/local/lib/mimalloc-1.6/include /usr/local/lib/mimalloc-1.6/libmimalloc.a -DUSE_MIMALLOC
+./ec_benchmark_mi: benchmark.cpp FP.o curve.o
+	$(CXX) -o ec_benchmark_mi $? $(CXXFLAGS) $(LDFLAGS) $(INCLUDE) -DUSE_MIMALLOC
 
 benchmark: ./ec_benchmark_mi
 	./ec_benchmark_mi

@@ -181,16 +181,6 @@ void sqr(Fp& z, const Fp &x) {
 }
 
 void Fp::mulInt(Fp &z, const Fp &x, int scalar) {
-#if 0
-    mp_limb_t tmp_z[SIZE * 2] = {0};
-    mp_limb_t q[SIZE + 1] = {0};
-    mp_limb_t m_[SIZE] = {0};
-    m_[0] = scalar;
-
-    mpn_mul_n(tmp_z, (const mp_limb_t *)x.value, m_, SIZE);
-    mpn_tdiv_qr(q, (mp_limb_t *)z.value, 0,
-            tmp_z, SIZE*2, (const mp_limb_t *)Fp::modulus, SIZE);
-#else
     mp_limb_t tmp_z[SIZE + 1] = {0};
     mp_limb_t q[2] = {0};
     for (size_t i = 0; i < SIZE; i++) {
@@ -200,7 +190,6 @@ void Fp::mulInt(Fp &z, const Fp &x, int scalar) {
     mpn_mul_1(tmp_z, (const mp_limb_t *)tmp_z, SIZE + 1, (mp_limb_t)scalar);
     mpn_tdiv_qr(q, (mp_limb_t *)z.value, 0,
             tmp_z, SIZE + 1, (const mp_limb_t *)Fp::modulus, SIZE);
-#endif
 }
 
 void Fp::neg(Fp &z, const Fp &x) {
