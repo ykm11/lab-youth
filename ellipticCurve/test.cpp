@@ -395,7 +395,6 @@ void test_fp_squareRoot() {
 #endif
 }
 
-#ifndef USE_MPN
 void test_GLV_decomposing() {
     std::cout << "[*] GLV decomposing-k secp256k1 test: ";
     GLV::initForsecp256k1();
@@ -458,7 +457,6 @@ void test_MultipleScalarMul() {
         puts("Failed");
     }
 }
-#endif
 
 void test_jacobi_ec_mul() {
     mpz_class p = mpz_class("FFFFFFFF00000001000000000000000000000000FFFFFFFFFFFFFFFFFFFFFFFF", 16);
@@ -491,12 +489,10 @@ void test_jacobi_ec_mul() {
 
 
 int main() {
-#ifndef USE_MPN
     test_GLV_decomposing();
     test_GLVsecp256k1_baseMul();
     test_GLVsecp256k1_ScalarMul();
     test_MultipleScalarMul();
-#endif
     test_fp_squareRoot();
     test_initFp_minus();
     test_isEqual_fp();

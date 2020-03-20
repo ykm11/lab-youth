@@ -316,7 +316,6 @@ void naf_mul(TPoint &R, const TPoint &P, const mpz_class &x) {
 }
 
 
-#ifndef USE_MPN
 class GLV {
 
 public:
@@ -327,19 +326,27 @@ public:
     static void initForsecp256k1() {
         Fp::setModulo(mpz_class("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F", 16));
         Fp::squareRoot(rw, Fp(-3));
+#ifndef USE_MPN
         mpz_add_ui(rw.value.get_mpz_t(), rw.value.get_mpz_t(), 1);
         Fp::neg(rw, rw); // - (sqrt(-3) + 1)
         mpz_tdiv_q_2exp(rw.value.get_mpz_t(), rw.value.get_mpz_t(), 1); 
         // - (sqrt(-3) + 1) / 2
 
-        Fp gx, gy;
-        gx = Fp("79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798", 16);
-        gy = Fp("483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8", 16);
+        Fp gx(mpz_class("79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798", 16));
+        Fp gy(mpz_class("483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8", 16));
         base = Point(gx.value, gy.value, 1);
-        
+#else
+        add(rw, rw, 1);
+        Fp::neg(rw, rw); // - (sqrt(-3) + 1)
+        mpn_rshift((mp_limb_t *)rw.value, (const mp_limb_t *)rw.value, SIZE, 1);
+        // - (sqrt(-3) + 1) / 2
+
+        mpz_class gx("79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798", 16);
+        mpz_class gy("483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8", 16);
+        base = Point(gx, gy, 1);
+#endif
         order = mpz_class("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141", 16);
         lmd = mpz_class("5363ad4cc05c30e0a5261c028812645a122e22ea20816678df02967c1b23bd72", 16);
-
     }
 
     static void decomposing_k(mpz_class &k0, mpz_class &k1, const mpz_class &k);
@@ -348,7 +355,6 @@ public:
     static void scalarMul(Point &R, const Point &P, const mpz_class &k);
 };
 
-#endif
 
 static inline void setInfPoint(Point &R) {
 #ifndef USE_MPN

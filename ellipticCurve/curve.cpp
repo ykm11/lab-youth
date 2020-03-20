@@ -350,7 +350,6 @@ void multipleMul(Point &R, const Point &P, const mpz_class &u, const Point &Q, c
 }
 
 
-#ifndef USE_MPN
 Fp GLV::rw;
 Point GLV::base;
 mpz_class GLV::lmd;
@@ -395,9 +394,15 @@ void GLV::decomposing_k(mpz_class &k0, mpz_class &k1, const mpz_class &k) {
 }
 
 void GLV::lambdaMul(Point &R, const Point &P) { 
+#if 0
     mulMod(R.x.value, GLV::rw.value, P.x.value, Fp::modulus); 
     R.y = P.y;
     R.z = P.z;
+#else
+    mul(R.x, GLV::rw, P.x);
+    move(R.y, P.y);
+    move(R.z, P.z);
+#endif
 }
 
 void GLV::mulBase(Point &R, const mpz_class &k) { 
@@ -515,4 +520,3 @@ void GLV::scalarMul(Point &R, const Point &P, const mpz_class &k) {
     }
     add(R, R, Q);
 }
-#endif

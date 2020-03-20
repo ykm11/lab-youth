@@ -82,7 +82,7 @@ void add(Fp& z, const Fp& x, const Fp& y) {
 
 #ifdef USE_MPN
 void add(Fp& z, const Fp& x, uint64_t scalar) {
-    mp_limb_t carry = mpn_add_1((mp_limb_t *)z.value, (const mp_limb_t *)x.value, (mp_limb_t)scalar, SIZE);
+    mp_limb_t carry = mpn_add_1((mp_limb_t *)z.value, (const mp_limb_t *)x.value, SIZE, (mp_limb_t)scalar);
     if (carry == 1) {
         mp_limb_t r[SIZE] = {0};
         mpn_sub_n(r, (const mp_limb_t *)z.value, (const mp_limb_t *)Fp::modulus, SIZE);

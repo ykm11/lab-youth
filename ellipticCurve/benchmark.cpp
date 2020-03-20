@@ -328,14 +328,13 @@ void benchmark_fp() {
 }
 
 
-#ifndef USE_MPN
 void benchmark_sqr() {
     std::cout << "[*] sqr benchmark\n";
     mpz_class p = mpz_class("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F", 16);
     Fp::setModulo(p);
     Fp x, r;
 
-    x = Fp("115792089237316195423570985008687907852837564279074904382605163141518161494337", 10); 
+    x = Fp(mpz_class("115792089237316195423570985008687907852837564279074904382605163141518161494337", 10));
 
     const int n = 1000000;
     time_t begin = clock();
@@ -353,7 +352,7 @@ void benchmark_fp_sqareRoot() {
     Fp::setModulo(p);
     Fp x, r;
 
-    x = Fp("115792089237316195423570985008687907852837564279074904382605163141518161494337", 10); 
+    x = Fp(mpz_class("115792089237316195423570985008687907852837564279074904382605163141518161494337", 10)); 
 
     const int n = 10000;
     time_t begin = clock();
@@ -428,7 +427,6 @@ void benchmark_MultipleScalarMul() {
     std::cout << "\t[k1+k2]Base";
     printf("\t\ttime = %fusec\n", (end - begin) / double(CLOCKS_PER_SEC) / n * 1e6);
 }
-#endif
 
 int main() {
     //benchmark_fp_sqareRoot();
@@ -440,7 +438,7 @@ int main() {
     benchmark_ec_mul();
     benchmark_ec_mul2();
 
-    //benchmark_GLV_decomposing();
-    //benchmark_GLVbaseMul(); 
-    //benchmark_MultipleScalarMul();
+    benchmark_GLV_decomposing();
+    benchmark_GLVbaseMul(); 
+    benchmark_MultipleScalarMul();
 }
