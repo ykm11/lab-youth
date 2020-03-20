@@ -360,13 +360,13 @@ void test_initFp_minus() {
     }
 }
 
-#ifndef USE_MPN
 void test_fp_squareRoot() {
     std::cout << "[*] Fp squareRoot test: ";
     mpz_class p = mpz_class("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F", 16);
     Fp::setModulo(p);
     Fp x, r;
 
+#ifndef USE_MPN
     r.value = 0;
     for (int i = 0; i < 100; i++) {
         mpz_random(x.value.get_mpz_t(), 4);
@@ -378,8 +378,24 @@ void test_fp_squareRoot() {
         }
     }
     std::cout << "OK\n";
+#else
+    Fp t;
+    mpn_zero((mp_limb_t *)r.value, SIZE);
+    for (int i = 0; i < 100; i++) {
+        mpn_random((mp_limb_t *)x.value, SIZE);
+        if (Fp::squareRoot(r, x)) {
+            sqr(t, r);
+            if (x != t) {
+                std::cout << "Failed\n";
+                return;
+            }
+        }
+    }
+    std::cout << "OK\n";
+#endif
 }
 
+#ifndef USE_MPN
 void test_GLV_decomposing() {
     std::cout << "[*] GLV decomposing-k secp256k1 test: ";
     GLV::initForsecp256k1();
@@ -480,8 +496,8 @@ int main() {
     test_GLVsecp256k1_baseMul();
     test_GLVsecp256k1_ScalarMul();
     test_MultipleScalarMul();
-    test_fp_squareRoot();
 #endif
+    test_fp_squareRoot();
     test_initFp_minus();
     test_isEqual_fp();
     test_ECorder();
