@@ -345,6 +345,21 @@ void test_isEqual_fp() {
 
 }
 
+void test_initFp_minus() {
+    mpz_class p("FFFFFFFF00000001000000000000000000000000FFFFFFFFFFFFFFFFFFFFFFFF", 16);
+    Fp::setModulo(p);
+    mpz_class t("FFFFDDDDAAAFAAAAAFFFBBBBCCCEE", 16);
+
+    Fp x(p-t);
+    Fp y(-t);
+    std::cout << "[*] Fp(MINUS NUM) test: ";
+    if (x == y) {
+        puts("OK");
+    } else {
+        puts("FAILED");
+    }
+}
+
 #ifndef USE_MPN
 void test_fp_squareRoot() {
     std::cout << "[*] Fp squareRoot test: ";
@@ -457,6 +472,8 @@ void test_jacobi_ec_mul() {
     }
 }
 
+
+
 int main() {
 #ifndef USE_MPN
     test_GLV_decomposing();
@@ -465,6 +482,7 @@ int main() {
     test_MultipleScalarMul();
     test_fp_squareRoot();
 #endif
+    test_initFp_minus();
     test_isEqual_fp();
     test_ECorder();
     test_ec_sub();

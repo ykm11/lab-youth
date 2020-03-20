@@ -57,8 +57,13 @@ public:
             value[i] = mpz_get_ui(x.get_mpz_t());
             mpz_tdiv_q_2exp(x.get_mpz_t(), x.get_mpz_t(), 64);
         }
+        if (v < 0) {
+            mpn_sub_n((mp_limb_t *)value, (const mp_limb_t *)modulus, (const mp_limb_t *)value, SIZE);
+            return;
+        }
         if (mpn_cmp((const mp_limb_t *)value, (const mp_limb_t *)modulus, SIZE) >= 0) {
             mpn_sub_n((mp_limb_t *)value, (const mp_limb_t *)value, (const mp_limb_t *)modulus, SIZE);
+            return;
         }
     }
 
