@@ -66,8 +66,7 @@ void add(Fp& z, const Fp& x, const Fp& y) {
         z.value -= Fp::modulus;
     }
 #else
-    mp_limb_t carry = mpn_add_n((mp_limb_t *)z.value, (const mp_limb_t *)x.value, (const mp_limb_t *)y.value, SIZE);
-    if (carry == 1) {
+    if (mpn_add_n((mp_limb_t *)z.value, (const mp_limb_t *)x.value, (const mp_limb_t *)y.value, SIZE)) {
         mp_limb_t r[SIZE] = {0};
         mpn_sub_n(r, (const mp_limb_t *)z.value, (const mp_limb_t *)Fp::modulus, SIZE);
         mpn_copyi((mp_limb_t *)z.value, (const mp_limb_t *)r, SIZE);
@@ -82,8 +81,7 @@ void add(Fp& z, const Fp& x, const Fp& y) {
 
 #ifdef USE_MPN
 void add(Fp& z, const Fp& x, uint64_t scalar) {
-    mp_limb_t carry = mpn_add_1((mp_limb_t *)z.value, (const mp_limb_t *)x.value, SIZE, (mp_limb_t)scalar);
-    if (carry == 1) {
+    if (mpn_add_1((mp_limb_t *)z.value, (const mp_limb_t *)x.value, SIZE, (mp_limb_t)scalar)) {
         mp_limb_t r[SIZE] = {0};
         mpn_sub_n(r, (const mp_limb_t *)z.value, (const mp_limb_t *)Fp::modulus, SIZE);
         mpn_copyi((mp_limb_t *)z.value, (const mp_limb_t *)r, SIZE);
@@ -102,12 +100,11 @@ void sub(Fp& z, const Fp& x, const Fp& y) {
         z.value += Fp::modulus;
     }
 #else
-    if (mpn_cmp((const mp_limb_t *)x.value, (const mp_limb_t *)y.value, SIZE) < 0) { // x < y
-        mpn_sub_n((mp_limb_t *)z.value, (const mp_limb_t *)y.value, (const mp_limb_t *)x.value, SIZE);
-        mpn_sub_n((mp_limb_t *)z.value, (const mp_limb_t *)Fp::modulus, (const mp_limb_t *)z.value, SIZE);
-        return;
+    if (mpn_sub_n((mp_limb_t *)z.value, (const mp_limb_t *)x.value, (const mp_limb_t *)y.value, SIZE)) {
+        mp_limb_t r[SIZE] = {0};
+        mpn_add_n(r, (const mp_limb_t *)z.value, (const mp_limb_t *)Fp::modulus, SIZE);
+        mpn_copyi((mp_limb_t *)z.value, r, SIZE);
     }
-    mpn_sub_n((mp_limb_t *)z.value, (const mp_limb_t *)x.value, (const mp_limb_t *)y.value, SIZE);
 #endif
 }
 
@@ -130,6 +127,7 @@ void invmod(Fp& r, const Fp& x) {
 #ifndef USE_MPN
     mpz_invert(r.value.get_mpz_t(), x.value.get_mpz_t(), Fp::modulus.get_mpz_t());
 #else
+    // mpn_だけで完結させたい
     mpz_t mr, mx, modulus;
     mpz_init(mr);
     set_mpz_t(mx, x.value, SIZE);
