@@ -127,17 +127,11 @@ void invmod(Fp& r, const Fp& x) {
 #ifndef USE_MPN
     mpz_invert(r.value.get_mpz_t(), x.value.get_mpz_t(), Fp::modulus.get_mpz_t());
 #else
-    // mpn_だけで完結させたい
-    mpz_t mr, mx, modulus;
-    mpz_init(mr);
-    set_mpz_t(mx, x.value, SIZE);
-    set_mpz_t(modulus, Fp::modulus, SIZE);
-    mpz_invert(mr, mx, modulus);
-
-    for (size_t i = 0; i < SIZE; i++) {
-        r.value[i] = mpz_get_ui(mr);
-        mpz_tdiv_q_2exp(mr, mr, 64);
-    }
+    mp_limb_t tp[mpn_sec_invert_itch(SIZE)];
+    mp_limb_t tmp_x[SIZE];
+    mpn_copyi(tmp_x, (const mp_limb_t *)x.value, SIZE);
+    mpn_sec_invert((mp_limb_t *)r.value, (mp_limb_t *)tmp_x, 
+            (const mp_limb_t *)Fp::modulus, SIZE, 2*SIZE*GMP_NUMB_BITS, tp);
 #endif
 }
 
