@@ -41,8 +41,8 @@ void benchmark_ec_add();
 void benchmark_ec_mul();
 void benchmark_fp();
 
-void benchmark_ec_add() {
-    std::cout << "[*] EC add benchmark\n";
+void benchmark_ec_add_secp256k1() {
+    std::cout << "[*] secp256k1 add benchmark\n";
     mpz_class a = mpz_class("0", 10);
     mpz_class b = mpz_class("7", 10);
     mpz_class p = mpz_class("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F", 16);
@@ -53,18 +53,66 @@ void benchmark_ec_add() {
     mpz_class gy = mpz_class("483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8", 16);
 
     Point G = EC.point(gx, gy);
-    Point R = Point(0, 1, 0);
+    Point R, Q;
+    EllipticCurve::dbl(R, G);
+
     const int n = 100000;
     time_t begin = clock();
     for(int i = 0; i < n; i++) {
-        add(R, R, G);
+        add(Q, R, G);
     }
     time_t end = clock();
-    printf("\ttime = %fusec\n", (end - begin) / double(CLOCKS_PER_SEC) / n * 1e6);
+    printf("\tProjection\ttime = %fusec\n", (end - begin) / double(CLOCKS_PER_SEC) / n * 1e6);
+
+    jPoint G1(gx, gy, 1);
+    jPoint R1, Q1;
+    EllipticCurve::dbl(R1, G1);
+
+    begin = clock();
+    for(int i = 0; i < n; i++) {
+        add(Q1, R1, G1);
+    }
+    end = clock();
+    printf("\tJacobian\ttime = %fusec\n", (end - begin) / double(CLOCKS_PER_SEC) / n * 1e6);
 }
 
-void benchmark_ec_dbl() {
-    std::cout << "[*] EC(a != -3) dbl benchmark\n";
+void benchmark_ec_add_P256() {
+    std::cout << "[*] NIST P256 add benchmark\n";
+    mpz_class a = mpz_class("FFFFFFFF00000001000000000000000000000000FFFFFFFFFFFFFFFFFFFFFFFC", 16);
+    mpz_class b = mpz_class("5AC635D8AA3A93E7B3EBBD55769886BC651D06B0CC53B0F63BCE3C3E27D2604B", 16);
+    mpz_class p = mpz_class("FFFFFFFF00000001000000000000000000000000FFFFFFFFFFFFFFFFFFFFFFFF", 16);
+    Fp::setModulo(p);
+
+    EllipticCurve EC = EllipticCurve(a, b);
+    mpz_class gx = mpz_class("6B17D1F2E12C4247F8BCE6E563A440F277037D812DEB33A0F4A13945D898C296", 16);
+    mpz_class gy = mpz_class("4FE342E2FE1A7F9B8EE7EB4A7C0F9E162BCE33576B315ECECBB6406837BF51F5", 16);
+
+    Point G = EC.point(gx, gy);
+    Point R, Q;
+    EllipticCurve::dbl(R, G);
+
+    const int n = 100000;
+    time_t begin = clock();
+    for(int i = 0; i < n; i++) {
+        add(Q, R, G);
+    }
+    time_t end = clock();
+    printf("\tProjection\ttime = %fusec\n", (end - begin) / double(CLOCKS_PER_SEC) / n * 1e6);
+
+    jPoint G1(gx, gy, 1);
+    jPoint R1, Q1;
+    EllipticCurve::dbl(R1, G1);
+
+    begin = clock();
+    for(int i = 0; i < n; i++) {
+        add(Q1, R1, G1);
+    }
+    end = clock();
+    printf("\tJacobian\ttime = %fusec\n", (end - begin) / double(CLOCKS_PER_SEC) / n * 1e6);
+}
+
+void benchmark_ec_dbl_secp256k1() {
+    std::cout << "[*] secp256k1 dbl benchmark\n";
     mpz_class a = mpz_class("0", 10);
     mpz_class b = mpz_class("7", 10);
     mpz_class p = mpz_class("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F", 16);
@@ -97,8 +145,8 @@ void benchmark_ec_dbl() {
     printf("\tJacobian\t time = %fusec\n", (end - begin) / double(CLOCKS_PER_SEC) / n * 1e6);
 }
 
-void benchmark_ec_jacobi_dbl() {
-    std::cout << "[*] EC(a == -3) dbl benchmark\n";
+void benchmark_ec_dbl_P256() {
+    std::cout << "[*] NIST P256 dbl benchmark\n";
     mpz_class p = mpz_class("FFFFFFFF00000001000000000000000000000000FFFFFFFFFFFFFFFFFFFFFFFF", 16);
     mpz_class a = mpz_class("FFFFFFFF00000001000000000000000000000000FFFFFFFFFFFFFFFFFFFFFFFC", 16);
     mpz_class b = mpz_class("5AC635D8AA3A93E7B3EBBD55769886BC651D06B0CC53B0F63BCE3C3E27D2604B", 16);
@@ -132,8 +180,8 @@ void benchmark_ec_jacobi_dbl() {
 }
 
 
-void benchmark_ec_mul() {
-    std::cout << "[*] EC mul benchmark (secp256k1)\n";
+void benchmark_ec_mul_secp256k1() {
+    std::cout << "[*] secp256k1 mul benchmark\n";
     mpz_class a = mpz_class("0", 10);
     mpz_class b = mpz_class("7", 10);
     mpz_class p = mpz_class("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F", 16);
@@ -221,8 +269,8 @@ void benchmark_ec_mul() {
 }
 
 
-void benchmark_ec_mul2() {
-    std::cout << "[*] EC mul benchmark (NIST P256)\n";
+void benchmark_ec_mul_P256() {
+    std::cout << "[*] NIST P256 mul benchmark\n";
     mpz_class p = mpz_class("FFFFFFFF00000001000000000000000000000000FFFFFFFFFFFFFFFFFFFFFFFF", 16);
     mpz_class a = mpz_class("FFFFFFFF00000001000000000000000000000000FFFFFFFFFFFFFFFFFFFFFFFC", 16);
     mpz_class b = mpz_class("5AC635D8AA3A93E7B3EBBD55769886BC651D06B0CC53B0F63BCE3C3E27D2604B", 16);
@@ -432,11 +480,12 @@ int main() {
     //benchmark_fp_sqareRoot();
     //benchmark_fp();
     //benchmark_sqr();
-    //benchmark_ec_add();
-    benchmark_ec_dbl();
-    benchmark_ec_jacobi_dbl();
-    benchmark_ec_mul();
-    benchmark_ec_mul2();
+    benchmark_ec_add_secp256k1();
+    benchmark_ec_dbl_secp256k1();
+    benchmark_ec_add_P256();
+    benchmark_ec_dbl_P256();
+    benchmark_ec_mul_secp256k1();
+    benchmark_ec_mul_P256();
 
     benchmark_GLV_decomposing();
     benchmark_GLVbaseMul(); 
