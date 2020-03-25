@@ -141,7 +141,7 @@ static inline void set_mpz_t(mpz_t& z, const uint64_t* p, int n) {
 
 static inline void dump(const mp_limb_t x[SIZE]) {
     mpz_t mx;
-    set_mpz_t(mx, (const uint64_t*)x, SIZE+1);
+    set_mpz_t(mx, (const uint64_t*)x, SIZE);
     std::cout << mx << std::endl;
 }
 
