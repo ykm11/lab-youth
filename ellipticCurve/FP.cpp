@@ -214,8 +214,7 @@ bool Fp::squareRoot(Fp& r, const Fp& x) {
 
     mpn_copyi(t, (const mp_limb_t*)Fp::modulus, SIZE); // t = p
     mpn_rshift(t, (const mp_limb_t*)t, SIZE, 1); // t = (p-1)/2
-    mpn_sec_powm(b, (const mp_limb_t*)x.value, SIZE, (const mp_limb_t*)t, 
-            SIZE*GMP_NUMB_BITS, (const mp_limb_t*)Fp::modulus, SIZE, tp);
+    powMod(b, (const mp_limb_t*)x.value, (const mp_limb_t*)t, (const mp_limb_t*)Fp::modulus, tp);
     mpn_copyi(q, (const mp_limb_t*)b, SIZE);
     q[0]--;
     if (mpn_zero_p((const mp_limb_t*)q, SIZE) == 0) { // b != 1
@@ -230,8 +229,7 @@ bool Fp::squareRoot(Fp& r, const Fp& x) {
     mpn_zero(z, SIZE);
     z[0] = 2;
     while(1) { // find quadratic non-residue
-        mpn_sec_powm(b, (const mp_limb_t*)z, SIZE, (const mp_limb_t*)t, 
-            SIZE*GMP_NUMB_BITS, (const mp_limb_t*)Fp::modulus, SIZE, tp);
+        powMod(b, (const mp_limb_t*)z, (const mp_limb_t*)t, (const mp_limb_t*)Fp::modulus, tp);
  
         b[0]++; // b + 1 == p
         if (mpn_cmp((const mp_limb_t*)b, (const mp_limb_t*)Fp::modulus, SIZE) == 0) break; // b != 1
@@ -239,17 +237,13 @@ bool Fp::squareRoot(Fp& r, const Fp& x) {
     }
 
     
-    mpn_sec_powm(c, (const mp_limb_t*)z, SIZE, (const mp_limb_t*)q, 
-            SIZE*GMP_NUMB_BITS, (const mp_limb_t*)Fp::modulus, SIZE, tp);
-    mpn_sec_powm(t, (const mp_limb_t*)x.value, SIZE, (const mp_limb_t*)q, 
-            SIZE*GMP_NUMB_BITS, (const mp_limb_t*)Fp::modulus, SIZE, tp);
+    powMod(c, (const mp_limb_t*)z, (const mp_limb_t*)q, (const mp_limb_t*)Fp::modulus, tp);
+    powMod(t, (const mp_limb_t*)x.value, (const mp_limb_t*)q, (const mp_limb_t*)Fp::modulus, tp);
 
     mpn_add_1(b, (const mp_limb_t*)q, SIZE, 1);
-
     mpn_rshift(b, (const mp_limb_t*)b, SIZE, 1);
 
-    mpn_sec_powm((mp_limb_t *)r.value, (const mp_limb_t*)x.value, SIZE, (const mp_limb_t*)b, 
-            SIZE*GMP_NUMB_BITS, (const mp_limb_t*)Fp::modulus, SIZE, tp);
+    powMod((mp_limb_t *)r.value, (const mp_limb_t*)x.value, (const mp_limb_t*)b, (const mp_limb_t*)Fp::modulus, tp);
     
     while(1) {
         mpn_copyi(z, (const mp_limb_t*)t, SIZE);
@@ -272,31 +266,19 @@ bool Fp::squareRoot(Fp& r, const Fp& x) {
         mpn_copyi(b, (const mp_limb_t*)z, SIZE);
         b[0]--;
         while(mpn_zero_p(b, SIZE) == 0) {
-            mpn_sqr(tmp, (const mp_limb_t*)z, SIZE);
-            mpn_tdiv_qr(q, z, 0, (const mp_limb_t*)tmp, SIZE*2, 
-                    (const mp_limb_t*)Fp::modulus, SIZE);
-
+            sqrMod(z, (const mp_limb_t*)z, (const mp_limb_t*)Fp::modulus, tmp, tmp_q);
             mpn_copyi(b, (const mp_limb_t*)z, SIZE);
             b[0]--;
             i++;
         }
         mpn_copyi(b, (const mp_limb_t *)c, SIZE);
         for(unsigned int j = 0; j < bcnt-i-1; j++) {
-            mpn_sqr(tmp, (const mp_limb_t*)b, SIZE);
-            mpn_tdiv_qr(tmp_q, b, 0, (const mp_limb_t*)tmp, SIZE*2, 
-                    (const mp_limb_t*)Fp::modulus, SIZE);
+            sqrMod(b, (const mp_limb_t*)b, (const mp_limb_t*)Fp::modulus, tmp, tmp_q);
         }
-        mpn_sqr(tmp, (const mp_limb_t*)c, SIZE);
-        mpn_tdiv_qr(tmp_q, c, 0, (const mp_limb_t*)tmp, SIZE*2, 
-                (const mp_limb_t*)Fp::modulus, SIZE);
-
-        mpn_mul_n(tmp, (const mp_limb_t*)t, (const mp_limb_t*)c, SIZE);
-        mpn_tdiv_qr(tmp_q, t, 0, (const mp_limb_t*)tmp, SIZE*2, 
-                (const mp_limb_t*)Fp::modulus, SIZE);
-
-        mpn_mul_n(tmp, (const mp_limb_t*)r.value, (const mp_limb_t*)b, SIZE);
-        mpn_tdiv_qr(tmp_q, (mp_limb_t*)r.value, 0, (const mp_limb_t*)tmp, SIZE*2, 
-                (const mp_limb_t*)Fp::modulus, SIZE);
+        sqrMod(c, (const mp_limb_t*)c, (const mp_limb_t*)Fp::modulus, tmp, tmp_q);
+        mulMod(t, (const mp_limb_t*)t, (const mp_limb_t*)c, (const mp_limb_t*)Fp::modulus, tmp, tmp_q);
+        mulMod((mp_limb_t*)r.value, (const mp_limb_t*)r.value, (const mp_limb_t*)b, 
+                (const mp_limb_t*)Fp::modulus, tmp, tmp_q);
     }
 }
 #endif
