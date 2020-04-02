@@ -53,3 +53,8 @@ benchmark521:
 	$(CXX) -o curve.o -c curve.cpp $(CXXFLAGS) -DSECP521
 	$(CXX) -o ec_benchmark521 benchmarkSecp521.cpp FP.o curve.o $(CXXFLAGS) $(LDFLAGS) -DSECP521
 
+benchmark521_mi:
+	$(CXX) -o FP.o -c FP.cpp $(CXXFLAGS) 
+	$(CXX) -o curve.o -c curve.cpp $(CXXFLAGS) 
+	$(CXX) -o ec_benchmark521_mi benchmarkSecp521.cpp FP.o curve.o $(CXXFLAGS) $(LDFLAGS) $(INCLUDE)
+

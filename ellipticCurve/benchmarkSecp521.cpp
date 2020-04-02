@@ -234,6 +234,7 @@ void benchmark_secp521r_dbl() {
     printf("\tJacobi dbl\ttime = %fusec\n", (end - begin) / double(CLOCKS_PER_SEC) / n * 1e6);
 }
 
+#ifdef SECP521
 void benchmark() {
     mp_limb_t p[SIZE] = {
         0xffffffffffffffff, 0xffffffffffffffff, 0xffffffffffffffff, 0xffffffffffffffff,
@@ -267,6 +268,7 @@ void benchmark() {
     end = clock();
     printf("\tmulMod \ttime = %fusec\n", (end - begin) / double(CLOCKS_PER_SEC) / n * 1e6);
 }
+#endif
 
 
 int main() {

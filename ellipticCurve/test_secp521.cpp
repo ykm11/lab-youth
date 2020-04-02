@@ -123,10 +123,21 @@ void test_secp521r() {
     jPoint G(Gx, Gy, Gz); 
 
     mpz_class q("14eba7e7ab32edc54a71f83be782d4d4be311be0d4e6c0b80bd36dffba1212020f7faacb3e839b5a2dca813576beb09d4d43db70f8b01bc1dfa18d18fde7cfd7147", 16);
-    dump(G);
     jPoint R;
     naf_mul(R, G, q);
-    dump(R);
+
+    mpz_class rx("1c6cbe47fbd79919e77522951800c04b519c10dacd1cc1e8e35f79a1cdca44b24a2f0bab26c5348609a228820cb5842095bf9fd518296941d1c0fc734cda313fb81", 16);
+    mpz_class ry("bc994a737d1c40174c56661e7481e569ddab7c7b23f621a161b6930f6006d98712337129c96bc4219e9b964878726af0108211e7414617911f3097ca89d3092bf9", 16);
+
+    Fp Rx(rx);
+    Fp Ry(ry);
+    jPoint act_R(Rx, Ry, Gz);
+    std::cout << "[*] secp521r1 mul test: ";
+    if (isEqual(R, act_R)) {
+        std::cout << "OK\n";
+    } else {
+        std::cout << "Failed\n";
+    }
 }
 
 int main() {
