@@ -234,8 +234,45 @@ void benchmark_secp521r_dbl() {
     printf("\tJacobi dbl\ttime = %fusec\n", (end - begin) / double(CLOCKS_PER_SEC) / n * 1e6);
 }
 
+void benchmark() {
+    mp_limb_t p[SIZE] = {
+        0xffffffffffffffff, 0xffffffffffffffff, 0xffffffffffffffff, 0xffffffffffffffff,
+        0xffffffffffffffff, 0xffffffffffffffff, 0xffffffffffffffff, 0xffffffffffffffff,
+        0x1ff
+    };
+
+    mp_limb_t a[SIZE] = {
+        0x2137201477420138L, 0x6313232130472104L, 0x3639164821638291L, 0x8371372917431694L,
+        0x1739278732747374L, 0x1732913789724789L, 0x7296392641693692L, 0x32dead13L,
+    };
+
+    mp_limb_t b[SIZE] = {
+        0x8032810382412080L, 0x2427104721732301L, 0x3281037402174017L, 0x7201839284217487L, 
+        0x1737201372138214L, 0x3747217427103782L, 0x13729dee74L,
+    };
+    mp_limb_t c[SIZE] = {0};
+
+    mp_limb_t tmp_z[SIZE * 2] = {0};
+    mp_limb_t t[SIZE*2] = {0};
+    mp_limb_t s[SIZE*2] = {0};
+
+
+    const int n = 100000;
+    time_t begin, end;
+    begin = clock();
+    for (int i = 0; i < n; i++) {
+        mpn_mul_n(tmp_z, (const mp_limb_t *)a, (const mp_limb_t *)b, SIZE);
+        mod((mp_limb_t*)c, (const mp_limb_t *)tmp_z, (const mp_limb_t *)p, t, s);
+    }
+    end = clock();
+    printf("\tmulMod \ttime = %fusec\n", (end - begin) / double(CLOCKS_PER_SEC) / n * 1e6);
+}
+
 
 int main() {
+#ifdef SECP521
+    benchmark();
+#endif
     benchmark_FP521mul();
     benchmark_FP521sqr();
     benchmark_secp521r_dbl();

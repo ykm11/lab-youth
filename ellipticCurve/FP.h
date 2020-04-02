@@ -199,7 +199,15 @@ static inline void powMod(mpz_class& z, const mpz_class& x, const mpz_class& y, 
 static inline void mod(mp_limb_t *z, const mp_limb_t *XY, const mp_limb_t *p, mp_limb_t *t, mp_limb_t *s) {
     // (T + (T mod R)*N) / R
     mpn_and_n(t, XY, p, SIZE); // T mod R
+#if 1
+    for (size_t i = 0; i < SIZE; i++) {
+        s[i+8] = t[i];
+    }
+    mpn_lshift(s, (const mp_limb_t*)s, SIZE*2, 9);
+    mpn_sub_n(s, (const mp_limb_t*)s, (const mp_limb_t*)t, SIZE*2);
+#else
     mpn_mul_n(s, (const mp_limb_t*)t, p, SIZE);
+#endif
     mpn_add_n(t, (const mp_limb_t*)s, XY, SIZE*2); // (T + (T mod R)*N)
 
     mpn_rshift(t, (const mp_limb_t*)t, SIZE*2, 9);
