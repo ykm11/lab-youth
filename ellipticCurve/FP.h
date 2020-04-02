@@ -13,11 +13,16 @@ void sqr(Fp& r, const Fp& x);
 
 static inline bool zeroCmp(const Fp &x);
 
-#ifdef USE_MPN
-#define SIZE 4
-
+#ifdef SECP521
+#define SIZE 9
 void add(Fp& z, const Fp& x, uint64_t scalar);
+
+#elif defined(USE_MPN)
+#define SIZE 4
+void add(Fp& z, const Fp& x, uint64_t scalar);
+
 #endif
+
 
 class Fp {
 public:
@@ -190,3 +195,20 @@ static inline void powMod(mpz_class& z, const mpz_class& x, const mpz_class& y, 
 
 #endif
 
+#ifdef SECP521
+static inline void mod(mp_limb_t *z, const mp_limb_t *XY, const mp_limb_t *p, mp_limb_t *t, mp_limb_t *s) {
+    // (T + (T mod R)*N) / R
+    mpn_and_n(t, XY, p, SIZE); // T mod R
+    mpn_mul_n(s, (const mp_limb_t*)t, p, SIZE);
+    mpn_add_n(t, (const mp_limb_t*)s, XY, SIZE*2); // (T + (T mod R)*N)
+
+    mpn_rshift(t, (const mp_limb_t*)t, SIZE*2, 9);
+    for (size_t i = 0; i < SIZE; i++) { // (T + (T mod R)*N) / R
+        t[i] = t[i+8];
+    }
+    if (mpn_cmp((const mp_limb_t*)t, p, SIZE) >= 0) {
+        mpn_sub_n(t, (const mp_limb_t*)t, p, SIZE);
+    }
+    mpn_copyi(z, (const mp_limb_t*)t, SIZE);
+}
+#endif

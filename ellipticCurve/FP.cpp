@@ -108,16 +108,22 @@ void sub(Fp& z, const Fp& x, const Fp& y) {
 }
 
 void mul(Fp& z, const Fp& x, const Fp& y) {
-#ifndef USE_MPN
-    z.value = (x.value * y.value) % Fp::modulus;
-#else
+#ifdef SECP521
+    mp_limb_t tmp_z[SIZE * 2] = {0};
+    mp_limb_t t[SIZE*2] = {0};
+    mp_limb_t s[SIZE*2] = {0};
+
+    mpn_mul_n(tmp_z, (const mp_limb_t *)x.value, (const mp_limb_t *)y.value, SIZE);
+    mod((mp_limb_t*)z.value, (const mp_limb_t *)tmp_z, (const mp_limb_t *)Fp::modulus, t, s);
+#elif defined(USE_MPN)
     mp_limb_t tmp_z[SIZE * 2] = {0};
     mp_limb_t q[SIZE + 1] = {0};
 
     mpn_mul_n(tmp_z, (const mp_limb_t *)x.value, (const mp_limb_t *)y.value, SIZE);
     mpn_tdiv_qr(q, (mp_limb_t *)z.value, 0,
             tmp_z, SIZE*2, (const mp_limb_t *)Fp::modulus, SIZE);
-
+#else
+    z.value = (x.value * y.value) % Fp::modulus;
 #endif
 }
 
@@ -135,15 +141,22 @@ void invmod(Fp& r, const Fp& x) {
 }
 
 void sqr(Fp &r, const Fp &x) { // r <- x^2
-#ifndef USE_MPN
-    mpz_powm_ui(r.value.get_mpz_t(), x.value.get_mpz_t(), 2, Fp::modulus.get_mpz_t());
-#else
+#ifdef SECP521
+    mp_limb_t tmp_r[SIZE * 2] = {0};
+    mp_limb_t t[SIZE*2] = {0};
+    mp_limb_t s[SIZE*2] = {0};
+
+    mpn_sqr(tmp_r, (const mp_limb_t *)x.value, SIZE);
+    mod((mp_limb_t*)r.value, (const mp_limb_t *)tmp_r, (const mp_limb_t *)Fp::modulus, t, s);
+#elif defined(USE_MPN)
     mp_limb_t tmp_r[SIZE * 2] = {0};
     mp_limb_t q[SIZE + 1] = {0};
 
     mpn_sqr(tmp_r, (const mp_limb_t *)x.value, SIZE);
     mpn_tdiv_qr(q, (mp_limb_t *)r.value, 0,
             tmp_r, SIZE*2, (const mp_limb_t *)Fp::modulus, SIZE);
+#else
+    mpz_powm_ui(r.value.get_mpz_t(), x.value.get_mpz_t(), 2, Fp::modulus.get_mpz_t());
 #endif
 }
 

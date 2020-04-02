@@ -133,6 +133,10 @@ public:
         a = Fp(A);
         b = Fp(B);
     }
+    EllipticCurve(const Fp &A, const Fp &B) {
+        move(a, A);
+        move(b, B);
+    }
     //~EllipticCurve() = default;
 
     Point point(const mpz_class &x, const mpz_class &y) const {

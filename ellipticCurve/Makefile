@@ -34,7 +34,6 @@ clean:
 test: ./ec_test_mi
 	./ec_test_mi
 
-
 ./ec_benchmark: benchmark.cpp FP.o curve.o
 	$(CXX) -o ec_benchmark $? $(CXXFLAGS) $(LDFLAGS)  
 
@@ -43,4 +42,14 @@ test: ./ec_test_mi
 
 benchmark: ./ec_benchmark_mi
 	./ec_benchmark_mi
+
+test521:
+	$(CXX) -o FP.o -c FP.cpp $(CXXFLAGS) -DSECP521
+	$(CXX) -o curve.o -c curve.cpp $(CXXFLAGS) -DSECP521
+	$(CXX) -o ec_test521 test_secp521.cpp FP.o curve.o $(CXXFLAGS) $(LDFLAGS) -DSECP521
+
+benchmark521:
+	$(CXX) -o FP.o -c FP.cpp $(CXXFLAGS) -DSECP521
+	$(CXX) -o curve.o -c curve.cpp $(CXXFLAGS) -DSECP521
+	$(CXX) -o ec_benchmark521 benchmarkSecp521.cpp FP.o curve.o $(CXXFLAGS) $(LDFLAGS) -DSECP521
 
