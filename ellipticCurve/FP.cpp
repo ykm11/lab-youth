@@ -134,11 +134,21 @@ void invmod(Fp& r, const Fp& x) {
 #ifndef USE_MPN
     mpz_invert(r.value.get_mpz_t(), x.value.get_mpz_t(), Fp::modulus.get_mpz_t());
 #else
-    mp_limb_t tp[mpn_sec_invert_itch(SIZE)];
-    mp_limb_t tmp_x[SIZE];
-    mpn_copyi(tmp_x, (const mp_limb_t *)x.value, SIZE);
-    mpn_sec_invert((mp_limb_t *)r.value, (mp_limb_t *)tmp_x, 
-            (const mp_limb_t *)Fp::modulus, SIZE, 2*SIZE*GMP_NUMB_BITS, tp);
+    mp_limb_t g[SIZE];
+    mp_limb_t u[SIZE];
+    mp_limb_t v[SIZE];
+    mp_limb_t s[SIZE+1];
+    mp_size_t sn;
+
+    mpn_copyi(u, (const mp_limb_t*)x.value, SIZE);
+    mpn_copyi(v, (const mp_limb_t*)Fp::modulus, SIZE);
+    mpn_gcdext(g, s, &sn, u, SIZE, v, SIZE);
+    mpn_copyi((mp_limb_t*)r.value, (const mp_limb_t*)s, SIZE);
+
+    if (sn < 0) {
+        mpn_sub_n((mp_limb_t*)r.value, (const mp_limb_t*)Fp::modulus, 
+                (const mp_limb_t*)r.value, SIZE);
+    }
 #endif
 }
 

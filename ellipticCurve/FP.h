@@ -198,6 +198,8 @@ static inline void powMod(mpz_class& z, const mpz_class& x, const mpz_class& y, 
 #ifdef SECP521
 static inline void mod(mp_limb_t *z, const mp_limb_t *XY, const mp_limb_t *p, mp_limb_t *t, mp_limb_t *s) {
     // (T + (T mod R)*N) / R
+    mpn_zero(t, SIZE*2);
+    mpn_zero(s, SIZE*2);
     mpn_and_n(t, XY, p, SIZE); // T mod R
 #if 1
     for (size_t i = 0; i < SIZE; i++) {
