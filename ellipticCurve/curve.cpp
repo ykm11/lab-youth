@@ -15,7 +15,8 @@ void EllipticCurve::dbl(Point &R, const Point &P) {
     Fp u, v, w, s, t;
 
 #ifndef USE_MPN
-    mpz_add_ui(s.value.get_mpz_t(), a.value.get_mpz_t(), 3);
+    //mpz_add_ui(s.value.get_mpz_t(), a.value.get_mpz_t(), 3);
+    s.value = a.value + 3;
     if (s.value == Fp::modulus) { // a == -3 ? 
 #else
     add(s, a, 3);
@@ -145,7 +146,8 @@ void EllipticCurve::dbl(jPoint &R, const jPoint &P) {
     sqr(t, P.z); // Z^{2}
 
 #ifndef USE_MPN
-    mpz_add_ui(v.value.get_mpz_t(), a.value.get_mpz_t(), 3);
+    //mpz_add_ui(v.value.get_mpz_t(), a.value.get_mpz_t(), 3);
+    v.value = a.value+3;
     if (v.value == Fp::modulus) {
 #else
     add(v, a, 3);
@@ -286,8 +288,8 @@ void dump(const Point &P) {
         std::cout << "(" << x.value << " : " << y.value << " : 1)" << std::endl;
 #else
         mpz_t mx, my;
-        set_mpz_t(mx, x.value, SIZE);
-        set_mpz_t(my, y.value, SIZE);
+        set_mpz_t(mx, (uint64_t*)x.value, SIZE);
+        set_mpz_t(my, (uint64_t*)y.value, SIZE);
         std::cout << "(" << mx << " : " << my << " : 1)" << std::endl;
 #endif
     }
@@ -303,8 +305,8 @@ void dump(const jPoint &P) {
         std::cout << "(" << x.value << " : " << y.value << " : 1)" << std::endl;
 #else
         mpz_t mx, my;
-        set_mpz_t(mx, x.value, SIZE);
-        set_mpz_t(my, y.value, SIZE);
+        set_mpz_t(mx, (uint64_t*)x.value, SIZE);
+        set_mpz_t(my, (uint64_t*)y.value, SIZE);
         std::cout << "(" << mx << " : " << my << " : 1)" << std::endl;
 #endif
     }

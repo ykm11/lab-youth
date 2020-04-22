@@ -5,7 +5,7 @@
 #ifndef USE_MPN
 mpz_class Fp::modulus;
 #else
-uint64_t Fp::modulus[SIZE];
+mp_limb_t Fp::modulus[SIZE];
 #endif
 
 void Fp::mulInt(Fp& z, const Fp& x, int scalar) {
@@ -27,11 +27,7 @@ void Fp::setModulo(const mpz_class& v) {
 #ifndef USE_MPN
     modulus = v;
 #else
-    mpz_class x = v;
-    for (size_t i = 0; i < SIZE; i++) {
-        modulus[i] = mpz_get_ui(x.get_mpz_t());
-        mpz_tdiv_q_2exp(x.get_mpz_t(), x.get_mpz_t(), 64);
-    }
+    getArray(modulus, SIZE, v, v.get_mpz_t()->_mp_size);
 #endif
 }
 
@@ -155,8 +151,8 @@ void invmod(Fp& r, const Fp& x) {
 void sqr(Fp &r, const Fp &x) { // r <- x^2
 #ifdef SECP521
     mp_limb_t tmp_r[SIZE * 2] = {0};
-    mp_limb_t t[SIZE*2] = {0};
-    mp_limb_t s[SIZE*2] = {0};
+    mp_limb_t t[SIZE*2];
+    mp_limb_t s[SIZE*2];
 
     mpn_sqr(tmp_r, (const mp_limb_t *)x.value, SIZE);
     mod((mp_limb_t*)r.value, (const mp_limb_t *)tmp_r, (const mp_limb_t *)Fp::modulus, t, s);

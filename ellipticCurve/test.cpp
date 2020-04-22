@@ -78,7 +78,7 @@ void test_ec_sub() {
     mpz_class gx = mpz_class("79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798", 16);
     mpz_class gy = mpz_class("483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8", 16);
 
-    Point G = EC(gx, gy);
+    Point G(gx, gy, 1);
     Point R5, R3, R2;
     r_mul(R2, G, 2);
     r_mul(R3, G, 114);
@@ -243,7 +243,7 @@ void test_jacobi_ec_add() {
 
     jPoint G1 = jPoint(gx, gy, 1);
 
-    Point P = EC(gx, gy);
+    Point P(gx, gy, 1);
     Point P2;
     add(P2, P, P);
     Fp px, py;
@@ -308,7 +308,7 @@ void test_ec_muls() {
     mpz_class gx = mpz_class("79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798", 16);
     mpz_class gy = mpz_class("483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8", 16);
 
-    Point G = EC(gx, gy);
+    Point G(gx, gy, 1);
     Point R1, R2, R3, R4, R5;
     l_mul(R1, G, n);
     r_mul(R2, G, n);

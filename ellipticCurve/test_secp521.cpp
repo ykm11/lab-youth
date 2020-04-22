@@ -2,6 +2,8 @@
 #include "FP.h"
 #include <iostream>
 
+#include <gmpxx.h>
+
 /*
 
 b =     0x0051953EB9618E1C9A1F929A21A0B68540EEA2DA725B99B315F3B8B489918EF109E156193951EC7E937B1652C0BD3BB1BF073573DF883D2C34F1EF451FD46B503F00
@@ -20,12 +22,12 @@ void test_FP521sqr() {
     };
     Fp::setModulo(p);
 
-    uint64_t a[SIZE] = {
+    mp_limb_t a[SIZE] = {
         0x2137201477420138L, 0x6313232130472104L, 0x3639164821638291L, 0x8371372917431694L,
         0x1739278732747374L, 0x1732913789724789L, 0x7296392641693692L, 0x32dead13L,
     };
 
-    uint64_t c[SIZE] = {
+    mp_limb_t c[SIZE] = {
         0xb54ed68553c0d66aL, 0x472128ceb6f2fe70L, 0xe1c253e06047ec35L, 0xad4178b877c07038L,
         0x45d683541d9077b8L, 0x4576d60c33560266L, 0xe15fd51f6649f17eL, 0xf24e2cd520844c75L,
         0x119L,
@@ -53,17 +55,17 @@ void test_FP521mul() {
     };
     Fp::setModulo(p);
 
-    uint64_t a[SIZE] = {
+    mp_limb_t a[SIZE] = {
         0x2137201477420138L, 0x6313232130472104L, 0x3639164821638291L, 0x8371372917431694L,
         0x1739278732747374L, 0x1732913789724789L, 0x7296392641693692L, 0x32dead13L,
     };
 
-    uint64_t b[SIZE] = {
+    mp_limb_t b[SIZE] = {
         0x8032810382412080L, 0x2427104721732301L, 0x3281037402174017L, 0x7201839284217487L, 
         0x1737201372138214L, 0x3747217427103782L, 0x13729dee74L,
     };
 
-    uint64_t c[SIZE] = {
+    mp_limb_t c[SIZE] = {
         0xd0703a58517ed36aL, 0xf528ff505bb4f563L, 0x4d076ef4b10b90b8L, 0x716bfdbf3276c02fL,
         0xd352a66d881d9a7dL, 0x5de5b5a08d52fdf8L, 0xcf56240ba7dabaa3L, 0x823193d5094ac774L,
         0x183L,
@@ -90,23 +92,23 @@ void test_secp521r() {
         0xffffffffffffffff, 0xffffffffffffffff, 0xffffffffffffffff, 0xffffffffffffffff,
         0x1ff
     };
-    uint64_t a[SIZE] = {
+    mp_limb_t a[SIZE] = {
         0xfffffffffffffffc, 0xffffffffffffffff, 0xffffffffffffffff, 0xffffffffffffffff,
         0xffffffffffffffff, 0xffffffffffffffff, 0xffffffffffffffff, 0xffffffffffffffff,
         0x1ff
     };
 
-    uint64_t b[SIZE] = {
+    mp_limb_t b[SIZE] = {
         0xef451fd46b503f00L, 0x3573df883d2c34f1L, 0x1652c0bd3bb1bf07L, 0x56193951ec7e937bL,
         0xb8b489918ef109e1L, 0xa2da725b99b315f3L, 0x929a21a0b68540eeL, 0x953eb9618e1c9a1fL,
         0x51L,
     };
-    uint64_t gx[SIZE] = {
+    mp_limb_t gx[SIZE] = {
         0xf97e7e31c2e5bd66L, 0x3348b3c1856a429bL, 0xfe1dc127a2ffa8deL, 0xa14b5e77efe75928L,
         0xf828af606b4d3dbaL, 0x9c648139053fb521L, 0x9e3ecb662395b442L, 0x858e06b70404e9cdL,
         0xc6L,
     };
-    uint64_t gy[SIZE] = {
+    mp_limb_t gy[SIZE] = {
         0x88be94769fd16650L, 0x353c7086a272c240L, 0xc550b9013fad0761L, 0x97ee72995ef42640L,
         0x17afbd17273e662cL, 0x98f54449579b4468L, 0x5c8a5fb42c7d1bd9L, 0x39296a789a3bc004L,
         0x118L,
