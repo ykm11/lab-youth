@@ -34,10 +34,10 @@ clean:
 test: ./ec_test_mi
 	./ec_test_mi
 
-./ec_benchmark: benchmark.cpp FP.o curve.o
+./ec_benchmark: benchmarks/benchmark.cpp FP.o curve.o
 	$(CXX) -o ec_benchmark $? $(CXXFLAGS) $(LDFLAGS)  
 
-./ec_benchmark_mi: benchmark.cpp FP.o curve.o
+./ec_benchmark_mi: benchmarks/benchmark.cpp FP.o curve.o
 	$(CXX) -o ec_benchmark_mi $? $(CXXFLAGS) $(LDFLAGS) $(INCLUDE) -DUSE_MIMALLOC
 
 benchmark: ./ec_benchmark_mi
@@ -54,11 +54,11 @@ benchmark521:
 	make clean
 	$(CXX) -o FP.o -c src/FP.cpp $(CXXFLAGS) -DSECP521 -I ./include
 	$(CXX) -o curve.o -c src/curve.cpp $(CXXFLAGS) -DSECP521 -I ./include
-	$(CXX) -o ec_benchmark521 benchmarkSecp521.cpp FP.o curve.o $(CXXFLAGS) $(LDFLAGS) -DSECP521 -I ./include
+	$(CXX) -o ec_benchmark521 benchmarks/benchmarkSecp521.cpp FP.o curve.o $(CXXFLAGS) $(LDFLAGS) -DSECP521 -I ./include
 
 benchmark521_mi:
 	make clean
 	$(CXX) -o FP.o -c src/FP.cpp $(CXXFLAGS) 
 	$(CXX) -o curve.o -c src/curve.cpp $(CXXFLAGS) 
-	$(CXX) -o ec_benchmark521_mi benchmarkSecp521.cpp FP.o curve.o $(CXXFLAGS) $(LDFLAGS) $(INCLUDE)
+	$(CXX) -o ec_benchmark521_mi benchmarks/benchmarkSecp521.cpp FP.o curve.o $(CXXFLAGS) $(LDFLAGS) $(INCLUDE)
 
