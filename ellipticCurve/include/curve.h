@@ -117,6 +117,14 @@ public:
         return r;
     }
 
+    bool operator==(const jPoint &other) const {
+        return isEqual(*this, other);
+    }
+
+    bool operator!=(const jPoint &other) const {
+        return !isEqual(*this, other);
+    }
+
     static void neg(jPoint &R, const jPoint &P) {
         R.x = P.x;
         R.z = P.z;
