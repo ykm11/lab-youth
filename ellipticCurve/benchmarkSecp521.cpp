@@ -49,13 +49,13 @@ n = 0x01FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFA518687
 */
 void benchmark_FP521sqr() {
 #ifdef SECP521
-    uint64_t p[SIZE] = {
+    mp_limb_t p[SIZE] = {
         0xffffffffffffffff, 0xffffffffffffffff, 0xffffffffffffffff, 0xffffffffffffffff,
         0xffffffffffffffff, 0xffffffffffffffff, 0xffffffffffffffff, 0xffffffffffffffff,
         0x1ff
     };
 
-    uint64_t a[SIZE] = {
+    mp_limb_t a[SIZE] = {
         0x2137201477420138L, 0x6313232130472104L, 0x3639164821638291L, 0x8371372917431694L,
         0x1739278732747374L, 0x1732913789724789L, 0x7296392641693692L, 0x32dead13L,
     };
@@ -79,18 +79,18 @@ void benchmark_FP521sqr() {
 
 void benchmark_FP521mul() {
 #ifdef SECP521
-    uint64_t p[SIZE] = {
+    mp_limb_t p[SIZE] = {
         0xffffffffffffffff, 0xffffffffffffffff, 0xffffffffffffffff, 0xffffffffffffffff,
         0xffffffffffffffff, 0xffffffffffffffff, 0xffffffffffffffff, 0xffffffffffffffff,
         0x1ff
     };
 
-    uint64_t a[SIZE] = {
+    mp_limb_t a[SIZE] = {
         0x2137201477420138L, 0x6313232130472104L, 0x3639164821638291L, 0x8371372917431694L,
         0x1739278732747374L, 0x1732913789724789L, 0x7296392641693692L, 0x32dead13L,
     };
 
-    uint64_t b[SIZE] = {
+    mp_limb_t b[SIZE] = {
         0x8032810382412080L, 0x2427104721732301L, 0x3281037402174017L, 0x7201839284217487L, 
         0x1737201372138214L, 0x3747217427103782L, 0x13729dee74L,
     };
@@ -117,28 +117,28 @@ void benchmark_FP521mul() {
 
 void benchmark_secp521r() {
 #ifdef SECP521
-    uint64_t p[SIZE] = {
+    mp_limb_t p[SIZE] = {
         0xffffffffffffffff, 0xffffffffffffffff, 0xffffffffffffffff, 0xffffffffffffffff,
         0xffffffffffffffff, 0xffffffffffffffff, 0xffffffffffffffff, 0xffffffffffffffff,
         0x1ff
     };
-    uint64_t a[SIZE] = {
+    mp_limb_t a[SIZE] = {
         0xfffffffffffffffc, 0xffffffffffffffff, 0xffffffffffffffff, 0xffffffffffffffff,
         0xffffffffffffffff, 0xffffffffffffffff, 0xffffffffffffffff, 0xffffffffffffffff,
         0x1ff
     };
 
-    uint64_t b[SIZE] = {
+    mp_limb_t b[SIZE] = {
         0xef451fd46b503f00L, 0x3573df883d2c34f1L, 0x1652c0bd3bb1bf07L, 0x56193951ec7e937bL,
         0xb8b489918ef109e1L, 0xa2da725b99b315f3L, 0x929a21a0b68540eeL, 0x953eb9618e1c9a1fL,
         0x51L,
     };
-    uint64_t gx[SIZE] = {
+    mp_limb_t gx[SIZE] = {
         0xf97e7e31c2e5bd66L, 0x3348b3c1856a429bL, 0xfe1dc127a2ffa8deL, 0xa14b5e77efe75928L,
         0xf828af606b4d3dbaL, 0x9c648139053fb521L, 0x9e3ecb662395b442L, 0x858e06b70404e9cdL,
         0xc6L,
     };
-    uint64_t gy[SIZE] = {
+    mp_limb_t gy[SIZE] = {
         0x88be94769fd16650L, 0x353c7086a272c240L, 0xc550b9013fad0761L, 0x97ee72995ef42640L,
         0x17afbd17273e662cL, 0x98f54449579b4468L, 0x5c8a5fb42c7d1bd9L, 0x39296a789a3bc004L,
         0x118L,
@@ -178,28 +178,28 @@ void benchmark_secp521r() {
 
 void benchmark_secp521r_dbl() {
 #ifdef SECP521
-    uint64_t p[SIZE] = {
+    mp_limb_t p[SIZE] = {
         0xffffffffffffffff, 0xffffffffffffffff, 0xffffffffffffffff, 0xffffffffffffffff,
         0xffffffffffffffff, 0xffffffffffffffff, 0xffffffffffffffff, 0xffffffffffffffff,
         0x1ff
     };
-    uint64_t a[SIZE] = {
+    mp_limb_t a[SIZE] = {
         0xfffffffffffffffc, 0xffffffffffffffff, 0xffffffffffffffff, 0xffffffffffffffff,
         0xffffffffffffffff, 0xffffffffffffffff, 0xffffffffffffffff, 0xffffffffffffffff,
         0x1ff
     };
 
-    uint64_t b[SIZE] = {
+    mp_limb_t b[SIZE] = {
         0xef451fd46b503f00L, 0x3573df883d2c34f1L, 0x1652c0bd3bb1bf07L, 0x56193951ec7e937bL,
         0xb8b489918ef109e1L, 0xa2da725b99b315f3L, 0x929a21a0b68540eeL, 0x953eb9618e1c9a1fL,
         0x51L,
     };
-    uint64_t gx[SIZE] = {
+    mp_limb_t gx[SIZE] = {
         0xf97e7e31c2e5bd66L, 0x3348b3c1856a429bL, 0xfe1dc127a2ffa8deL, 0xa14b5e77efe75928L,
         0xf828af606b4d3dbaL, 0x9c648139053fb521L, 0x9e3ecb662395b442L, 0x858e06b70404e9cdL,
         0xc6L,
     };
-    uint64_t gy[SIZE] = {
+    mp_limb_t gy[SIZE] = {
         0x88be94769fd16650L, 0x353c7086a272c240L, 0xc550b9013fad0761L, 0x97ee72995ef42640L,
         0x17afbd17273e662cL, 0x98f54449579b4468L, 0x5c8a5fb42c7d1bd9L, 0x39296a789a3bc004L,
         0x118L,

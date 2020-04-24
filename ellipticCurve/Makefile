@@ -25,11 +25,11 @@ clean:
 .SECONDARY: $(DEP)
 
 
-./ec_test: test.cpp FP.o curve.o
-	$(CXX) -o ec_test test.cpp FP.o curve.o $(CXXFLAGS) $(LDFLAGS)  
+./ec_test: tests/test.cpp FP.o curve.o
+	$(CXX) -o ec_test tests/test.cpp FP.o curve.o $(CXXFLAGS) $(LDFLAGS)  
 
-./ec_test_mi: test.cpp FP.o curve.o
-	$(CXX) -o ec_test_mi test.cpp FP.o curve.o $(CXXFLAGS) $(LDFLAGS) $(INCLUDE) -DUSE_MIMALLOC
+./ec_test_mi: tests/test.cpp FP.o curve.o
+	$(CXX) -o ec_test_mi tests/test.cpp FP.o curve.o $(CXXFLAGS) $(LDFLAGS) $(INCLUDE) -DUSE_MIMALLOC
 
 test: ./ec_test_mi
 	./ec_test_mi
@@ -43,18 +43,22 @@ test: ./ec_test_mi
 benchmark: ./ec_benchmark_mi
 	./ec_benchmark_mi
 
+# このあたりも綺麗にしたい
 test521:
-	$(CXX) -o FP.o -c FP.cpp $(CXXFLAGS) -DSECP521
-	$(CXX) -o curve.o -c curve.cpp $(CXXFLAGS) -DSECP521
-	$(CXX) -o ec_test521 test_secp521.cpp FP.o curve.o $(CXXFLAGS) $(LDFLAGS) -DSECP521
+	make clean
+	$(CXX) -o FP.o -c src/FP.cpp $(CXXFLAGS) -DSECP521 -I ./include
+	$(CXX) -o curve.o -c src/curve.cpp $(CXXFLAGS) -DSECP521 -I ./include
+	$(CXX) -o ec_test521 tests/test_secp521.cpp FP.o curve.o $(CXXFLAGS) $(LDFLAGS) -DSECP521 -I ./include
 
 benchmark521:
-	$(CXX) -o FP.o -c FP.cpp $(CXXFLAGS) -DSECP521
-	$(CXX) -o curve.o -c curve.cpp $(CXXFLAGS) -DSECP521
-	$(CXX) -o ec_benchmark521 benchmarkSecp521.cpp FP.o curve.o $(CXXFLAGS) $(LDFLAGS) -DSECP521
+	make clean
+	$(CXX) -o FP.o -c src/FP.cpp $(CXXFLAGS) -DSECP521 -I ./include
+	$(CXX) -o curve.o -c src/curve.cpp $(CXXFLAGS) -DSECP521 -I ./include
+	$(CXX) -o ec_benchmark521 benchmarkSecp521.cpp FP.o curve.o $(CXXFLAGS) $(LDFLAGS) -DSECP521 -I ./include
 
 benchmark521_mi:
-	$(CXX) -o FP.o -c FP.cpp $(CXXFLAGS) 
-	$(CXX) -o curve.o -c curve.cpp $(CXXFLAGS) 
+	make clean
+	$(CXX) -o FP.o -c src/FP.cpp $(CXXFLAGS) 
+	$(CXX) -o curve.o -c src/curve.cpp $(CXXFLAGS) 
 	$(CXX) -o ec_benchmark521_mi benchmarkSecp521.cpp FP.o curve.o $(CXXFLAGS) $(LDFLAGS) $(INCLUDE)
 

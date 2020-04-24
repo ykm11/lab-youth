@@ -105,7 +105,7 @@ public:
         }
     }
 
-    static void setModulo(const uint64_t p[SIZE]);
+    static void setModulo(const mp_limb_t p[SIZE]);
     static void setModulo(const mpz_class& v);
 
     Fp operator+(const Fp& other) const { 

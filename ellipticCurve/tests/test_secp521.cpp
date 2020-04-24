@@ -15,7 +15,7 @@ n = 0x01FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFA518687
 
 */
 void test_FP521sqr() {
-    uint64_t p[SIZE] = {
+    mp_limb_t p[SIZE] = {
         0xffffffffffffffff, 0xffffffffffffffff, 0xffffffffffffffff, 0xffffffffffffffff,
         0xffffffffffffffff, 0xffffffffffffffff, 0xffffffffffffffff, 0xffffffffffffffff,
         0x1ff
@@ -48,7 +48,7 @@ void test_FP521sqr() {
 
 
 void test_FP521mul() {
-    uint64_t p[SIZE] = {
+    mp_limb_t p[SIZE] = {
         0xffffffffffffffff, 0xffffffffffffffff, 0xffffffffffffffff, 0xffffffffffffffff,
         0xffffffffffffffff, 0xffffffffffffffff, 0xffffffffffffffff, 0xffffffffffffffff,
         0x1ff
@@ -87,7 +87,7 @@ void test_FP521mul() {
 
 
 void test_secp521r() {
-    uint64_t p[SIZE] = {
+    mp_limb_t p[SIZE] = {
         0xffffffffffffffff, 0xffffffffffffffff, 0xffffffffffffffff, 0xffffffffffffffff,
         0xffffffffffffffff, 0xffffffffffffffff, 0xffffffffffffffff, 0xffffffffffffffff,
         0x1ff

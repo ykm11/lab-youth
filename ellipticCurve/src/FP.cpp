@@ -32,7 +32,7 @@ void Fp::setModulo(const mpz_class& v) {
 }
 
 #ifdef USE_MPN
-void Fp::setModulo(const uint64_t p[SIZE]) {
+void Fp::setModulo(const mp_limb_t p[SIZE]) {
     mpn_copyi((mp_limb_t *)modulus, (const mp_limb_t *)p, SIZE);
 }
 #endif
