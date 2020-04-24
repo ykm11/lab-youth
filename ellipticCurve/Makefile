@@ -5,12 +5,12 @@ DEP=$(SRC:.cpp=.d)
 TARGET=main
 CXXFLAGS=-Wall -Wextra -O3 -std=c++17 -DNDEBUG -DUSE_MPN
 LDFLAGS=-lgmpxx -lgmp -lpthread
-INCLUDE=-I /usr/local/lib/mimalloc-1.6/include /usr/local/lib/mimalloc-1.6/libmimalloc.a 
+INCLUDE=-I /usr/local/lib/mimalloc-1.6/include /usr/local/lib/mimalloc-1.6/libmimalloc.a -I ./include
 
 all: $(TARGET)
 
-%.o: %.cpp
-	$(CXX) -c $< -o $@ $(CXXFLAGS) -MMD -MP -MF $(@:.o=.d)
+%.o: src/%.cpp
+	$(CXX) -c $< -o $@ $(CXXFLAGS) -MMD -MP -MF $(@:.o=.d) -I ./include
 
 -include $(DEP)
 
