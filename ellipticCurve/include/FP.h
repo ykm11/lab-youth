@@ -16,10 +16,25 @@ static inline void sub_n(mp_limb_t* z, mp_limb_t* x, mp_limb_t* y, size_t n);
 static inline void add_n(mp_limb_t* z, mp_limb_t* x, mp_limb_t* y, size_t n);
 static inline void getArray(mp_limb_t *buf, size_t maxSize, const mpz_class &x, int xn);
 
+#ifdef USE_MPN
+static inline void mulMod(mp_limb_t* z, const mp_limb_t* x, const mp_limb_t* y, const mp_limb_t* modulus, 
+        mp_limb_t* tmp,  mp_limb_t* q);
+static inline void powMod(mp_limb_t* r, const mp_limb_t* x, const mp_limb_t* e, 
+        const mp_limb_t* modulus, mp_limb_t* tp);
+static inline void sqrMod(mp_limb_t* r, const mp_limb_t* x, const mp_limb_t* modulus, 
+        mp_limb_t* tmp,  mp_limb_t* q);
+#else
+static inline void mulMod(mpz_class& z, const mpz_class& x, const mpz_class& y, const mpz_class& m);
+static inline void sqrMod(mpz_class& z, const mpz_class& x, const mpz_class& m);
+static inline void powMod(mpz_class& z, const mpz_class& x, const mpz_class& y, const mpz_class& m);
+#endif
+
+ 
 #ifdef SECP521
 #define SIZE 9
 void add(Fp& z, const Fp& x, uint64_t scalar);
-
+static inline void mod(mp_limb_t *z, const mp_limb_t *XY, const mp_limb_t *p, mp_limb_t *t, mp_limb_t *s);
+ 
 #elif defined(USE_MPN)
 #define SIZE 4
 void add(Fp& z, const Fp& x, uint64_t scalar);
@@ -176,12 +191,6 @@ static inline void set_mpz_t(mpz_t& z, const uint64_t* p, int n) {
     z->_mp_d = (mp_limb_t*)const_cast<uint64_t*>(p);
 }
 
-static inline void dump(const mp_limb_t x[SIZE]) {
-    mpz_t mx;
-    set_mpz_t(mx, (const uint64_t*)x, SIZE);
-    std::cout << mx << std::endl;
-}
-
 #endif
 
 static inline void dump(const Fp &x) {
@@ -215,59 +224,3 @@ static inline void getArray(mp_limb_t *buf, size_t maxSize, const mpz_class &x, 
     memset((char*)buf + xByteSize, 0, bufByteSize - xByteSize);
 }
 
-
-#ifdef USE_MPN
-static inline void powMod(mp_limb_t* r, const mp_limb_t* x, const mp_limb_t* e, const mp_limb_t* modulus,
-        mp_limb_t* tp) {
-    mpn_sec_powm(r, x, SIZE, e, SIZE*GMP_NUMB_BITS, modulus, SIZE, tp);
-}
-
-static inline void sqrMod(mp_limb_t* r, const mp_limb_t* x, const mp_limb_t* modulus, 
-        mp_limb_t* tmp,  mp_limb_t* q) {
-    mpn_sqr(tmp, x, SIZE);
-    mpn_tdiv_qr(q, r, 0, (const mp_limb_t*)tmp, SIZE*2, modulus, SIZE);
-}
-static inline void mulMod(mp_limb_t* z, const mp_limb_t* x, const mp_limb_t* y, const mp_limb_t* modulus, 
-        mp_limb_t* tmp,  mp_limb_t* q) {
-    mpn_mul_n(tmp, x, y, SIZE);
-    mpn_tdiv_qr(q, z, 0, (const mp_limb_t*)tmp, SIZE*2, modulus, SIZE);
-} 
-#else
-static inline void mulMod(mpz_class& z, const mpz_class& x, const mpz_class& y, const mpz_class& m) {
-    mpz_mul(z.get_mpz_t(), x.get_mpz_t(), y.get_mpz_t());
-    mpz_mod(z.get_mpz_t(), z.get_mpz_t(), m.get_mpz_t());
-}
-
-static inline void sqrMod(mpz_class& z, const mpz_class& x, const mpz_class& m) {
-    mpz_powm_ui(z.get_mpz_t(), x.get_mpz_t(), 2, m.get_mpz_t());
-}
-
-static inline void powMod(mpz_class& z, const mpz_class& x, const mpz_class& y, const mpz_class& m) {
-    mpz_powm(z.get_mpz_t(), x.get_mpz_t(), y.get_mpz_t(), m.get_mpz_t());
-}
-
-#endif
-
-#ifdef SECP521
-static inline void mod(mp_limb_t *z, const mp_limb_t *XY, const mp_limb_t *p, mp_limb_t *t, mp_limb_t *s) {
-    // (T + (T mod R)*N) / R
-    mpn_zero(t, SIZE*2);
-    mpn_zero(s, SIZE*2);
-    mpn_and_n(t, XY, p, SIZE); // T mod R
-    for (size_t i = 0; i < SIZE; i++) {
-        s[i+8] = t[i];
-    }
-    mpn_lshift(s, (const mp_limb_t*)s, SIZE*2, 9);
-    sub_n(s, s, t, SIZE*2);
-    add_n(t, s, (mp_limb_t *)XY, SIZE*2); // (T + (T mod R)*N)
-
-    mpn_rshift(t, (const mp_limb_t*)t, SIZE*2, 9);
-    for (size_t i = 0; i < SIZE; i++) { // (T + (T mod R)*N) / R
-        t[i] = t[i+8];
-    }
-    if (mpn_cmp((const mp_limb_t*)t, p, SIZE) >= 0) {
-        sub_n(t, t, (mp_limb_t*)p, SIZE);
-    }
-    mpn_copyi(z, (const mp_limb_t*)t, SIZE);
-}
-#endif
