@@ -202,21 +202,6 @@ bool Fp::squareRoot(Fp& r, const Fp& x) {
     }
 }
 
-static inline void powMod(mp_limb_t* r, const mp_limb_t* x, const mp_limb_t* e, const mp_limb_t* modulus,
-        mp_limb_t* tp) {
-    mpn_sec_powm(r, x, SIZE, e, SIZE*GMP_NUMB_BITS, modulus, SIZE, tp);
-}
-
-static inline void sqrMod(mp_limb_t* r, const mp_limb_t* x, const mp_limb_t* modulus, 
-        mp_limb_t* tmp,  mp_limb_t* q) {
-    mpn_sqr(tmp, x, SIZE);
-    mpn_tdiv_qr(q, r, 0, (const mp_limb_t*)tmp, SIZE*2, modulus, SIZE);
-}
-static inline void mulMod(mp_limb_t* z, const mp_limb_t* x, const mp_limb_t* y, const mp_limb_t* modulus, 
-        mp_limb_t* tmp,  mp_limb_t* q) {
-    mpn_mul_n(tmp, x, y, SIZE);
-    mpn_tdiv_qr(q, z, 0, (const mp_limb_t*)tmp, SIZE*2, modulus, SIZE);
-} 
 
 #ifdef SECP521
 static inline void mod(mp_limb_t *z, const mp_limb_t *XY, const mp_limb_t *p, mp_limb_t *t, mp_limb_t *s) {

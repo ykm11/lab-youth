@@ -204,6 +204,39 @@ static inline void dump(const Fp &x) {
 }
 
 
+#ifdef USE_MPN
+static inline void powMod(mp_limb_t* r, const mp_limb_t* x, const mp_limb_t* e, const mp_limb_t* modulus,
+        mp_limb_t* tp) {
+    mpn_sec_powm(r, x, SIZE, e, SIZE*GMP_NUMB_BITS, modulus, SIZE, tp);
+}
+
+static inline void sqrMod(mp_limb_t* r, const mp_limb_t* x, const mp_limb_t* modulus, 
+        mp_limb_t* tmp,  mp_limb_t* q) {
+    mpn_sqr(tmp, x, SIZE);
+    mpn_tdiv_qr(q, r, 0, (const mp_limb_t*)tmp, SIZE*2, modulus, SIZE);
+}
+static inline void mulMod(mp_limb_t* z, const mp_limb_t* x, const mp_limb_t* y, const mp_limb_t* modulus, 
+        mp_limb_t* tmp,  mp_limb_t* q) {
+    mpn_mul_n(tmp, x, y, SIZE);
+    mpn_tdiv_qr(q, z, 0, (const mp_limb_t*)tmp, SIZE*2, modulus, SIZE);
+} 
+
+#else
+static inline void mulMod(mpz_class& z, const mpz_class& x, const mpz_class& y, const mpz_class& m) {
+    mpz_mul(z.get_mpz_t(), x.get_mpz_t(), y.get_mpz_t());
+    mpz_mod(z.get_mpz_t(), z.get_mpz_t(), m.get_mpz_t());
+}
+
+static inline void sqrMod(mpz_class& z, const mpz_class& x, const mpz_class& m) {
+    mpz_powm_ui(z.get_mpz_t(), x.get_mpz_t(), 2, m.get_mpz_t());
+}
+
+static inline void powMod(mpz_class& z, const mpz_class& x, const mpz_class& y, const mpz_class& m) {
+    mpz_powm(z.get_mpz_t(), x.get_mpz_t(), y.get_mpz_t(), m.get_mpz_t());
+}
+
+#endif
+
 static inline void add_n(mp_limb_t* z, mp_limb_t* x, mp_limb_t* y, size_t n) {
     mpn_add_n(z, (const mp_limb_t *)x, (const mp_limb_t*)y, n); 
 }
