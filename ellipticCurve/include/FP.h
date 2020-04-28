@@ -203,6 +203,12 @@ static inline void dump(const Fp &x) {
 #endif
 }
 
+static inline void dump(const mp_limb_t x[SIZE]) {
+    mpz_t mx;
+    set_mpz_t(mx, (const uint64_t*)x, SIZE);
+    std::cout << mx << std::endl;
+}
+
 
 #ifdef USE_MPN
 static inline void powMod(mp_limb_t* r, const mp_limb_t* x, const mp_limb_t* e, const mp_limb_t* modulus,
