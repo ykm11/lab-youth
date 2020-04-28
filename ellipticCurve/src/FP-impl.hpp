@@ -1,3 +1,4 @@
+#pragma once
 #include "FP.h"
 #include <gmpxx.h>
 #include <iostream>
