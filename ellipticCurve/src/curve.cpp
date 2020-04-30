@@ -288,8 +288,8 @@ void dump(const Point &P) {
         std::cout << "(" << x.value << " : " << y.value << " : 1)" << std::endl;
 #else
         mpz_t mx, my;
-        set_mpz_t(mx, (uint64_t*)x.value, SIZE);
-        set_mpz_t(my, (uint64_t*)y.value, SIZE);
+        set_mpz_t(mx, (uint64_t*)x.value, Fp::size);
+        set_mpz_t(my, (uint64_t*)y.value, Fp::size);
         std::cout << "(" << mx << " : " << my << " : 1)" << std::endl;
 #endif
     }
@@ -305,8 +305,8 @@ void dump(const jPoint &P) {
         std::cout << "(" << x.value << " : " << y.value << " : 1)" << std::endl;
 #else
         mpz_t mx, my;
-        set_mpz_t(mx, (uint64_t*)x.value, SIZE);
-        set_mpz_t(my, (uint64_t*)y.value, SIZE);
+        set_mpz_t(mx, (uint64_t*)x.value, Fp::size);
+        set_mpz_t(my, (uint64_t*)y.value, Fp::size);
         std::cout << "(" << mx << " : " << my << " : 1)" << std::endl;
 #endif
     }

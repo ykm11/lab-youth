@@ -350,7 +350,7 @@ public:
 #else
         add(rw, rw, 1);
         Fp::neg(rw, rw); // - (sqrt(-3) + 1)
-        mpn_rshift((mp_limb_t *)rw.value, (const mp_limb_t *)rw.value, SIZE, 1);
+        mpn_rshift((mp_limb_t *)rw.value, (const mp_limb_t *)rw.value, Fp::size, 1);
         // - (sqrt(-3) + 1) / 2
 
         mpz_class gx("79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798", 16);
@@ -374,9 +374,9 @@ static inline void setInfPoint(Point &R) {
     R.y.value = 1;
     R.z.value = 0;
 #else
-    mpn_zero((mp_limb_t *)R.x.value, SIZE);
-    mpn_zero((mp_limb_t *)R.y.value, SIZE);
-    mpn_zero((mp_limb_t *)R.z.value, SIZE);
+    mpn_zero((mp_limb_t *)R.x.value, Fp::size);
+    mpn_zero((mp_limb_t *)R.y.value, Fp::size);
+    mpn_zero((mp_limb_t *)R.z.value, Fp::size);
     //R.x.value[0] = 0;
     R.y.value[0] = 1;
     //R.z.value[0] = 0;
@@ -389,9 +389,9 @@ static inline void setInfPoint(jPoint &R) {
     R.y.value = 1;
     R.z.value = 0;
 #else
-    mpn_zero((mp_limb_t *)R.x.value, SIZE);
-    mpn_zero((mp_limb_t *)R.y.value, SIZE);
-    mpn_zero((mp_limb_t *)R.z.value, SIZE);
+    mpn_zero((mp_limb_t *)R.x.value, Fp::size);
+    mpn_zero((mp_limb_t *)R.y.value, Fp::size);
+    mpn_zero((mp_limb_t *)R.z.value, Fp::size);
     R.x.value[0] = 1;
     R.y.value[0] = 1;
     //R.z.value[0] = 0;
@@ -404,9 +404,9 @@ template <class TPoint> static inline void setPoint(TPoint &R, const Fp &Rx, con
     R.y.value = Ry.value;
     R.z.value = Rz.value;
 #else
-    mpn_copyi((mp_limb_t *)R.x.value, (const mp_limb_t *)Rx.value, SIZE);
-    mpn_copyi((mp_limb_t *)R.y.value, (const mp_limb_t *)Ry.value, SIZE);
-    mpn_copyi((mp_limb_t *)R.z.value, (const mp_limb_t *)Rz.value, SIZE);
+    mpn_copyi((mp_limb_t *)R.x.value, (const mp_limb_t *)Rx.value, Fp::size);
+    mpn_copyi((mp_limb_t *)R.y.value, (const mp_limb_t *)Ry.value, Fp::size);
+    mpn_copyi((mp_limb_t *)R.z.value, (const mp_limb_t *)Rz.value, Fp::size);
 #endif
 }
 
