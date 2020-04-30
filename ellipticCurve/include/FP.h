@@ -248,6 +248,11 @@ static inline void sub_n(mp_limb_t* z, mp_limb_t* x, mp_limb_t* y, size_t n) {
     mpn_sub_n(z, (const mp_limb_t *)x, (const mp_limb_t*)y, n); 
 }
 
+static inline void mul_n(mp_limb_t* XY, mp_limb_t* x, mp_limb_t* y, size_t n) {
+    mpn_mul_n(XY, (const mp_limb_t*)x, (const mp_limb_t*)y, n);
+}
+
+
 static inline void getArray(mp_limb_t *buf, size_t maxSize, const mpz_class &x, int xn) {
     const size_t bufByteSize = sizeof(mp_limb_t) * maxSize;
     size_t xByteSize;

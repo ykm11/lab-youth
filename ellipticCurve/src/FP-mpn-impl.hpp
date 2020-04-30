@@ -27,7 +27,8 @@ void Fp::setModulo(const mp_limb_t p[YKM_ECC_MAX_SIZE]) {
 
 
 void Fp::neg(Fp& r, const Fp& x) {
-    mpn_sub_n((mp_limb_t *)r.value, (const mp_limb_t *)Fp::modulus, (const mp_limb_t *)x.value, size);
+    sub_n(r.value, Fp::modulus, (mp_limb_t*)x.value, size);
+    //mpn_sub_n((mp_limb_t *)r.value, (const mp_limb_t *)Fp::modulus, (const mp_limb_t *)x.value, size);
 }
 
 bool isEq(const Fp& x, const Fp& y) {
@@ -37,32 +38,37 @@ bool isEq(const Fp& x, const Fp& y) {
 void add(Fp& z, const Fp& x, const Fp& y) {
     if (mpn_add_n((mp_limb_t *)z.value, (const mp_limb_t *)x.value, (const mp_limb_t *)y.value, Fp::size)) {
         mp_limb_t r[Fp::size];
-        mpn_sub_n(r, (const mp_limb_t *)z.value, (const mp_limb_t *)Fp::modulus, Fp::size);
+        //mpn_sub_n(r, (const mp_limb_t *)z.value, (const mp_limb_t *)Fp::modulus, Fp::size);
+        sub_n(r, z.value, Fp::modulus, Fp::size);
         mpn_copyi((mp_limb_t *)z.value, (const mp_limb_t *)r, Fp::size);
         return;
     }
 
     if (mpn_cmp((const mp_limb_t *)z.value, (const mp_limb_t *)Fp::modulus, Fp::size) >= 0) {
-        mpn_sub_n((mp_limb_t *)z.value, (const mp_limb_t *)z.value, (const mp_limb_t *)Fp::modulus, Fp::size);
+        //mpn_sub_n((mp_limb_t *)z.value, (const mp_limb_t *)z.value, (const mp_limb_t *)Fp::modulus, Fp::size);
+        sub_n(z.value, z.value, Fp::modulus, Fp::size);
     }
 }
 
 void add(Fp& z, const Fp& x, uint64_t scalar) {
     if (mpn_add_1((mp_limb_t *)z.value, (const mp_limb_t *)x.value, Fp::size, (mp_limb_t)scalar)) {
         mp_limb_t r[Fp::size];
-        mpn_sub_n(r, (const mp_limb_t *)z.value, (const mp_limb_t *)Fp::modulus, Fp::size);
+        //mpn_sub_n(r, (const mp_limb_t *)z.value, (const mp_limb_t *)Fp::modulus, Fp::size);
+        sub_n(r, z.value, Fp::modulus, Fp::size);
         mpn_copyi((mp_limb_t *)z.value, (const mp_limb_t *)r, Fp::size);
         return;
     }
     if (mpn_cmp((const mp_limb_t *)z.value, (const mp_limb_t *)Fp::modulus, Fp::size) >= 0) {
-        mpn_sub_n((mp_limb_t *)z.value, (const mp_limb_t *)z.value, (const mp_limb_t *)Fp::modulus, Fp::size);
+        //mpn_sub_n((mp_limb_t *)z.value, (const mp_limb_t *)z.value, (const mp_limb_t *)Fp::modulus, Fp::size);
+        mpn_sub_n(z.value, z.value, Fp::modulus, Fp::size);
     }
 }
 
 void sub(Fp& z, const Fp& x, const Fp& y) {
     if (mpn_sub_n((mp_limb_t *)z.value, (const mp_limb_t *)x.value, (const mp_limb_t *)y.value, Fp::size)) {
         mp_limb_t r[Fp::size];
-        mpn_add_n(r, (const mp_limb_t *)z.value, (const mp_limb_t *)Fp::modulus, Fp::size);
+        //mpn_add_n(r, (const mp_limb_t *)z.value, (const mp_limb_t *)Fp::modulus, Fp::size);
+        add_n(r, z.value, Fp::modulus, Fp::size);
         mpn_copyi((mp_limb_t *)z.value, r, Fp::size);
     }
 }
@@ -73,7 +79,8 @@ void mul(Fp& z, const Fp& x, const Fp& y) {
     mp_limb_t t[Fp::size*2];
     mp_limb_t s[Fp::size*2];
 
-    mpn_mul_n(tmp_z, (const mp_limb_t *)x.value, (const mp_limb_t *)y.value, Fp::size);
+    //mpn_mul_n(tmp_z, (const mp_limb_t *)x.value, (const mp_limb_t *)y.value, Fp::size);
+    mul_n(tmp_z, (mp_limb_t *)x.value, (mp_limb_t *)y.value, Fp::size);
     mod((mp_limb_t*)z.value, (const mp_limb_t *)tmp_z, (const mp_limb_t *)Fp::modulus, t, s);
 
 #elif defined(USE_MPN)
@@ -81,7 +88,8 @@ void mul(Fp& z, const Fp& x, const Fp& y) {
     mp_limb_t tmp_z[Fp::size * 2];
     mp_limb_t q[Fp::size + 1];
 
-    mpn_mul_n(tmp_z, (const mp_limb_t *)x.value, (const mp_limb_t *)y.value, Fp::size);
+    //mpn_mul_n(tmp_z, (const mp_limb_t *)x.value, (const mp_limb_t *)y.value, Fp::size);
+    mul_n(tmp_z, (mp_limb_t *)x.value, (mp_limb_t *)y.value, Fp::size);
     mpn_tdiv_qr(q, (mp_limb_t *)z.value, 0,
             tmp_z, Fp::size*2, (const mp_limb_t *)Fp::modulus, Fp::size);
 #else
@@ -103,8 +111,8 @@ void invmod(Fp& r, const Fp& x) {
     mpn_copyi((mp_limb_t*)r.value, (const mp_limb_t*)s, Fp::size);
 
     if (sn < 0) {
-        mpn_sub_n((mp_limb_t*)r.value, (const mp_limb_t*)Fp::modulus, 
-                (const mp_limb_t*)r.value, Fp::size);
+        //mpn_sub_n((mp_limb_t*)r.value, (const mp_limb_t*)Fp::modulus, (const mp_limb_t*)r.value, Fp::size);
+        sub_n(r.value, Fp::modulus, r.value, Fp::size);
     }
 }
 
@@ -176,8 +184,8 @@ bool Fp::squareRoot(Fp& r, const Fp& x) {
             return false;
         } else if (mpn_zero_p(z, size) == 1) { // t == 1
             if ((r.value[0] & 1) == 1) {
-                mpn_sub_n((mp_limb_t *)r.value, (const mp_limb_t *)Fp::modulus,  
-                        (const mp_limb_t*)r.value, size);
+                //mpn_sub_n((mp_limb_t *)r.value, (const mp_limb_t *)Fp::modulus, (const mp_limb_t*)r.value, size);
+                sub_n(r.value, Fp::modulus, r.value, size);
             }
             return true;
         }
