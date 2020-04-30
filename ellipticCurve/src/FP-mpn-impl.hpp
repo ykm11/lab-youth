@@ -205,27 +205,3 @@ bool Fp::squareRoot(Fp& r, const Fp& x) {
     }
 }
 
-
-#ifdef SECP521
-static inline void mod(mp_limb_t *z, const mp_limb_t *XY, const mp_limb_t *p, mp_limb_t *t, mp_limb_t *s) {
-    // (T + (T mod R)*N) / R
-    mpn_zero(t, Fp::size*2);
-    mpn_zero(s, Fp::size*2);
-    mpn_and_n(t, XY, p, Fp::size); // T mod R
-    for (size_t i = 0; i < Fp::size; i++) {
-        s[i+8] = t[i];
-    }
-    mpn_lshift(s, (const mp_limb_t*)s, Fp::size*2, 9);
-    sub_n(s, s, t, Fp::size*2);
-    add_n(t, s, (mp_limb_t *)XY, Fp::size*2); // (T + (T mod R)*N)
-
-    mpn_rshift(t, (const mp_limb_t*)t, Fp::size*2, 9);
-    for (size_t i = 0; i < Fp::size; i++) { // (T + (T mod R)*N) / R
-        t[i] = t[i+8];
-    }
-    if (mpn_cmp((const mp_limb_t*)t, p, Fp::size) >= 0) {
-        sub_n(t, t, (mp_limb_t*)p, Fp::size);
-    }
-    mpn_copyi(z, (const mp_limb_t*)t, Fp::size);
-}
-#endif
