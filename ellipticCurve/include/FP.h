@@ -121,7 +121,7 @@ public:
         }
     }
 
-    static void setModulo(const mp_limb_t p[size]);
+    static void setModulo(const mp_limb_t p[YKM_ECC_MAX_SIZE]);
     static void setModulo(const mpz_class& v);
 
     Fp operator+(const Fp& other) const { 

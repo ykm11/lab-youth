@@ -21,7 +21,7 @@ void Fp::setModulo(const mpz_class& v) {
     getArray(modulus, size, v, v.get_mpz_t()->_mp_size);
 }
 
-void Fp::setModulo(const mp_limb_t p[size]) {
+void Fp::setModulo(const mp_limb_t p[YKM_ECC_MAX_SIZE]) {
     mpn_copyi((mp_limb_t *)modulus, (const mp_limb_t *)p, size);
 }
 
