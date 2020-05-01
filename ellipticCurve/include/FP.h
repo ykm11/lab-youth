@@ -4,41 +4,39 @@
 #include <iostream>
 
 class Fp;
-void add(Fp& z, const Fp& x, const Fp& y);
-void sub(Fp& z, const Fp& x, const Fp& y);
-void mul(Fp& z, const Fp& x, const Fp& y);
-void invmod(Fp& r, const Fp& x);
-bool isEq(const Fp& x, const Fp& y);
-void sqr(Fp& r, const Fp& x);
-
-static inline bool zeroCmp(const Fp &x);
-static inline void sub_n(mp_limb_t* z, mp_limb_t* x, mp_limb_t* y, size_t n);
-static inline void add_n(mp_limb_t* z, mp_limb_t* x, mp_limb_t* y, size_t n);
-static inline void getArray(mp_limb_t *buf, size_t maxSize, const mpz_class &x, int xn);
+void add(Fp&, const Fp&, const Fp&);
+void sub(Fp&, const Fp&, const Fp&);
+void mul(Fp&, const Fp&, const Fp&);
+void invmod(Fp&, const Fp&);
+bool isEq(const Fp&, const Fp&);
+void sqr(Fp&, const Fp&);
+static inline bool zeroCmp(const Fp&);
 
 #ifdef USE_MPN
-static inline void mulMod(mp_limb_t* z, const mp_limb_t* x, const mp_limb_t* y, const mp_limb_t* modulus, 
-        mp_limb_t* tmp,  mp_limb_t* q, size_t size);
-static inline void powMod(mp_limb_t* r, const mp_limb_t* x, const mp_limb_t* e, 
-        const mp_limb_t* modulus, mp_limb_t* tp, size_t size);
-static inline void sqrMod(mp_limb_t* r, const mp_limb_t* x, const mp_limb_t* modulus, 
-        mp_limb_t* tmp,  mp_limb_t* q, size_t size);
+#define YKM_ECC_MAX_SIZE ((521+63)/64)
+
+static inline void sub_n(mp_limb_t*, mp_limb_t*, mp_limb_t*, size_t);
+static inline void add_n(mp_limb_t*, mp_limb_t*, mp_limb_t*, size_t);
+static inline void getArray(mp_limb_t*, size_t, const mpz_class &, int);
+static inline void mulMod(mp_limb_t*, const mp_limb_t*, const mp_limb_t*, const mp_limb_t*, 
+        mp_limb_t*,  mp_limb_t*, size_t);
+static inline void powMod(mp_limb_t*, const mp_limb_t*, const mp_limb_t*, 
+        const mp_limb_t*, mp_limb_t*, size_t);
+static inline void sqrMod(mp_limb_t*, const mp_limb_t*, const mp_limb_t*, 
+        mp_limb_t*,  mp_limb_t*, size_t);
 #else
-static inline void mulMod(mpz_class& z, const mpz_class& x, const mpz_class& y, const mpz_class& m);
-static inline void sqrMod(mpz_class& z, const mpz_class& x, const mpz_class& m);
-static inline void powMod(mpz_class& z, const mpz_class& x, const mpz_class& y, const mpz_class& m);
+static inline void mulMod(mpz_class&, const mpz_class&, const mpz_class&, const mpz_class&);
+static inline void sqrMod(mpz_class&, const mpz_class&, const mpz_class&);
+static inline void powMod(mpz_class&, const mpz_class&, const mpz_class&, const mpz_class&);
 #endif
 
-
-#define YKM_ECC_MAX_SIZE ((521+63)/64)
  
 #ifdef SECP521
-void add(Fp& z, const Fp& x, uint64_t scalar);
-static inline void mod(mp_limb_t *z, const mp_limb_t *XY, const mp_limb_t *p, mp_limb_t *t, mp_limb_t *s);
+void add(Fp&, const Fp&, uint64_t);
+static inline void mod(mp_limb_t*, const mp_limb_t*, const mp_limb_t*, mp_limb_t*, mp_limb_t*);
  
 #elif defined(USE_MPN)
-void add(Fp& z, const Fp& x, uint64_t scalar);
-static inline void dump(const mp_limb_t x[YKM_ECC_MAX_SIZE]);
+void add(Fp&, const Fp&, uint64_t);
 
 #endif
 
@@ -199,13 +197,6 @@ static inline void dump(const Fp &x) {
     std::cout << x.value << std::endl;
 #endif
 }
-
-static inline void dump(const mp_limb_t x[YKM_ECC_MAX_SIZE]) {
-    mpz_t mx;
-    set_mpz_t(mx, (const uint64_t*)x, YKM_ECC_MAX_SIZE);
-    std::cout << mx << std::endl;
-}
-
 
 #ifdef USE_MPN
 static inline void powMod(mp_limb_t* r, const mp_limb_t* x, const mp_limb_t* e, const mp_limb_t* modulus,

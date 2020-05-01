@@ -9,25 +9,25 @@ class Point;
 class jPoint;
 class EllipticCurve;
 
-bool isEqual(const Point &P, const Point &Q);
-bool isEqual(const jPoint &P, const jPoint &Q);
-void add(Point &R, const Point &P, const Point &Q);
-void add(jPoint &R, const jPoint &P, const jPoint &Q);
-template<class TPoint> void sub(TPoint &R, const TPoint &P, const TPoint &Q);
+bool isEqual(const Point&, const Point&);
+bool isEqual(const jPoint&, const jPoint&);
+void add(Point&, const Point&, const Point&);
+void add(jPoint&, const jPoint&, const jPoint&);
+template<class TPoint> void sub(TPoint&, const TPoint&, const TPoint&);
 
 void dump(const Point &P);
 void dump(const jPoint &P);
 
-template<class TPoint> void l_mul(TPoint &R, const TPoint &P, const mpz_class &x); 
-template<class TPoint> void r_mul(TPoint &R, const TPoint &G, const mpz_class &x);
-template<class TPoint> void montgomery_mul(TPoint &R0, const TPoint &G, const mpz_class &n);
-template<class TPoint> void window_mul(TPoint &R, const TPoint &G, const mpz_class &n);
-template<class TPoint> void naf_mul(TPoint &R, const TPoint &G, const mpz_class &x);
+template<class TPoint> void l_mul(TPoint&, const TPoint&, const mpz_class&); 
+template<class TPoint> void r_mul(TPoint&, const TPoint&, const mpz_class&);
+template<class TPoint> void montgomery_mul(TPoint&, const TPoint&, const mpz_class&);
+template<class TPoint> void window_mul(TPoint&, const TPoint&, const mpz_class&);
+template<class TPoint> void naf_mul(TPoint&, const TPoint&, const mpz_class&);
 
-void multipleMul(Point &R, const Point &P, const mpz_class &u, const Point &Q, const mpz_class &v);
+void multipleMul(Point&, const Point&, const mpz_class&, const Point&, const mpz_class&);
 
-static inline void getNafArray(int8_t naf[], const mpz_class &x);
-template <class TPoint> static inline void setPoint(TPoint &R, const Fp &Rx, const Fp &Ry, const Fp &Rz);
+static inline void getNafArray(int8_t *naf, const mpz_class&);
+template <class TPoint> static inline void setPoint(TPoint&, const Fp&, const Fp&, const Fp&);
 
 class Point {
 public:
@@ -410,7 +410,7 @@ template <class TPoint> static inline void setPoint(TPoint &R, const Fp &Rx, con
 #endif
 }
 
-static inline void getNafArray(int8_t naf[], const mpz_class &x) {
+static inline void getNafArray(int8_t *naf, const mpz_class &x) {
     int j = 0;
     mpz_class z, n; 
     n = x;
