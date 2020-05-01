@@ -81,7 +81,7 @@ void mul(Fp& z, const Fp& x, const Fp& y) {
 
     //mpn_mul_n(tmp_z, (const mp_limb_t *)x.value, (const mp_limb_t *)y.value, Fp::size);
     mul_n(tmp_z, (mp_limb_t *)x.value, (mp_limb_t *)y.value, Fp::size);
-    mod((mp_limb_t*)z.value, (const mp_limb_t *)tmp_z, (const mp_limb_t *)Fp::modulus, t, s);
+    secp521Mod((mp_limb_t*)z.value, (const mp_limb_t *)tmp_z, (const mp_limb_t *)Fp::modulus, t, s);
 
 #elif defined(USE_MPN)
 
@@ -123,7 +123,7 @@ void sqr(Fp &r, const Fp &x) { // r <- x^2
     mp_limb_t s[Fp::size*2];
 
     mpn_sqr(tmp_r, (const mp_limb_t *)x.value, Fp::size);
-    mod((mp_limb_t*)r.value, (const mp_limb_t *)tmp_r, (const mp_limb_t *)Fp::modulus, t, s);
+    secp521Mod((mp_limb_t*)r.value, (const mp_limb_t *)tmp_r, (const mp_limb_t *)Fp::modulus, t, s);
 #elif defined(USE_MPN)
     mp_limb_t tmp_r[Fp::size * 2];
     mp_limb_t q[Fp::size + 1];

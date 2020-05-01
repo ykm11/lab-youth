@@ -17,6 +17,7 @@ static inline bool zeroCmp(const Fp&);
 
 static inline void sub_n(mp_limb_t*, mp_limb_t*, mp_limb_t*, size_t);
 static inline void add_n(mp_limb_t*, mp_limb_t*, mp_limb_t*, size_t);
+static inline void mul_n(mp_limb_t*, mp_limb_t*, mp_limb_t*, size_t);
 static inline void getArray(mp_limb_t*, size_t, const mpz_class &, int);
 static inline void mulMod(mp_limb_t*, const mp_limb_t*, const mp_limb_t*, const mp_limb_t*, 
         mp_limb_t*,  mp_limb_t*, size_t);
@@ -24,6 +25,9 @@ static inline void powMod(mp_limb_t*, const mp_limb_t*, const mp_limb_t*,
         const mp_limb_t*, mp_limb_t*, size_t);
 static inline void sqrMod(mp_limb_t*, const mp_limb_t*, const mp_limb_t*, 
         mp_limb_t*,  mp_limb_t*, size_t);
+
+static inline void copy_n(mp_limb_t *r, mp_limb_t *v, size_t n);
+
 #else
 static inline void mulMod(mpz_class&, const mpz_class&, const mpz_class&, const mpz_class&);
 static inline void sqrMod(mpz_class&, const mpz_class&, const mpz_class&);
@@ -33,7 +37,7 @@ static inline void powMod(mpz_class&, const mpz_class&, const mpz_class&, const 
  
 #ifdef SECP521
 void add(Fp&, const Fp&, uint64_t);
-static inline void mod(mp_limb_t*, const mp_limb_t*, const mp_limb_t*, mp_limb_t*, mp_limb_t*);
+static inline void secp521Mod(mp_limb_t*, const mp_limb_t*, const mp_limb_t*, mp_limb_t*, mp_limb_t*);
  
 #elif defined(USE_MPN)
 void add(Fp&, const Fp&, uint64_t);
@@ -155,11 +159,12 @@ public:
 #endif
 
 
-static inline void move(Fp &z, const Fp &x) {
+static inline void copy(Fp &z, const Fp &x) {
 #ifndef USE_MPN
     z.value = x.value;
 #else
-    mpn_copyi(z.value, (const mp_limb_t *)x.value, Fp::size);
+    //mpn_copyi(z.value, (const mp_limb_t *)x.value, Fp::size);
+    copy_n(z.value, (mp_limb_t *)x.value, Fp::size);
 #endif
 }
 
@@ -243,6 +248,9 @@ static inline void mul_n(mp_limb_t* XY, mp_limb_t* x, mp_limb_t* y, size_t n) {
     mpn_mul_n(XY, (const mp_limb_t*)x, (const mp_limb_t*)y, n);
 }
 
+static inline void copy_n(mp_limb_t *r, mp_limb_t *v, size_t n) {
+    mpn_copyi(r, (const mp_limb_t*)v, n);
+}
 
 static inline void getArray(mp_limb_t *buf, size_t maxSize, const mpz_class &x, int xn) {
     const size_t bufByteSize = sizeof(mp_limb_t) * maxSize;
@@ -257,25 +265,26 @@ static inline void getArray(mp_limb_t *buf, size_t maxSize, const mpz_class &x, 
 }
 
 #ifdef SECP521
-static inline void mod(mp_limb_t *z, const mp_limb_t *XY, const mp_limb_t *p, mp_limb_t *t, mp_limb_t *s) {
+static inline void secp521Mod(mp_limb_t *z, const mp_limb_t *XY, const mp_limb_t *p, mp_limb_t *t, mp_limb_t *s) {
     // (T + (T mod R)*N) / R
-    mpn_zero(t, Fp::size*2);
-    mpn_zero(s, Fp::size*2);
-    mpn_and_n(t, XY, p, Fp::size); // T mod R
-    for (size_t i = 0; i < Fp::size; i++) {
+    mpn_zero(t, 9*2);
+    mpn_zero(s, 9*2);
+    mpn_and_n(t, XY, p, 9); // T mod R
+    for (size_t i = 0; i < 9; i++) {
         s[i+8] = t[i];
     }
-    mpn_lshift(s, (const mp_limb_t*)s, Fp::size*2, 9);
-    sub_n(s, s, t, Fp::size*2);
-    add_n(t, s, (mp_limb_t *)XY, Fp::size*2); // (T + (T mod R)*N)
+    mpn_lshift(s, (const mp_limb_t*)s, 9*2, 9);
+    sub_n(s, s, t, 9*2);
+    add_n(t, s, (mp_limb_t *)XY, 9*2); // (T + (T mod R)*N)
 
-    mpn_rshift(t, (const mp_limb_t*)t, Fp::size*2, 9);
-    for (size_t i = 0; i < Fp::size; i++) { // (T + (T mod R)*N) / R
+    mpn_rshift(t, (const mp_limb_t*)t, 9*2, 9);
+    for (size_t i = 0; i < 9; i++) { // (T + (T mod R)*N) / R
         t[i] = t[i+8];
     }
-    if (mpn_cmp((const mp_limb_t*)t, p, Fp::size) >= 0) {
-        sub_n(t, t, (mp_limb_t*)p, Fp::size);
+    if (mpn_cmp((const mp_limb_t*)t, p, 9) >= 0) {
+        sub_n(t, t, (mp_limb_t*)p, 9);
     }
-    mpn_copyi(z, (const mp_limb_t*)t, Fp::size);
+    //mpn_copyi(z, (const mp_limb_t*)t, Fp::size);
+    copy_n(z, t, 9);
 }
 #endif

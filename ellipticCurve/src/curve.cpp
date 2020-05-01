@@ -255,7 +255,7 @@ bool isEqual(const Point &P, const Point &Q) {
     mul(u, P.x, Q.z); // X  * Z'
     mul(v, Q.x, P.z); // X' * Z
 
-    return (s == t) && (u == v);
+    return isEq(s, t) && isEq(u, v);
 }
 
 bool isEqual(const jPoint &P, const jPoint &Q) {
@@ -272,46 +272,8 @@ bool isEqual(const jPoint &P, const jPoint &Q) {
     mul(s, s, P.y); // Y1 * Z2^{3}
     mul(t, t, Q.y); // Y2 * Z1^{3}
 
-    sub(v, v, u); // X2 * Z1^{2} - X1 * Z2^{2}
-    sub(t, t, s); // Y2 * Z1^{3} - Y1 * Z2^{3}
-
-    return (zeroCmp(v) && zeroCmp(t));
+    return isEq(s, t) && isEq(u, v);
 }
-
-void dump(const Point &P) {
-    if (zeroCmp(P.z)) {
-        std::cout << "(0 : 1 : 0)" << std::endl;
-    } else {
-        Fp x, y;
-        P.xy(x, y);
-#ifndef USE_MPN
-        std::cout << "(" << x.value << " : " << y.value << " : 1)" << std::endl;
-#else
-        mpz_t mx, my;
-        set_mpz_t(mx, (uint64_t*)x.value, Fp::size);
-        set_mpz_t(my, (uint64_t*)y.value, Fp::size);
-        std::cout << "(" << mx << " : " << my << " : 1)" << std::endl;
-#endif
-    }
-}
-
-void dump(const jPoint &P) {
-    if (zeroCmp(P.z)) {
-        std::cout << "(1 : 1 : 0)" << std::endl;
-    } else {
-        Fp x, y;
-        P.xy(x, y);
-#ifndef USE_MPN
-        std::cout << "(" << x.value << " : " << y.value << " : 1)" << std::endl;
-#else
-        mpz_t mx, my;
-        set_mpz_t(mx, (uint64_t*)x.value, Fp::size);
-        set_mpz_t(my, (uint64_t*)y.value, Fp::size);
-        std::cout << "(" << mx << " : " << my << " : 1)" << std::endl;
-#endif
-    }
-}
-
 
 void multipleMul(Point &R, const Point &P, const mpz_class &u, const Point &Q, const mpz_class &v) {
     size_t k_bits;
@@ -396,15 +358,9 @@ void GLV::decomposing_k(mpz_class &k0, mpz_class &k1, const mpz_class &k) {
 }
 
 void GLV::lambdaMul(Point &R, const Point &P) { 
-#if 0
-    mulMod(R.x.value, GLV::rw.value, P.x.value, Fp::modulus); 
-    R.y = P.y;
-    R.z = P.z;
-#else
     mul(R.x, GLV::rw, P.x);
-    move(R.y, P.y);
-    move(R.z, P.z);
-#endif
+    copy(R.y, P.y);
+    copy(R.z, P.z);
 }
 
 void GLV::mulBase(Point &R, const mpz_class &k) { 
