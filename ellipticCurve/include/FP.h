@@ -107,8 +107,8 @@ public:
 
     Fp() { }
     Fp(mp_limb_t v[YKM_ECC_MAX_SIZE]){
-        mpn_copyi(value, (const mp_limb_t *)v, size);
-        if (mpn_cmp((const mp_limb_t *)value, (const mp_limb_t *)modulus, size) >= 0) {
+        copy_n(value, v, size);
+        if (cmp_n(value, modulus, size) >= 0) {
             sub_n(value, value, modulus, size);
         }
     }
@@ -120,7 +120,7 @@ public:
             sub_n(value, modulus, value, size);
             return;
         }
-        if (mpn_cmp((const mp_limb_t *)value, (const mp_limb_t *)modulus, size) >= 0) {
+        if (cmp_n(value, modulus, size) >= 0) {
             sub_n(value, value, modulus, size);
             return;
         }
@@ -182,7 +182,7 @@ inline bool zeroCmp(const Fp &x) {
 
 #ifdef YKM_ECC_USE_MPN
 
-static inline void set_mpz_t(mpz_t& z, const uint64_t* p, int n) {
+inline void set_mpz_t(mpz_t& z, const uint64_t* p, int n) {
     int s = n;
     while (s > 0) {
         if (p[s - 1]) break;
@@ -195,7 +195,7 @@ static inline void set_mpz_t(mpz_t& z, const uint64_t* p, int n) {
 
 #endif
 
-static inline void dump(const Fp &x) {
+inline void dump(const Fp &x) {
 #ifdef YKM_ECC_USE_MPN
     mpz_t mx;
     set_mpz_t(mx, (const uint64_t*)x.value, Fp::size);
