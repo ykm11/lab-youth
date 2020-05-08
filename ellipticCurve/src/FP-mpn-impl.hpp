@@ -22,30 +22,27 @@ void Fp::setModulo(const mpz_class& v) {
 }
 
 void Fp::setModulo(const mp_limb_t p[YKM_ECC_MAX_SIZE]) {
-    mpn_copyi((mp_limb_t *)modulus, (const mp_limb_t *)p, size);
+    copy_n(modulus, (mp_limb_t *)p, size);
 }
 
 
 void Fp::neg(Fp& r, const Fp& x) {
     sub_n(r.value, Fp::modulus, (mp_limb_t*)x.value, size);
-    //mpn_sub_n((mp_limb_t *)r.value, (const mp_limb_t *)Fp::modulus, (const mp_limb_t *)x.value, size);
 }
 
 bool isEq(const Fp& x, const Fp& y) {
-    return mpn_cmp((const mp_limb_t*)x.value, (const mp_limb_t*)y.value, Fp::size) == 0;
+    return cmp_n((mp_limb_t*)x.value, (mp_limb_t*)y.value, Fp::size) == 0;
 }
 
 void add(Fp& z, const Fp& x, const Fp& y) {
-    if (mpn_add_n((mp_limb_t *)z.value, (const mp_limb_t *)x.value, (const mp_limb_t *)y.value, Fp::size)) {
+    if (add_n(z.value, (mp_limb_t *)x.value, (mp_limb_t *)y.value, Fp::size)) {
         mp_limb_t r[Fp::size];
-        //mpn_sub_n(r, (const mp_limb_t *)z.value, (const mp_limb_t *)Fp::modulus, Fp::size);
         sub_n(r, z.value, Fp::modulus, Fp::size);
-        mpn_copyi((mp_limb_t *)z.value, (const mp_limb_t *)r, Fp::size);
+        copy_n(z.value, r, Fp::size);
         return;
     }
 
-    if (mpn_cmp((const mp_limb_t *)z.value, (const mp_limb_t *)Fp::modulus, Fp::size) >= 0) {
-        //mpn_sub_n((mp_limb_t *)z.value, (const mp_limb_t *)z.value, (const mp_limb_t *)Fp::modulus, Fp::size);
+    if (cmp_n(z.value, Fp::modulus, Fp::size) >= 0) {
         sub_n(z.value, z.value, Fp::modulus, Fp::size);
     }
 }
@@ -53,18 +50,17 @@ void add(Fp& z, const Fp& x, const Fp& y) {
 void add(Fp& z, const Fp& x, uint64_t scalar) {
     if (mpn_add_1((mp_limb_t *)z.value, (const mp_limb_t *)x.value, Fp::size, (mp_limb_t)scalar)) {
         mp_limb_t r[Fp::size];
-        //mpn_sub_n(r, (const mp_limb_t *)z.value, (const mp_limb_t *)Fp::modulus, Fp::size);
         sub_n(r, z.value, Fp::modulus, Fp::size);
-        mpn_copyi((mp_limb_t *)z.value, (const mp_limb_t *)r, Fp::size);
+        copy_n(z.value, r, Fp::size);
         return;
     }
-    if (mpn_cmp((const mp_limb_t *)z.value, (const mp_limb_t *)Fp::modulus, Fp::size) >= 0) {
-        mpn_sub_n(z.value, z.value, Fp::modulus, Fp::size);
+    if (cmp_n(z.value, Fp::modulus, Fp::size) >= 0) {
+        sub_n(z.value, z.value, Fp::modulus, Fp::size);
     }
 }
 
 void sub(Fp& z, const Fp& x, const Fp& y) {
-    if (mpn_sub_n((mp_limb_t *)z.value, (const mp_limb_t *)x.value, (const mp_limb_t *)y.value, Fp::size)) {
+    if (sub_n(z.value, (mp_limb_t *)x.value, (mp_limb_t *)y.value, Fp::size)) {
         mp_limb_t r[Fp::size];
         add_n(r, z.value, Fp::modulus, Fp::size);
         copy_n(z.value, r, Fp::size);
@@ -72,7 +68,7 @@ void sub(Fp& z, const Fp& x, const Fp& y) {
 }
 
 void mul(Fp& z, const Fp& x, const Fp& y) {
-#ifdef SECP521
+#ifdef YKM_ECC_SECP521
     mp_limb_t tmp_z[Fp::size * 2];
     mp_limb_t t[Fp::size*2];
     mp_limb_t s[Fp::size*2];
@@ -80,7 +76,7 @@ void mul(Fp& z, const Fp& x, const Fp& y) {
     mul_n(tmp_z, (mp_limb_t *)x.value, (mp_limb_t *)y.value, Fp::size);
     secp521Mod((mp_limb_t*)z.value, (const mp_limb_t *)tmp_z, (const mp_limb_t *)Fp::modulus, t, s);
 
-#elif defined(USE_MPN)
+#elif defined(YKM_ECC_USE_MPN)
 
     mp_limb_t tmp_z[Fp::size * 2];
     mp_limb_t q[Fp::size + 1];
@@ -111,14 +107,14 @@ void invmod(Fp& r, const Fp& x) {
 }
 
 void sqr(Fp &r, const Fp &x) { // r <- x^2
-#ifdef SECP521
+#ifdef YKM_ECC_SECP521
     mp_limb_t tmp_r[Fp::size * 2];
     mp_limb_t t[Fp::size*2];
     mp_limb_t s[Fp::size*2];
 
     mpn_sqr(tmp_r, (const mp_limb_t *)x.value, Fp::size);
     secp521Mod((mp_limb_t*)r.value, (const mp_limb_t *)tmp_r, (const mp_limb_t *)Fp::modulus, t, s);
-#elif defined(USE_MPN)
+#elif defined(YKM_ECC_USE_MPN)
     mp_limb_t tmp_r[Fp::size * 2];
     mp_limb_t q[Fp::size + 1];
 
@@ -154,7 +150,7 @@ bool Fp::squareRoot(Fp& r, const Fp& x) {
         powMod(b, z, t, modulus, tp, size);
  
         b[0]++; // b + 1 == p
-        if (mpn_cmp((const mp_limb_t*)b, (const mp_limb_t*)Fp::modulus, size) == 0) break; // b != 1
+        if (cmp_n(b, Fp::modulus, size) == 0) break; // b != 1
         z[0]++;
     }
 

@@ -1,4 +1,4 @@
-#ifndef SECP521
+#ifdef YKM_ECC_USE_MPN
 
 /*
     g++ -O3 -DNDEBUG -I <mimalloc>/include <mimalloc>/build/libmimalloc.a -lpthread -lgmpxx -lgmp
@@ -32,8 +32,6 @@ static struct UseMiMalloc {
 } g_UseMiMalloc;
 #endif
 
-#define SECP521_SIZE 9
-
 #include "curve.h"
 #include "FP.h"
 #include <iostream>
@@ -51,21 +49,8 @@ n = 0x01FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFA518687
 
 */
 void benchmark_FP521sqr() {
-#ifdef SECP521
-    mp_limb_t p[SECP521_SIZE] = {
-        0xffffffffffffffff, 0xffffffffffffffff, 0xffffffffffffffff, 0xffffffffffffffff,
-        0xffffffffffffffff, 0xffffffffffffffff, 0xffffffffffffffff, 0xffffffffffffffff,
-        0x1ff
-    };
-
-    mp_limb_t a[SECP521_SIZE] = {
-        0x2137201477420138L, 0x6313232130472104L, 0x3639164821638291L, 0x8371372917431694L,
-        0x1739278732747374L, 0x1732913789724789L, 0x7296392641693692L, 0x32dead13L,
-    };
-#else
     mpz_class p("1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", 16);
     mpz_class a("32DEAD137296392641693692173291378972478917392787327473748371372917431694363916482163829163132321304721042137201477420138", 16);
-#endif
     Fp::setModulo(p);
     Fp x(a);
     Fp z;
@@ -81,27 +66,9 @@ void benchmark_FP521sqr() {
 }
 
 void benchmark_FP521mul() {
-#ifdef SECP521
-    mp_limb_t p[SECP521_SIZE] = {
-        0xffffffffffffffff, 0xffffffffffffffff, 0xffffffffffffffff, 0xffffffffffffffff,
-        0xffffffffffffffff, 0xffffffffffffffff, 0xffffffffffffffff, 0xffffffffffffffff,
-        0x1ff
-    };
-
-    mp_limb_t a[SECP521_SIZE] = {
-        0x2137201477420138L, 0x6313232130472104L, 0x3639164821638291L, 0x8371372917431694L,
-        0x1739278732747374L, 0x1732913789724789L, 0x7296392641693692L, 0x32dead13L,
-    };
-
-    mp_limb_t b[SECP521_SIZE] = {
-        0x8032810382412080L, 0x2427104721732301L, 0x3281037402174017L, 0x7201839284217487L, 
-        0x1737201372138214L, 0x3747217427103782L, 0x13729dee74L,
-    };
-#else
     mpz_class p("1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", 16);
     mpz_class a("32DEAD137296392641693692173291378972478917392787327473748371372917431694363916482163829163132321304721042137201477420138", 16);
     mpz_class b("13729DEE74374721742710378217372013721382147201839284217487328103740217401724271047217323018032810382412080", 16);
-#endif
     Fp::setModulo(p);
     Fp x(a);
     Fp y(b);
@@ -119,40 +86,11 @@ void benchmark_FP521mul() {
 }
 
 void benchmark_secp521r() {
-#ifdef SECP521
-    mp_limb_t p[SECP521_SIZE] = {
-        0xffffffffffffffff, 0xffffffffffffffff, 0xffffffffffffffff, 0xffffffffffffffff,
-        0xffffffffffffffff, 0xffffffffffffffff, 0xffffffffffffffff, 0xffffffffffffffff,
-        0x1ff
-    };
-    mp_limb_t a[SECP521_SIZE] = {
-        0xfffffffffffffffc, 0xffffffffffffffff, 0xffffffffffffffff, 0xffffffffffffffff,
-        0xffffffffffffffff, 0xffffffffffffffff, 0xffffffffffffffff, 0xffffffffffffffff,
-        0x1ff
-    };
-
-    mp_limb_t b[SECP521_SIZE] = {
-        0xef451fd46b503f00L, 0x3573df883d2c34f1L, 0x1652c0bd3bb1bf07L, 0x56193951ec7e937bL,
-        0xb8b489918ef109e1L, 0xa2da725b99b315f3L, 0x929a21a0b68540eeL, 0x953eb9618e1c9a1fL,
-        0x51L,
-    };
-    mp_limb_t gx[SECP521_SIZE] = {
-        0xf97e7e31c2e5bd66L, 0x3348b3c1856a429bL, 0xfe1dc127a2ffa8deL, 0xa14b5e77efe75928L,
-        0xf828af606b4d3dbaL, 0x9c648139053fb521L, 0x9e3ecb662395b442L, 0x858e06b70404e9cdL,
-        0xc6L,
-    };
-    mp_limb_t gy[SECP521_SIZE] = {
-        0x88be94769fd16650L, 0x353c7086a272c240L, 0xc550b9013fad0761L, 0x97ee72995ef42640L,
-        0x17afbd17273e662cL, 0x98f54449579b4468L, 0x5c8a5fb42c7d1bd9L, 0x39296a789a3bc004L,
-        0x118L,
-    };
-#else
     mpz_class p("1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", 16);
     mpz_class a("1fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffc", 16);
     mpz_class b("0051953EB9618E1C9A1F929A21A0B68540EEA2DA725B99B315F3B8B489918EF109E156193951EC7E937B1652C0BD3BB1BF073573DF883D2C34F1EF451FD46B503F00", 16);
     mpz_class gx("00C6858E06B70404E9CD9E3ECB662395B4429C648139053FB521F828AF606B4D3DBAA14B5E77EFE75928FE1DC127A2FFA8DE3348B3C1856A429BF97E7E31C2E5BD66", 16);
     mpz_class gy("011839296A789A3BC0045C8A5FB42C7D1BD998F54449579B446817AFBD17273E662C97EE72995EF42640C550B9013FAD0761353C7086A272C24088BE94769FD16650", 16);
-#endif
 
     Fp::setModulo(p);
 
@@ -180,40 +118,11 @@ void benchmark_secp521r() {
 }
 
 void benchmark_secp521r_dbl() {
-#ifdef SECP521
-    mp_limb_t p[SECP521_SIZE] = {
-        0xffffffffffffffff, 0xffffffffffffffff, 0xffffffffffffffff, 0xffffffffffffffff,
-        0xffffffffffffffff, 0xffffffffffffffff, 0xffffffffffffffff, 0xffffffffffffffff,
-        0x1ff
-    };
-    mp_limb_t a[SECP521_SIZE] = {
-        0xfffffffffffffffc, 0xffffffffffffffff, 0xffffffffffffffff, 0xffffffffffffffff,
-        0xffffffffffffffff, 0xffffffffffffffff, 0xffffffffffffffff, 0xffffffffffffffff,
-        0x1ff
-    };
-
-    mp_limb_t b[SECP521_SIZE] = {
-        0xef451fd46b503f00L, 0x3573df883d2c34f1L, 0x1652c0bd3bb1bf07L, 0x56193951ec7e937bL,
-        0xb8b489918ef109e1L, 0xa2da725b99b315f3L, 0x929a21a0b68540eeL, 0x953eb9618e1c9a1fL,
-        0x51L,
-    };
-    mp_limb_t gx[SECP521_SIZE] = {
-        0xf97e7e31c2e5bd66L, 0x3348b3c1856a429bL, 0xfe1dc127a2ffa8deL, 0xa14b5e77efe75928L,
-        0xf828af606b4d3dbaL, 0x9c648139053fb521L, 0x9e3ecb662395b442L, 0x858e06b70404e9cdL,
-        0xc6L,
-    };
-    mp_limb_t gy[SECP521_SIZE] = {
-        0x88be94769fd16650L, 0x353c7086a272c240L, 0xc550b9013fad0761L, 0x97ee72995ef42640L,
-        0x17afbd17273e662cL, 0x98f54449579b4468L, 0x5c8a5fb42c7d1bd9L, 0x39296a789a3bc004L,
-        0x118L,
-    };
-#else
     mpz_class p("1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", 16);
     mpz_class a("1fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffc", 16);
     mpz_class b("0051953EB9618E1C9A1F929A21A0B68540EEA2DA725B99B315F3B8B489918EF109E156193951EC7E937B1652C0BD3BB1BF073573DF883D2C34F1EF451FD46B503F00", 16);
     mpz_class gx("00C6858E06B70404E9CD9E3ECB662395B4429C648139053FB521F828AF606B4D3DBAA14B5E77EFE75928FE1DC127A2FFA8DE3348B3C1856A429BF97E7E31C2E5BD66", 16);
     mpz_class gy("011839296A789A3BC0045C8A5FB42C7D1BD998F54449579B446817AFBD17273E662C97EE72995EF42640C550B9013FAD0761353C7086A272C24088BE94769FD16650", 16);
-#endif
 
     Fp::setModulo(p);
 
@@ -237,35 +146,35 @@ void benchmark_secp521r_dbl() {
     printf("\tJacobi dbl\ttime = %fusec\n", (end - begin) / double(CLOCKS_PER_SEC) / n * 1e6);
 }
 
-#ifdef SECP521
+#ifdef YKM_ECC_SECP521
 void benchmark() {
-    mp_limb_t p[SECP521_SIZE] = {
+    mp_limb_t p[9] = {
         0xffffffffffffffff, 0xffffffffffffffff, 0xffffffffffffffff, 0xffffffffffffffff,
         0xffffffffffffffff, 0xffffffffffffffff, 0xffffffffffffffff, 0xffffffffffffffff,
         0x1ff
     };
 
-    mp_limb_t a[SECP521_SIZE] = {
+    mp_limb_t a[9] = {
         0x2137201477420138L, 0x6313232130472104L, 0x3639164821638291L, 0x8371372917431694L,
         0x1739278732747374L, 0x1732913789724789L, 0x7296392641693692L, 0x32dead13L,
     };
 
-    mp_limb_t b[SECP521_SIZE] = {
+    mp_limb_t b[9] = {
         0x8032810382412080L, 0x2427104721732301L, 0x3281037402174017L, 0x7201839284217487L, 
         0x1737201372138214L, 0x3747217427103782L, 0x13729dee74L,
     };
-    mp_limb_t c[SECP521_SIZE] = {0};
+    mp_limb_t c[9] = {0};
 
-    mp_limb_t tmp_z[SECP521_SIZE * 2] = {0};
-    mp_limb_t t[SECP521_SIZE*2] = {0};
-    mp_limb_t s[SECP521_SIZE*2] = {0};
+    mp_limb_t tmp_z[9*2] = {0};
+    mp_limb_t t[9*2] = {0};
+    mp_limb_t s[9*2] = {0};
 
 
     const int n = 100000;
     time_t begin, end;
     begin = clock();
     for (int i = 0; i < n; i++) {
-        mpn_mul_n(tmp_z, (const mp_limb_t *)a, (const mp_limb_t *)b, SECP521_SIZE);
+        mpn_mul_n(tmp_z, (const mp_limb_t *)a, (const mp_limb_t *)b, 9);
         secp521Mod((mp_limb_t*)c, (const mp_limb_t *)tmp_z, (const mp_limb_t *)p, t, s);
     }
     end = clock();
@@ -275,7 +184,7 @@ void benchmark() {
 
 
 int main() {
-#ifdef SECP521
+#ifdef YKM_ECC_SECP521
     benchmark();
 #endif
     benchmark_FP521mul();

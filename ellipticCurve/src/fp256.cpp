@@ -1,4 +1,4 @@
-#ifdef USE_MPN
+#ifdef YKM_ECC_USE_MPN
 #include "FP-mpn-impl.hpp"
 size_t Fp::size = 4;
 

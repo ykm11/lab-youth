@@ -14,7 +14,7 @@ void EllipticCurve::dbl(Point &R, const Point &P) {
     Fp Rx, Ry, Rz;
     Fp u, v, w, s, t;
 
-#ifndef USE_MPN
+#ifndef YKM_ECC_USE_MPN
     //mpz_add_ui(s.value.get_mpz_t(), a.value.get_mpz_t(), 3);
     s.value = a.value + 3;
     if (s.value == Fp::modulus) { // a == -3 ? 
@@ -145,7 +145,7 @@ void EllipticCurve::dbl(jPoint &R, const jPoint &P) {
     
     sqr(t, P.z); // Z^{2}
 
-#ifndef USE_MPN
+#ifndef YKM_ECC_USE_MPN
     //mpz_add_ui(v.value.get_mpz_t(), a.value.get_mpz_t(), 3);
     v.value = a.value+3;
     if (v.value == Fp::modulus) {

@@ -366,7 +366,7 @@ void test_fp_squareRoot() {
     Fp::setModulo(p);
     Fp x, r;
 
-#ifndef USE_MPN
+#ifndef YKM_ECC_USE_MPN
     r.value = 0;
     for (int i = 0; i < 100; i++) {
         mpz_random(x.value.get_mpz_t(), 4);

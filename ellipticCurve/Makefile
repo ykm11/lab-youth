@@ -3,7 +3,7 @@ OBJ=$(SRC:.cpp=.o)
 DEP=$(SRC:.cpp=.d)
 
 TARGET=main
-CXXFLAGS=-Wall -Wextra -O3 -std=c++17 -DNDEBUG -DUSE_MPN
+CXXFLAGS=-Wall -Wextra -O3 -std=c++17 -DNDEBUG -DYKM_ECC_USE_MPN
 LDFLAGS=-lgmpxx -lgmp -lpthread
 INCLUDE=-I /usr/local/lib/mimalloc-1.6/include /usr/local/lib/mimalloc-1.6/libmimalloc.a -I ./include
 
@@ -45,14 +45,14 @@ benchmark: ./ec_benchmark_mi
 
 # このあたりも綺麗にしたい
 test521:
-	$(CXX) -o fp521.o -c src/fp521.cpp $(CXXFLAGS) -DSECP521 -I ./include
-	$(CXX) -o curve.o -c src/curve.cpp $(CXXFLAGS) -DSECP521 -I ./include
+	$(CXX) -o fp521.o -c src/fp521.cpp $(CXXFLAGS) -DYKM_ECC_SECP521 -I ./include
+	$(CXX) -o curve.o -c src/curve.cpp $(CXXFLAGS) -DYKM_ECC_SECP521 -I ./include
 	$(CXX) -o ec_test521 tests/test_secp521.cpp fp521.o curve.o $(CXXFLAGS) $(LDFLAGS) -DSECP521 -I ./include
 
 benchmark521:
-	$(CXX) -o fp521.o -c src/fp521.cpp $(CXXFLAGS) -DSECP521 -I ./include
-	$(CXX) -o curve.o -c src/curve.cpp $(CXXFLAGS) -DSECP521 -I ./include
-	$(CXX) -o ec_benchmark521 benchmarks/benchmarkSecp521.cpp fp521.o curve.o $(CXXFLAGS) $(LDFLAGS) -DSECP521 -I ./include
+	$(CXX) -o fp521.o -c src/fp521.cpp $(CXXFLAGS) -DYKM_ECC_SECP521 -I ./include
+	$(CXX) -o curve.o -c src/curve.cpp $(CXXFLAGS) -DYKM_ECC_SECP521 -I ./include
+	$(CXX) -o ec_benchmark521 benchmarks/benchmarkSecp521.cpp fp521.o curve.o $(CXXFLAGS) $(LDFLAGS) -DYKM_ECC_SECP521 $(INCLUDE)
 
 benchmark521_mi:
 	$(CXX) -o FP.o -c src/fp521.cpp $(CXXFLAGS) -I ./include

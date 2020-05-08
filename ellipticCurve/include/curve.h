@@ -25,8 +25,8 @@ template<class TPoint> void naf_mul(TPoint&, const TPoint&, const mpz_class&);
 
 void multipleMul(Point&, const Point&, const mpz_class&, const Point&, const mpz_class&);
 
-static inline void getNafArray(int8_t *naf, const mpz_class&);
-template <class TPoint> static inline void setPoint(TPoint&, const Fp&, const Fp&, const Fp&);
+inline void getNafArray(int8_t *naf, const mpz_class&);
+template <class TPoint> inline void setPoint(TPoint&, const Fp&, const Fp&, const Fp&);
 
 class Point {
 public:
@@ -337,7 +337,7 @@ public:
     static void initForsecp256k1() {
         Fp::setModulo(mpz_class("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F", 16));
         Fp::squareRoot(rw, Fp(-3));
-#ifndef USE_MPN
+#ifndef YKM_ECC_USE_MPN
         mpz_add_ui(rw.value.get_mpz_t(), rw.value.get_mpz_t(), 1);
         Fp::neg(rw, rw); // - (sqrt(-3) + 1)
         mpz_tdiv_q_2exp(rw.value.get_mpz_t(), rw.value.get_mpz_t(), 1); 
@@ -372,7 +372,7 @@ template<class TPoint> void dump(const TPoint P) {
     } else {
         Fp x, y;
         P.xy(x, y);
-#ifndef USE_MPN
+#ifndef YKM_ECC_USE_MPN
         std::cout << "(" << x.value << " : " << y.value << " : 1)" << std::endl;
 #else
         mpz_t mx, my;
@@ -384,7 +384,7 @@ template<class TPoint> void dump(const TPoint P) {
 }
 
 static inline void setInfPoint(Point &R) {
-#ifndef USE_MPN
+#ifndef YKM_ECC_USE_MPN
     R.x.value = 0;
     R.y.value = 1;
     R.z.value = 0;
@@ -399,7 +399,7 @@ static inline void setInfPoint(Point &R) {
 }
 
 static inline void setInfPoint(jPoint &R) {
-#ifndef USE_MPN
+#ifndef YKM_ECC_USE_MPN
     R.x.value = 1;
     R.y.value = 1;
     R.z.value = 0;
@@ -413,8 +413,8 @@ static inline void setInfPoint(jPoint &R) {
 #endif
 }
 
-template <class TPoint> static inline void setPoint(TPoint &R, const Fp &Rx, const Fp &Ry, const Fp &Rz) {
-#ifndef USE_MPN
+template <class TPoint> inline void setPoint(TPoint &R, const Fp &Rx, const Fp &Ry, const Fp &Rz) {
+#ifndef YKM_ECC_USE_MPN
     R.x.value = Rx.value;
     R.y.value = Ry.value;
     R.z.value = Rz.value;
@@ -425,7 +425,7 @@ template <class TPoint> static inline void setPoint(TPoint &R, const Fp &Rx, con
 #endif
 }
 
-static inline void getNafArray(int8_t *naf, const mpz_class &x) {
+inline void getNafArray(int8_t *naf, const mpz_class &x) {
     int j = 0;
     mpz_class z, n; 
     n = x;
