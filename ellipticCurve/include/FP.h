@@ -19,11 +19,11 @@ static inline void sub_n(mp_limb_t*, mp_limb_t*, mp_limb_t*, size_t);
 static inline void add_n(mp_limb_t*, mp_limb_t*, mp_limb_t*, size_t);
 static inline void mul_n(mp_limb_t*, mp_limb_t*, mp_limb_t*, size_t);
 static inline void getArray(mp_limb_t*, size_t, const mpz_class &, int);
-static inline void mulMod(mp_limb_t*, const mp_limb_t*, const mp_limb_t*, const mp_limb_t*, 
+static inline void mulMod(mp_limb_t*, mp_limb_t*, mp_limb_t*, mp_limb_t*, 
         mp_limb_t*,  mp_limb_t*, size_t);
-static inline void powMod(mp_limb_t*, const mp_limb_t*, const mp_limb_t*, 
-        const mp_limb_t*, mp_limb_t*, size_t);
-static inline void sqrMod(mp_limb_t*, const mp_limb_t*, const mp_limb_t*, 
+static inline void powMod(mp_limb_t*, mp_limb_t*, mp_limb_t*, 
+        mp_limb_t*, mp_limb_t*, size_t);
+static inline void sqrMod(mp_limb_t*, mp_limb_t*, mp_limb_t*, 
         mp_limb_t*,  mp_limb_t*, size_t);
 
 static inline void copy_n(mp_limb_t *r, mp_limb_t *v, size_t n);
