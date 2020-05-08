@@ -55,7 +55,7 @@ benchmark521:
 	$(CXX) -o ec_benchmark521 benchmarks/benchmarkSecp521.cpp fp521.o curve.o $(CXXFLAGS) $(LDFLAGS) -DYKM_ECC_SECP521 $(INCLUDE)
 
 benchmark521_mi:
-	$(CXX) -o FP.o -c src/fp521.cpp $(CXXFLAGS) -I ./include
+	$(CXX) -o fp521.o -c src/fp521.cpp $(CXXFLAGS) -I ./include
 	$(CXX) -o curve.o -c src/curve.cpp $(CXXFLAGS)  -I ./include
-	$(CXX) -o ec_benchmark521_mi benchmarks/benchmarkSecp521.cpp FP.o curve.o $(CXXFLAGS) $(LDFLAGS) $(INCLUDE) 
+	$(CXX) -o ec_benchmark521_mi benchmarks/benchmarkSecp521.cpp fp521.o curve.o $(CXXFLAGS) $(LDFLAGS) $(INCLUDE) 
 

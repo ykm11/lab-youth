@@ -383,7 +383,7 @@ template<class TPoint> void dump(const TPoint P) {
     }
 }
 
-static inline void setInfPoint(Point &R) {
+inline void setInfPoint(Point &R) {
 #ifndef YKM_ECC_USE_MPN
     R.x.value = 0;
     R.y.value = 1;
@@ -398,7 +398,7 @@ static inline void setInfPoint(Point &R) {
 #endif
 }
 
-static inline void setInfPoint(jPoint &R) {
+inline void setInfPoint(jPoint &R) {
 #ifndef YKM_ECC_USE_MPN
     R.x.value = 1;
     R.y.value = 1;

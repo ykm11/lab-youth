@@ -15,7 +15,6 @@ void EllipticCurve::dbl(Point &R, const Point &P) {
     Fp u, v, w, s, t;
 
 #ifndef YKM_ECC_USE_MPN
-    //mpz_add_ui(s.value.get_mpz_t(), a.value.get_mpz_t(), 3);
     s.value = a.value + 3;
     if (s.value == Fp::modulus) { // a == -3 ? 
 #else
