@@ -67,7 +67,7 @@ void sub(Fp& z, const Fp& x, const Fp& y) {
     if (mpn_sub_n((mp_limb_t *)z.value, (const mp_limb_t *)x.value, (const mp_limb_t *)y.value, Fp::size)) {
         mp_limb_t r[Fp::size];
         add_n(r, z.value, Fp::modulus, Fp::size);
-        copy_n(z, r, Fp::size);
+        copy_n(z.value, r, Fp::size);
     }
 }
 
