@@ -106,7 +106,7 @@ public:
     Fp(mp_limb_t v[YKM_ECC_MAX_SIZE]){
         mpn_copyi(value, (const mp_limb_t *)v, size);
         if (mpn_cmp((const mp_limb_t *)value, (const mp_limb_t *)modulus, size) >= 0) {
-            sub_n(value, value, Fp::modulus, size);
+            sub_n(value, value, modulus, size);
         }
     }
 
@@ -163,7 +163,6 @@ static inline void copy(Fp &z, const Fp &x) {
 #ifndef USE_MPN
     z.value = x.value;
 #else
-    //mpn_copyi(z.value, (const mp_limb_t *)x.value, Fp::size);
     copy_n(z.value, (mp_limb_t *)x.value, Fp::size);
 #endif
 }
@@ -173,7 +172,7 @@ static inline bool zeroCmp(const Fp &x) {
 #ifndef USE_MPN
     return (x.value == 0);
 #else
-    return (mpn_zero_p((const mp_limb_t *)x.value, Fp::size) == 1);
+    return (mpn_zero_p(x.value, Fp::size) == 1);
 #endif
 }
 
@@ -204,20 +203,21 @@ static inline void dump(const Fp &x) {
 }
 
 #ifdef USE_MPN
-static inline void powMod(mp_limb_t* r, const mp_limb_t* x, const mp_limb_t* e, const mp_limb_t* modulus,
+static inline void powMod(mp_limb_t* r, mp_limb_t* x, mp_limb_t* e, mp_limb_t* modulus,
         mp_limb_t* tp, size_t size) {
-    mpn_sec_powm(r, x, size, e, size*GMP_NUMB_BITS, modulus, size, tp);
+    mpn_sec_powm(r, (const mp_limb_t *)x, size, (const mp_limb_t*)e, 
+            size*GMP_NUMB_BITS, (const mp_limb_t *)modulus, size, tp);
 }
 
-static inline void sqrMod(mp_limb_t* r, const mp_limb_t* x, const mp_limb_t* modulus, 
+static inline void sqrMod(mp_limb_t* r, mp_limb_t* x, mp_limb_t* modulus, 
         mp_limb_t* tmp,  mp_limb_t* q, size_t size) {
-    mpn_sqr(tmp, x, size);
-    mpn_tdiv_qr(q, r, 0, (const mp_limb_t*)tmp, size*2, modulus, size);
+    mpn_sqr(tmp, (const mp_limb_t *)x, size);
+    mpn_tdiv_qr(q, r, 0, (const mp_limb_t*)tmp, size*2, (const mp_limb_t *)modulus, size);
 }
-static inline void mulMod(mp_limb_t* z, const mp_limb_t* x, const mp_limb_t* y, const mp_limb_t* modulus, 
+static inline void mulMod(mp_limb_t* z, mp_limb_t* x, mp_limb_t* y, mp_limb_t* modulus, 
         mp_limb_t* tmp,  mp_limb_t* q, size_t size) {
-    mpn_mul_n(tmp, x, y, size);
-    mpn_tdiv_qr(q, z, 0, (const mp_limb_t*)tmp, size*2, modulus, size);
+    mul_n(tmp, x, y, size);
+    mpn_tdiv_qr(q, z, 0, (const mp_limb_t*)tmp, size*2, (const mp_limb_t *)modulus, size);
 } 
 
 #else

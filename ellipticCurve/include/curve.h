@@ -15,12 +15,7 @@ void add(Point&, const Point&, const Point&);
 void add(jPoint&, const jPoint&, const jPoint&);
 template<class TPoint> void sub(TPoint&, const TPoint&, const TPoint&);
 
-#if 1
 template<class TPoint> void dump(const TPoint P);
-#else
-void dump(const Point &P);
-void dump(const jPoint &P);
-#endif
 
 template<class TPoint> void l_mul(TPoint&, const TPoint&, const mpz_class&); 
 template<class TPoint> void r_mul(TPoint&, const TPoint&, const mpz_class&);
@@ -252,7 +247,7 @@ void window_mul(TPoint &R, const TPoint &G, const mpz_class &n) { // windows met
     size_t k_bits = mpz_sizeinbase(n.get_mpz_t(), 2);
     TPoint P[4];
 
-    P[0] = TPoint(0, 1, 0);
+    setInfPoint(P[0]);
     P[1] = G;
     EllipticCurve::dbl(P[2], G);
     add(P[3], P[2], G);
@@ -279,7 +274,7 @@ void naf_mul(TPoint &R, const TPoint &P, const mpz_class &x) {
     size_t w_size = 5;
     size_t tblSize = 1 << w_size;
     TPoint tbl[tblSize];
-    tbl[0] = TPoint(0, 1, 0);
+    setInfPoint(tbl[0]);
     tbl[1] = P;
 
     for (size_t k = 2; k < 21; k=k+2) {
@@ -424,9 +419,6 @@ template <class TPoint> static inline void setPoint(TPoint &R, const Fp &Rx, con
     R.y.value = Ry.value;
     R.z.value = Rz.value;
 #else
-    //mpn_copyi((mp_limb_t *)R.x.value, (const mp_limb_t *)Rx.value, Fp::size);
-    //mpn_copyi((mp_limb_t *)R.y.value, (const mp_limb_t *)Ry.value, Fp::size);
-    //mpn_copyi((mp_limb_t *)R.z.value, (const mp_limb_t *)Rz.value, Fp::size);
     copy_n(R.x.value, (mp_limb_t *)Rx.value, Fp::size);
     copy_n(R.y.value, (mp_limb_t *)Ry.value, Fp::size);
     copy_n(R.z.value, (mp_limb_t *)Rz.value, Fp::size);
@@ -440,12 +432,12 @@ static inline void getNafArray(int8_t *naf, const mpz_class &x) {
     while (n > 0) {
         if((n & 1) == 1) {
             z = 2 - (n & 3);
-            n = n - z;
+            n -= z;
         } else {
             z = 0;
         }
         naf[j] = mpz_get_si(z.get_mpz_t());
-        n = n >> 1;
+        n >>= 1;
         j++;
     }
 }
