@@ -380,9 +380,9 @@ void test_fp_squareRoot() {
     std::cout << "OK\n";
 #else
     Fp t;
-    mpn_zero((mp_limb_t *)r.value, Fp::size);
+    mpn_zero((mp_limb_t *)r.value, Fp::size_);
     for (int i = 0; i < 100; i++) {
-        mpn_random((mp_limb_t *)x.value, Fp::size);
+        mpn_random((mp_limb_t *)x.value, Fp::size_);
         if (Fp::squareRoot(r, x)) {
             sqr(t, r);
             if (x != t) {

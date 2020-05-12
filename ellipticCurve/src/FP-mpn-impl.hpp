@@ -6,83 +6,83 @@
 mp_limb_t Fp::modulus[YKM_ECC_MAX_SIZE];
 
 void Fp::mulInt(Fp& z, const Fp& x, int scalar) {
-    mp_limb_t tmp_z[size + 1];
+    mp_limb_t tmp_z[size_ + 1];
     mp_limb_t q[2];
     
-    mpn_zero(tmp_z, size+1);
-    mpn_copyi((mp_limb_t *)tmp_z, (const mp_limb_t *)x.value, size);
+    mpn_zero(tmp_z, size_+1);
+    copy_n(tmp_z, (mp_limb_t *)x.value, size_);
 
-    mpn_mul_1(tmp_z, (const mp_limb_t *)tmp_z, size + 1, (mp_limb_t)scalar);
+    mpn_mul_1(tmp_z, (const mp_limb_t *)tmp_z, size_ + 1, (mp_limb_t)scalar);
     mpn_tdiv_qr(q, (mp_limb_t *)z.value, 0,
-            tmp_z, size + 1, (const mp_limb_t *)Fp::modulus, size);
+            tmp_z, size_ + 1, (const mp_limb_t *)modulus, size_);
 }
 
 void Fp::setModulo(const mpz_class& v) {
-    getArray(modulus, size, v, v.get_mpz_t()->_mp_size);
+    getArray(modulus, size_, v, v.get_mpz_t()->_mp_size);
 }
 
 void Fp::setModulo(const mp_limb_t p[YKM_ECC_MAX_SIZE]) {
-    copy_n(modulus, (mp_limb_t *)p, size);
+    copy_n(modulus, (mp_limb_t *)p, size_);
 }
 
 
 void Fp::neg(Fp& r, const Fp& x) {
-    sub_n(r.value, Fp::modulus, (mp_limb_t*)x.value, size);
+    sub_n(r.value, modulus, (mp_limb_t*)x.value, size_);
 }
 
 bool isEq(const Fp& x, const Fp& y) {
-    return cmp_n((mp_limb_t*)x.value, (mp_limb_t*)y.value, Fp::size) == 0;
+    return cmp_n((mp_limb_t*)x.value, (mp_limb_t*)y.value, Fp::size_) == 0;
 }
 
 void add(Fp& z, const Fp& x, const Fp& y) {
-    if (add_n(z.value, (mp_limb_t *)x.value, (mp_limb_t *)y.value, Fp::size)) {
-        mp_limb_t r[Fp::size];
-        sub_n(r, z.value, Fp::modulus, Fp::size);
-        copy_n(z.value, r, Fp::size);
+    if (add_n(z.value, (mp_limb_t *)x.value, (mp_limb_t *)y.value, Fp::size_)) {
+        mp_limb_t r[Fp::size_];
+        sub_n(r, z.value, Fp::modulus, Fp::size_);
+        copy_n(z.value, r, Fp::size_);
         return;
     }
 
-    if (cmp_n(z.value, Fp::modulus, Fp::size) >= 0) {
-        sub_n(z.value, z.value, Fp::modulus, Fp::size);
+    if (cmp_n(z.value, Fp::modulus, Fp::size_) >= 0) {
+        sub_n(z.value, z.value, Fp::modulus, Fp::size_);
     }
 }
 
 void add(Fp& z, const Fp& x, uint64_t scalar) {
-    if (mpn_add_1((mp_limb_t *)z.value, (const mp_limb_t *)x.value, Fp::size, (mp_limb_t)scalar)) {
-        mp_limb_t r[Fp::size];
-        sub_n(r, z.value, Fp::modulus, Fp::size);
-        copy_n(z.value, r, Fp::size);
+    if (mpn_add_1((mp_limb_t *)z.value, (const mp_limb_t *)x.value, Fp::size_, (mp_limb_t)scalar)) {
+        mp_limb_t r[Fp::size_];
+        sub_n(r, z.value, Fp::modulus, Fp::size_);
+        copy_n(z.value, r, Fp::size_);
         return;
     }
-    if (cmp_n(z.value, Fp::modulus, Fp::size) >= 0) {
-        sub_n(z.value, z.value, Fp::modulus, Fp::size);
+    if (cmp_n(z.value, Fp::modulus, Fp::size_) >= 0) {
+        sub_n(z.value, z.value, Fp::modulus, Fp::size_);
     }
 }
 
 void sub(Fp& z, const Fp& x, const Fp& y) {
-    if (sub_n(z.value, (mp_limb_t *)x.value, (mp_limb_t *)y.value, Fp::size)) {
-        mp_limb_t r[Fp::size];
-        add_n(r, z.value, Fp::modulus, Fp::size);
-        copy_n(z.value, r, Fp::size);
+    if (sub_n(z.value, (mp_limb_t *)x.value, (mp_limb_t *)y.value, Fp::size_)) {
+        mp_limb_t r[Fp::size_];
+        add_n(r, z.value, Fp::modulus, Fp::size_);
+        copy_n(z.value, r, Fp::size_);
     }
 }
 
 void mul(Fp& z, const Fp& x, const Fp& y) {
 #ifdef YKM_ECC_SECP521
-    mp_limb_t tmp_z[Fp::size * 2];
-    mp_limb_t t[Fp::size*2];
-    mp_limb_t s[Fp::size*2];
+    mp_limb_t tmp_z[Fp::size_ * 2];
+    mp_limb_t t[Fp::size_*2];
+    mp_limb_t s[Fp::size_*2];
 
-    mul_n(tmp_z, (mp_limb_t *)x.value, (mp_limb_t *)y.value, Fp::size);
-    secp521Mod((mp_limb_t*)z.value, (const mp_limb_t *)tmp_z, (const mp_limb_t *)Fp::modulus, t, s);
+    mul_n(tmp_z, (mp_limb_t *)x.value, (mp_limb_t *)y.value, Fp::size_);
+    secp521Mod(z.value, tmp_z, Fp::modulus, t, s);
 
 #elif defined(YKM_ECC_USE_MPN)
 
-    mp_limb_t tmp_z[Fp::size * 2];
-    mp_limb_t q[Fp::size + 1];
+    mp_limb_t tmp_z[Fp::size_ * 2];
+    mp_limb_t q[Fp::size_ + 1];
 
     mulMod(z.value, (mp_limb_t *)x.value, (mp_limb_t *)y.value, 
-            Fp::modulus, tmp_z, q, Fp::size);
+            Fp::modulus, tmp_z, q, Fp::size_);
 #else
     z.value = (x.value * y.value) % Fp::modulus;
 #endif
@@ -90,112 +90,112 @@ void mul(Fp& z, const Fp& x, const Fp& y) {
 
 
 void invmod(Fp& r, const Fp& x) {
-    mp_limb_t g[Fp::size];
-    mp_limb_t u[Fp::size];
-    mp_limb_t v[Fp::size];
-    mp_limb_t s[Fp::size+1];
+    mp_limb_t g[Fp::size_];
+    mp_limb_t u[Fp::size_];
+    mp_limb_t v[Fp::size_];
+    mp_limb_t s[Fp::size_+1];
     mp_size_t sn;
 
-    copy_n(u, (mp_limb_t *)x.value, Fp::size);
-    copy_n(v, Fp::modulus, Fp::size);
-    mpn_gcdext(g, s, &sn, u, Fp::size, v, Fp::size);
-    copy_n(r.value, s, Fp::size);
+    copy_n(u, (mp_limb_t *)x.value, Fp::size_);
+    copy_n(v, Fp::modulus, Fp::size_);
+    mpn_gcdext(g, s, &sn, u, Fp::size_, v, Fp::size_);
+    copy_n(r.value, s, Fp::size_);
 
     if (sn < 0) {
-        sub_n(r.value, Fp::modulus, r.value, Fp::size);
+        sub_n(r.value, Fp::modulus, r.value, Fp::size_);
     }
 }
 
 void sqr(Fp &r, const Fp &x) { // r <- x^2
 #ifdef YKM_ECC_SECP521
-    mp_limb_t tmp_r[Fp::size * 2];
-    mp_limb_t t[Fp::size*2];
-    mp_limb_t s[Fp::size*2];
+    mp_limb_t tmp_r[Fp::size_ * 2];
+    mp_limb_t t[Fp::size_*2];
+    mp_limb_t s[Fp::size_*2];
 
-    mpn_sqr(tmp_r, (const mp_limb_t *)x.value, Fp::size);
-    secp521Mod((mp_limb_t*)r.value, (const mp_limb_t *)tmp_r, (const mp_limb_t *)Fp::modulus, t, s);
+    mpn_sqr(tmp_r, (mp_limb_t *)x.value, Fp::size_);
+    secp521Mod(r.value, tmp_r, Fp::modulus, t, s);
 #elif defined(YKM_ECC_USE_MPN)
-    mp_limb_t tmp_r[Fp::size * 2];
-    mp_limb_t q[Fp::size + 1];
+    mp_limb_t tmp_r[Fp::size_ * 2];
+    mp_limb_t q[Fp::size_ + 1];
 
-    sqrMod(r.value, (mp_limb_t *)x.value, Fp::modulus, tmp_r, q, Fp::size);
+    sqrMod(r.value, (mp_limb_t *)x.value, Fp::modulus, tmp_r, q, Fp::size_);
 #else
     mpz_powm_ui(r.value.get_mpz_t(), x.value.get_mpz_t(), 2, Fp::modulus.get_mpz_t());
 #endif
 }
 
 bool Fp::squareRoot(Fp& r, const Fp& x) {
-    mp_limb_t q[size];
-    mp_limb_t c[size], t[size], b[size], z[size];
-    mp_limb_t tp[mpn_sec_powm_itch(size, Fp::size*GMP_NUMB_BITS, size)];
+    mp_limb_t q[size_];
+    mp_limb_t c[size_], t[size_], b[size_], z[size_];
+    mp_limb_t tp[mpn_sec_powm_itch(size_, size_*GMP_NUMB_BITS, size_)];
     mp_bitcnt_t bcnt;
 
-    copy_n(t, modulus, size); // t = p
-    mpn_rshift(t, (const mp_limb_t*)t, size, 1); // t = (p-1)/2
-    powMod(b, (mp_limb_t*)x.value, t, modulus, tp, size);
-    copy_n(q, b, size);
+    copy_n(t, modulus, size_); // t = p
+    mpn_rshift(t, (const mp_limb_t*)t, size_, 1); // t = (p-1)/2
+    powMod(b, (mp_limb_t*)x.value, t, modulus, tp, size_);
+    copy_n(q, b, size_);
     q[0]--;
-    if (mpn_zero_p((const mp_limb_t*)q, size) == 0) { // b != 1
-        mpn_zero((mp_limb_t *)r.value, size);
+    if (mpn_zero_p((const mp_limb_t*)q, size_) == 0) { // b != 1
+        mpn_zero((mp_limb_t *)r.value, size_);
         // エラー投げたほうがいいかも
         return false;
     }
 
     bcnt = mpn_scan1(t, 0);
-    mpn_rshift(q, (const mp_limb_t*)t, size, bcnt);
+    mpn_rshift(q, (const mp_limb_t*)t, size_, bcnt);
 
-    mpn_zero(z, size);
+    mpn_zero(z, size_);
     z[0] = 2;
     while(1) { // find quadratic non-residue
-        powMod(b, z, t, modulus, tp, size);
+        powMod(b, z, t, modulus, tp, size_);
  
         b[0]++; // b + 1 == p
-        if (cmp_n(b, Fp::modulus, size) == 0) break; // b != 1
+        if (cmp_n(b, Fp::modulus, size_) == 0) break; // b != 1
         z[0]++;
     }
 
     
-    powMod(c, z, q, modulus, tp, size);
-    powMod(t, (mp_limb_t*)x.value, q, modulus, tp, size);
+    powMod(c, z, q, modulus, tp, size_);
+    powMod(t, (mp_limb_t*)x.value, q, modulus, tp, size_);
 
-    mpn_add_1(b, (const mp_limb_t*)q, size, 1);
-    mpn_rshift(b, (const mp_limb_t*)b, size, 1);
+    mpn_add_1(b, (const mp_limb_t*)q, size_, 1);
+    mpn_rshift(b, (const mp_limb_t*)b, size_, 1);
 
-    powMod(r.value, (mp_limb_t*)x.value, b, modulus, tp, size);
+    powMod(r.value, (mp_limb_t*)x.value, b, modulus, tp, size_);
     
     while(1) {
-        copy_n(z, t, size);
+        copy_n(z, t, size_);
         z[0]--;
-        if (mpn_zero_p(t, Fp::size) == 1) { // t == 0
-            mpn_zero((mp_limb_t *)r.value, size);
+        if (mpn_zero_p(t, size_) == 1) { // t == 0
+            mpn_zero((mp_limb_t *)r.value, size_);
             return false;
-        } else if (mpn_zero_p(z, size) == 1) { // t == 1
+        } else if (mpn_zero_p(z, size_) == 1) { // t == 1
             if ((r.value[0] & 1) == 1) {
-                sub_n(r.value, modulus, r.value, size);
+                sub_n(r.value, modulus, r.value, size_);
             }
             return true;
         }
-        copy_n(z, t, size);
+        copy_n(z, t, size_);
         unsigned int i = 1;
-        mp_limb_t tmp[size*2];
-        mp_limb_t tmp_q[size+1];
+        mp_limb_t tmp[size_*2];
+        mp_limb_t tmp_q[size_+1];
 
-        copy_n(b, z, size);
+        copy_n(b, z, size_);
 
         b[0]--;
-        while(mpn_zero_p(b, Fp::size) == 0) {
-            sqrMod(z, z, modulus, tmp, tmp_q, size);
-            copy_n(b, z, size);
+        while(mpn_zero_p(b, size_) == 0) {
+            sqrMod(z, z, modulus, tmp, tmp_q, size_);
+            copy_n(b, z, size_);
             b[0]--;
             i++;
         }
-        copy_n(b, c, size);
+        copy_n(b, c, size_);
         for(unsigned int j = 0; j < bcnt-i-1; j++) {
-            sqrMod(b, b, modulus, tmp, tmp_q, size);
+            sqrMod(b, b, modulus, tmp, tmp_q, size_);
         }
-        sqrMod(c, c, modulus, tmp, tmp_q, size);
-        mulMod(t, t, c, modulus, tmp, tmp_q, size);
-        mulMod(r.value, r.value, b, modulus, tmp, tmp_q, size);
+        sqrMod(c, c, modulus, tmp, tmp_q, size_);
+        mulMod(t, t, c, modulus, tmp, tmp_q, size_);
+        mulMod(r.value, r.value, b, modulus, tmp, tmp_q, size_);
     }
 }
 

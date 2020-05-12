@@ -349,7 +349,7 @@ public:
 #else
         add(rw, rw, 1);
         Fp::neg(rw, rw); // - (sqrt(-3) + 1)
-        mpn_rshift((mp_limb_t *)rw.value, (const mp_limb_t *)rw.value, Fp::size, 1);
+        mpn_rshift((mp_limb_t *)rw.value, (const mp_limb_t *)rw.value, Fp::size_, 1);
         // - (sqrt(-3) + 1) / 2
 
         mpz_class gx("79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798", 16);
@@ -376,8 +376,8 @@ template<class TPoint> void dump(const TPoint P) {
         std::cout << "(" << x.value << " : " << y.value << " : 1)" << std::endl;
 #else
         mpz_t mx, my;
-        set_mpz_t(mx, (uint64_t*)x.value, Fp::size);
-        set_mpz_t(my, (uint64_t*)y.value, Fp::size);
+        set_mpz_t(mx, (uint64_t*)x.value, Fp::size_);
+        set_mpz_t(my, (uint64_t*)y.value, Fp::size_);
         std::cout << "(" << mx << " : " << my << " : 1)" << std::endl;
 #endif
     }
@@ -389,9 +389,9 @@ inline void setInfPoint(Point &R) {
     R.y.value = 1;
     R.z.value = 0;
 #else
-    mpn_zero((mp_limb_t *)R.x.value, Fp::size);
-    mpn_zero((mp_limb_t *)R.y.value, Fp::size);
-    mpn_zero((mp_limb_t *)R.z.value, Fp::size);
+    mpn_zero((mp_limb_t *)R.x.value, Fp::size_);
+    mpn_zero((mp_limb_t *)R.y.value, Fp::size_);
+    mpn_zero((mp_limb_t *)R.z.value, Fp::size_);
     //R.x.value[0] = 0;
     R.y.value[0] = 1;
     //R.z.value[0] = 0;
@@ -404,9 +404,9 @@ inline void setInfPoint(jPoint &R) {
     R.y.value = 1;
     R.z.value = 0;
 #else
-    mpn_zero((mp_limb_t *)R.x.value, Fp::size);
-    mpn_zero((mp_limb_t *)R.y.value, Fp::size);
-    mpn_zero((mp_limb_t *)R.z.value, Fp::size);
+    mpn_zero(R.x.value, Fp::size_);
+    mpn_zero(R.y.value, Fp::size_);
+    mpn_zero(R.z.value, Fp::size_);
     R.x.value[0] = 1;
     R.y.value[0] = 1;
     //R.z.value[0] = 0;
@@ -419,9 +419,9 @@ template <class TPoint> inline void setPoint(TPoint &R, const Fp &Rx, const Fp &
     R.y.value = Ry.value;
     R.z.value = Rz.value;
 #else
-    copy_n(R.x.value, (mp_limb_t *)Rx.value, Fp::size);
-    copy_n(R.y.value, (mp_limb_t *)Ry.value, Fp::size);
-    copy_n(R.z.value, (mp_limb_t *)Rz.value, Fp::size);
+    copy_n(R.x.value, (mp_limb_t *)Rx.value, Fp::size_);
+    copy_n(R.y.value, (mp_limb_t *)Ry.value, Fp::size_);
+    copy_n(R.z.value, (mp_limb_t *)Rz.value, Fp::size_);
 #endif
 }
 

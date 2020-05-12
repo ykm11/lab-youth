@@ -145,8 +145,7 @@ void EllipticCurve::dbl(jPoint &R, const jPoint &P) {
     sqr(t, P.z); // Z^{2}
 
 #ifndef YKM_ECC_USE_MPN
-    //mpz_add_ui(v.value.get_mpz_t(), a.value.get_mpz_t(), 3);
-    v.value = a.value+3;
+    v.value = a.value + 3;
     if (v.value == Fp::modulus) {
 #else
     add(v, a, 3);

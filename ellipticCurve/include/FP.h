@@ -40,7 +40,7 @@ inline void powMod(mpz_class&, const mpz_class&, const mpz_class&, const mpz_cla
  
 #ifdef YKM_ECC_SECP521
 void add(Fp&, const Fp&, uint64_t);
-inline void secp521Mod(mp_limb_t*, const mp_limb_t*, const mp_limb_t*, mp_limb_t*, mp_limb_t*);
+inline void secp521Mod(mp_limb_t*, mp_limb_t*, mp_limb_t*, mp_limb_t*, mp_limb_t*);
  
 #elif defined(YKM_ECC_USE_MPN)
 void add(Fp&, const Fp&, uint64_t);
@@ -102,26 +102,26 @@ public:
 class Fp {
 public:
     static mp_limb_t modulus[YKM_ECC_MAX_SIZE];
-    static size_t size;
+    static size_t size_;
     mp_limb_t value[YKM_ECC_MAX_SIZE];
 
     Fp() { }
     Fp(mp_limb_t v[YKM_ECC_MAX_SIZE]){
-        copy_n(value, v, size);
-        if (cmp_n(value, modulus, size) >= 0) {
-            sub_n(value, value, modulus, size);
+        copy_n(value, v, size_);
+        if (cmp_n(value, modulus, size_) >= 0) {
+            sub_n(value, value, modulus, size_);
         }
     }
 
     Fp(const mpz_class& v) {
-        getArray(value, size, v, v.get_mpz_t()->_mp_size);
+        getArray(value, size_, v, v.get_mpz_t()->_mp_size);
 
         if (v < 0) {
-            sub_n(value, modulus, value, size);
+            sub_n(value, modulus, value, size_);
             return;
         }
-        if (cmp_n(value, modulus, size) >= 0) {
-            sub_n(value, value, modulus, size);
+        if (cmp_n(value, modulus, size_) >= 0) {
+            sub_n(value, value, modulus, size_);
             return;
         }
     }
@@ -166,7 +166,7 @@ inline void copy(Fp &z, const Fp &x) {
 #ifndef YKM_ECC_USE_MPN
     z.value = x.value;
 #else
-    copy_n(z.value, (mp_limb_t *)x.value, Fp::size);
+    copy_n(z.value, (mp_limb_t *)x.value, Fp::size_);
 #endif
 }
 
@@ -175,7 +175,7 @@ inline bool zeroCmp(const Fp &x) {
 #ifndef YKM_ECC_USE_MPN
     return (x.value == 0);
 #else
-    return (mpn_zero_p(x.value, Fp::size) == 1);
+    return (mpn_zero_p(x.value, Fp::size_) == 1);
 #endif
 }
 
@@ -198,7 +198,7 @@ inline void set_mpz_t(mpz_t& z, const uint64_t* p, int n) {
 inline void dump(const Fp &x) {
 #ifdef YKM_ECC_USE_MPN
     mpz_t mx;
-    set_mpz_t(mx, (const uint64_t*)x.value, Fp::size);
+    set_mpz_t(mx, (const uint64_t*)x.value, Fp::size_);
     std::cout << mx << std::endl;
 #else
     std::cout << x.value << std::endl;
@@ -274,7 +274,7 @@ inline void getArray(mp_limb_t *buf, size_t maxSize, const mpz_class &x, int xn)
 }
 
 #ifdef YKM_ECC_SECP521
-inline void secp521Mod(mp_limb_t *z, const mp_limb_t *XY, const mp_limb_t *p, mp_limb_t *t, mp_limb_t *s) {
+inline void secp521Mod(mp_limb_t *z, mp_limb_t *XY, mp_limb_t *p, mp_limb_t *t, mp_limb_t *s) {
     // (T + (T mod R)*N) / R
     mpn_zero(t, 9*2);
     mpn_zero(s, 9*2);
@@ -284,14 +284,14 @@ inline void secp521Mod(mp_limb_t *z, const mp_limb_t *XY, const mp_limb_t *p, mp
     }
     mpn_lshift(s, (const mp_limb_t*)s, 9*2, 9);
     sub_n(s, s, t, 9*2);
-    add_n(t, s, (mp_limb_t *)XY, 9*2); // (T + (T mod R)*N)
+    add_n(t, s, XY, 9*2); // (T + (T mod R)*N)
 
     mpn_rshift(t, (const mp_limb_t*)t, 9*2, 9);
     for (size_t i = 0; i < 9; i++) { // (T + (T mod R)*N) / R
         t[i] = t[i+8];
     }
-    if (mpn_cmp((const mp_limb_t*)t, p, 9) >= 0) {
-        sub_n(t, t, (mp_limb_t*)p, 9);
+    if (mpn_cmp(t, p, 9) >= 0) {
+        sub_n(t, t, p, 9);
     }
     copy_n(z, t, 9);
 }
