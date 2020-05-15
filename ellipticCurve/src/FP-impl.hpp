@@ -16,7 +16,10 @@ void Fp::setModulo(const mpz_class& v) {
 
 
 void Fp::neg(Fp& r, const Fp& x) {
-    mpz_sub(r.value.get_mpz_t(), Fp::modulus.get_mpz_t(), x.value.get_mpz_t());
+    if (x.value == 0) {
+        return;
+    }
+    r.value = modulus - x.value;
 }
 
 bool isEq(const Fp& x, const Fp& y) {
@@ -46,7 +49,7 @@ void invmod(Fp& r, const Fp& x) {
 }
 
 void sqr(Fp &r, const Fp &x) { // r <- x^2
-    mpz_powm_ui(r.value.get_mpz_t(), x.value.get_mpz_t(), 2, Fp::modulus.get_mpz_t());
+    r.value = (x.value * x.value) % Fp::modulus;
 }
 
 bool Fp::squareRoot(Fp& r, const Fp& x) {
@@ -54,9 +57,9 @@ bool Fp::squareRoot(Fp& r, const Fp& x) {
     mpz_class c, t, b, z;
     mp_bitcnt_t bcnt = 1;
 
-    mpz_sub_ui(t.get_mpz_t(), Fp::modulus.get_mpz_t(), 1); // t = p - 1
-    mpz_tdiv_q_2exp(t.get_mpz_t(), t.get_mpz_t(), 1); // t = (p-1)/2
-    powMod(b, x.value, t, Fp::modulus);
+    t = modulus - 1; // t = p - 1
+    t /= 2;
+    powMod(b, x.value, t, modulus);
     if (b != 1) {
         r.value = 0;
         // エラー投げたほうがいいかも
@@ -70,17 +73,17 @@ bool Fp::squareRoot(Fp& r, const Fp& x) {
 
     z = 2;
     while(1) { // find quadratic non-residue
-        powMod(b, z, t, Fp::modulus);
+        powMod(b, z, t, modulus);
         if (b != 1) break;
         mpz_add_ui(z.get_mpz_t(), z.get_mpz_t(), 1);
     }
 
-    powMod(c, z, q, Fp::modulus);
-    powMod(t, x.value, q, Fp::modulus);
+    powMod(c, z, q, modulus);
+    powMod(t, x.value, q, modulus);
     
-    mpz_add_ui(b.get_mpz_t(), q.get_mpz_t(), 1);
-    mpz_tdiv_q_2exp(b.get_mpz_t(), b.get_mpz_t(), 1); // (q+1)/2
-    powMod(r.value, x.value, b, Fp::modulus);
+    b = q + 1;
+    b /= 2;
+    powMod(r.value, x.value, b, modulus);
     
     while(1) {
         if (t == 0) {
@@ -95,15 +98,15 @@ bool Fp::squareRoot(Fp& r, const Fp& x) {
         z = std::move(t);
         unsigned int i;
         for (i = 1; z != 1; i++) {
-            sqrMod(z, z, Fp::modulus);
+            sqrMod(z, z, modulus);
         }
         b = std::move(c);
         for(unsigned int j = 0; j < bcnt-i-1; j++) {
-            sqrMod(b, b, Fp::modulus);
+            sqrMod(b, b, modulus);
         }
-        sqrMod(c, b, Fp::modulus);
-        mulMod(t, t, c, Fp::modulus);
-        mulMod(r.value, r.value, b, Fp::modulus);
+        sqrMod(c, b, modulus);
+        mulMod(t, t, c, modulus);
+        mulMod(r.value, r.value, b, modulus);
     }
 }
 

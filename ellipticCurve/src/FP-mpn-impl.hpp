@@ -27,6 +27,9 @@ void Fp::setModulo(const mp_limb_t p[YKM_ECC_MAX_SIZE]) {
 
 
 void Fp::neg(Fp& r, const Fp& x) {
+    if (zeroCmp(x)) {
+        return;
+    }
     sub_n(r.value, modulus, (mp_limb_t*)x.value, size_);
 }
 
@@ -48,7 +51,7 @@ void add(Fp& z, const Fp& x, const Fp& y) {
 }
 
 void add(Fp& z, const Fp& x, uint64_t scalar) {
-    if (mpn_add_1((mp_limb_t *)z.value, (const mp_limb_t *)x.value, Fp::size_, (mp_limb_t)scalar)) {
+    if (add_1(z.value, (mp_limb_t *)x.value, Fp::size_, (mp_limb_t)scalar)) {
         mp_limb_t r[Fp::size_];
         sub_n(r, z.value, Fp::modulus, Fp::size_);
         copy_n(z.value, r, Fp::size_);

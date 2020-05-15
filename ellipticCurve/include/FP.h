@@ -19,6 +19,7 @@ inline bool zeroCmp(const Fp&);
 
 inline mp_limb_t sub_n(mp_limb_t*, mp_limb_t*, mp_limb_t*, size_t);
 inline mp_limb_t add_n(mp_limb_t*, mp_limb_t*, mp_limb_t*, size_t);
+inline mp_limb_t add_1(mp_limb_t*, mp_limb_t*, size_t mp_limb_t);
 inline void mul_n(mp_limb_t*, mp_limb_t*, mp_limb_t*, size_t);
 inline void getArray(mp_limb_t*, size_t, const mpz_class&, int);
 inline void mulMod(mp_limb_t*, mp_limb_t*, mp_limb_t*, mp_limb_t*, 
@@ -239,6 +240,11 @@ inline void powMod(mpz_class& z, const mpz_class& x, const mpz_class& y, const m
 }
 
 #endif
+
+
+inline mp_limb_t add_1(mp_limb_t* z, mp_limb_t* x, size_t n, mp_limb_t scalar) {
+    return mpn_add_1(z, (const mp_limb_t *)x, n, scalar); 
+}
 
 inline mp_limb_t add_n(mp_limb_t* z, mp_limb_t* x, mp_limb_t* y, size_t n) {
     return mpn_add_n(z, (const mp_limb_t *)x, (const mp_limb_t*)y, n); 
