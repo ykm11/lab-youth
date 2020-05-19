@@ -40,11 +40,11 @@ inline void powMod(mpz_class&, const mpz_class&, const mpz_class&, const mpz_cla
 
  
 #ifdef YKM_ECC_SECP521
-void add(Fp&, const Fp&, uint64_t);
+void add(Fp&, const Fp&, mp_limb_t);
 inline void secp521Mod(mp_limb_t*, mp_limb_t*, mp_limb_t*, mp_limb_t*, mp_limb_t*);
  
 #elif defined(YKM_ECC_USE_MPN)
-void add(Fp&, const Fp&, uint64_t);
+void add(Fp&, const Fp&, mp_limb_t);
 
 #endif
 
@@ -156,7 +156,7 @@ public:
     }
 
     static void neg(Fp& r, const Fp& x);
-    static void mulInt(Fp& z, const Fp& x, int scalar);
+    static void mulInt(Fp& z, const Fp& x, mp_limb_t scalar);
     static bool squareRoot(Fp& r, const Fp& x);
 
 };

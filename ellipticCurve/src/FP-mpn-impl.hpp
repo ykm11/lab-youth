@@ -5,16 +5,15 @@
 
 mp_limb_t Fp::modulus[YKM_ECC_MAX_SIZE];
 
-void Fp::mulInt(Fp& z, const Fp& x, int scalar) {
+void Fp::mulInt(Fp& z, const Fp& x, mp_limb_t scalar) {
     mp_limb_t tmp_z[size_ + 1];
     mp_limb_t q[2];
-    
-    mpn_zero(tmp_z, size_+1);
-    copy_n(tmp_z, (mp_limb_t *)x.value, size_);
+    mp_limb_t tmp; 
 
-    mpn_mul_1(tmp_z, (const mp_limb_t *)tmp_z, size_ + 1, (mp_limb_t)scalar);
-    mpn_tdiv_qr(q, (mp_limb_t *)z.value, 0,
-            tmp_z, size_ + 1, (const mp_limb_t *)modulus, size_);
+    tmp = mpn_mul_1(tmp_z, x.value, size_, scalar);
+    tmp_z[size_] = tmp;
+    mpn_tdiv_qr(q, z.value, 0, tmp_z, size_ + 1, 
+            (const mp_limb_t *)modulus, size_);
 }
 
 void Fp::setModulo(const mpz_class& v) {
@@ -50,7 +49,7 @@ void add(Fp& z, const Fp& x, const Fp& y) {
     }
 }
 
-void add(Fp& z, const Fp& x, uint64_t scalar) {
+void add(Fp& z, const Fp& x, mp_limb_t scalar) {
     if (add_1(z.value, (mp_limb_t *)x.value, Fp::size_, (mp_limb_t)scalar)) {
         mp_limb_t r[Fp::size_];
         sub_n(r, z.value, Fp::modulus, Fp::size_);
@@ -64,9 +63,13 @@ void add(Fp& z, const Fp& x, uint64_t scalar) {
 
 void sub(Fp& z, const Fp& x, const Fp& y) {
     if (sub_n(z.value, (mp_limb_t *)x.value, (mp_limb_t *)y.value, Fp::size_)) {
+#if 0
         mp_limb_t r[Fp::size_];
         add_n(r, z.value, Fp::modulus, Fp::size_);
         copy_n(z.value, r, Fp::size_);
+#else
+        add_n(z.value, z.value, Fp::modulus, Fp::size_);
+#endif
     }
 }
 
@@ -122,8 +125,6 @@ void sqr(Fp &r, const Fp &x) { // r <- x^2
     mp_limb_t q[Fp::size_ + 1];
 
     sqrMod(r.value, (mp_limb_t *)x.value, Fp::modulus, tmp_r, q, Fp::size_);
-#else
-    mpz_powm_ui(r.value.get_mpz_t(), x.value.get_mpz_t(), 2, Fp::modulus.get_mpz_t());
 #endif
 }
 
