@@ -299,12 +299,12 @@ inline void secp521Mod(mp_limb_t *z, mp_limb_t *XY, mp_limb_t *p, mp_limb_t *t, 
         t[i] = t[i+8];
     }
 #else
-    memcpy(t, t + 8, sizeof(mp_limb_t)*9);
+    memcpy(s, t + 8, sizeof(mp_limb_t)*9);
 #endif
     
-    if (mpn_cmp(t, p, 9) >= 0) {
-        sub_n(t, t, p, 9);
+    if (mpn_cmp(s, p, 9) >= 0) {
+        sub_n(s, s, p, 9);
     }
-    copy_n(z, t, 9);
+    copy_n(z, s, 9);
 }
 #endif
