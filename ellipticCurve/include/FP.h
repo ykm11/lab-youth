@@ -287,16 +287,20 @@ inline void secp521Mod(mp_limb_t *z, mp_limb_t *XY, mp_limb_t *p, mp_limb_t *t, 
     mpn_and_n(t, XY, p, 9); // T mod R = T & p
 
     // s[i+8] = t[i]; i <= 0 < 9
-    memcpy(s + sizeof(mp_limb_t)*8, t, sizeof(mp_limb_t)*8);
+    memcpy(s + 8, t, sizeof(mp_limb_t)*9);
     mpn_lshift(s, (const mp_limb_t*)s, 9*2, 9);
     sub_n(s, s, t, 9*2); // (T mod R)*N
 
     add_n(t, s, XY, 9*2); // (T + (T mod R)*N)
 
     mpn_rshift(t, (const mp_limb_t*)t, 9*2, 9);
+#if 0
     for (size_t i = 0; i < 9; i++) { // (T + (T mod R)*N) / R
         t[i] = t[i+8];
     }
+#else
+    memcpy(t, t + 8, sizeof(mp_limb_t)*9);
+#endif
     
     if (mpn_cmp(t, p, 9) >= 0) {
         sub_n(t, t, p, 9);
