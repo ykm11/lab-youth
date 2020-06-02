@@ -15,7 +15,7 @@ void add(Point&, const Point&, const Point&);
 void add(jPoint&, const jPoint&, const jPoint&);
 template<class TPoint> void sub(TPoint&, const TPoint&, const TPoint&);
 
-template<class TPoint> void dump(const TPoint P);
+template<class TPoint> void dump(const TPoint&);
 
 template<class TPoint> void l_mul(TPoint&, const TPoint&, const mpz_class&); 
 template<class TPoint> void r_mul(TPoint&, const TPoint&, const mpz_class&);
@@ -25,7 +25,7 @@ template<class TPoint> void naf_mul(TPoint&, const TPoint&, const mpz_class&);
 
 void multipleMul(Point&, const Point&, const mpz_class&, const Point&, const mpz_class&);
 
-inline void getNafArray(int8_t *naf, const mpz_class&);
+inline void getNafArray(int8_t*, const mpz_class&);
 template <class TPoint> inline void setPoint(TPoint&, const Fp&, const Fp&, const Fp&);
 
 class Point {
@@ -88,16 +88,6 @@ public:
     jPoint(const Fp &X, const Fp &Y, const Fp &Z) : x(X), y(Y), z(Z) {}
     jPoint(const mpz_class &X, const mpz_class &Y, const mpz_class &Z) : x(X), y(Y), z(Z) {}
 
-    void xy(Fp &s, Fp &t) const { // ヤコビ座標からアフィン座標へ
-        Fp inv_z;
-        invmod(inv_z, z);
-
-        sqr(t, inv_z); // Z^{2}
-        mul(s, x, t); // X / Z^{2}
-        mul(t, t, inv_z); // Z^{3}
-        mul(t, y, t); // Y / Z^{3}
-    }
-
     jPoint operator+(const jPoint &other) const {
         jPoint r;
         add(r, *this, other);
@@ -122,6 +112,16 @@ public:
 
     bool operator!=(const jPoint &other) const {
         return !isEqual(*this, other);
+    }
+
+    void xy(Fp &s, Fp &t) const { // ヤコビ座標からアフィン座標へ
+        Fp inv_z;
+        invmod(inv_z, z);
+
+        sqr(t, inv_z); // Z^{2}
+        mul(s, x, t); // X / Z^{2}
+        mul(t, t, inv_z); // Z^{3}
+        mul(t, y, t); // Y / Z^{3}
     }
 
     static void neg(jPoint &R, const jPoint &P) {
@@ -271,8 +271,8 @@ void naf_mul(TPoint &R, const TPoint &P, const mpz_class &x) {
     int8_t naf[naf_size];
     memset(naf, 0, naf_size);
 
-    size_t w_size = 5;
-    size_t tblSize = 1 << w_size;
+    const size_t w_size = 5;
+    const size_t tblSize = 1 << w_size;
     TPoint tbl[tblSize];
     setInfPoint(tbl[0]);
     tbl[1] = P;
@@ -281,22 +281,33 @@ void naf_mul(TPoint &R, const TPoint &P, const mpz_class &x) {
         EllipticCurve::dbl(tbl[k], tbl[k/2]);
         add(tbl[k+1], tbl[k], P);
     }
-    
+ 
     getNafArray(naf, x);
     while (naf_size >= 1 && naf[naf_size-1] == 0) {
         naf_size--;
     }
 
     TPoint Q;
-    R = P;
-    int8_t t;
-    int i;
-    for (i = naf_size-2; i >= int(w_size-1); i=i-w_size) {
+    int8_t t = 1;
+    while((naf_size-1) % w_size != 0) {
+        t <<= 1;
+        t += naf[naf_size-2];
+        naf_size--;
+    }
+    if (t < 0) {
+        TPoint::neg(R, tbl[-t]);
+    } else {
+        R = tbl[t];
+    }
+
+    for (int i = naf_size-2; i >= int(w_size-1); i=i-w_size) {
+        t = 0;
         for (size_t j = 0; j < w_size; j++) {
             EllipticCurve::dbl(R, R);
+            t <<= 1;
+            t += naf[i-j];
         }
 
-        t = 16*naf[i] + 8*naf[i-1] + 4*naf[i-2] + 2*naf[i-3] + naf[i-4]; 
         if (t < 0) {
             TPoint::neg(Q, tbl[-t]);
         } else {
@@ -304,26 +315,6 @@ void naf_mul(TPoint &R, const TPoint &P, const mpz_class &x) {
         }
         add(R, R, Q);
     }
-
-    if (i < 0) {
-        return;
-    }
-
-    t = 0;
-    while (i > 0) {
-        EllipticCurve::dbl(R, R);
-        t = t + (1 << i) * naf[i];
-        i--;
-    }
-    EllipticCurve::dbl(R, R);
-    t = t + naf[0];
-
-    if (t < 0) {
-        TPoint::neg(Q, tbl[-t]);
-    } else {
-        Q = tbl[t];
-    }
-    add(R, R, Q);
 }
 
 
@@ -366,7 +357,7 @@ public:
     static void scalarMul(Point &R, const Point &P, const mpz_class &k);
 };
 
-template<class TPoint> void dump(const TPoint P) {
+template<class TPoint> void dump(const TPoint &P) {
     if (zeroCmp(P.z)) {
         std::cout << "(0 : 1 : 0)" << std::endl;
     } else {
