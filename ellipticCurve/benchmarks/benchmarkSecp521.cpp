@@ -175,7 +175,7 @@ void benchmark() {
     begin = clock();
     for (int i = 0; i < n; i++) {
         mpn_mul_n(tmp_z, (const mp_limb_t *)a, (const mp_limb_t *)b, 9);
-        secp521Mod((mp_limb_t*)c, (const mp_limb_t *)tmp_z, (const mp_limb_t *)p, t, s);
+        secp521Mod(c, tmp_z, p, t, s);
     }
     end = clock();
     printf("\tmulMod \ttime = %fusec\n", (end - begin) / double(CLOCKS_PER_SEC) / n * 1e6);

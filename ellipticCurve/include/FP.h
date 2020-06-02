@@ -282,20 +282,22 @@ inline void getArray(mp_limb_t *buf, size_t maxSize, const mpz_class &x, int xn)
 #ifdef YKM_ECC_SECP521
 inline void secp521Mod(mp_limb_t *z, mp_limb_t *XY, mp_limb_t *p, mp_limb_t *t, mp_limb_t *s) {
     // (T + (T mod R)*N) / R
-    mpn_zero(t, 9*2);
-    mpn_zero(s, 9*2);
-    mpn_and_n(t, XY, p, 9); // T mod R
-    for (size_t i = 0; i < 9; i++) {
-        s[i+8] = t[i];
-    }
+    memset(t, 0, sizeof(mp_limb_t) * 9*2);
+    memset(s, 0, sizeof(mp_limb_t) * 9*2);
+    mpn_and_n(t, XY, p, 9); // T mod R = T & p
+
+    // s[i+8] = t[i]; i <= 0 < 9
+    memcpy(s + sizeof(mp_limb_t)*8, t, sizeof(mp_limb_t)*8);
     mpn_lshift(s, (const mp_limb_t*)s, 9*2, 9);
-    sub_n(s, s, t, 9*2);
+    sub_n(s, s, t, 9*2); // (T mod R)*N
+
     add_n(t, s, XY, 9*2); // (T + (T mod R)*N)
 
     mpn_rshift(t, (const mp_limb_t*)t, 9*2, 9);
     for (size_t i = 0; i < 9; i++) { // (T + (T mod R)*N) / R
         t[i] = t[i+8];
     }
+    
     if (mpn_cmp(t, p, 9) >= 0) {
         sub_n(t, t, p, 9);
     }
