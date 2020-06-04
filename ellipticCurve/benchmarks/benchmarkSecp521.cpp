@@ -1,4 +1,4 @@
-#ifdef YKM_ECC_USE_MPN
+#ifdef USE_MIMALLOC
 
 /*
     g++ -O3 -DNDEBUG -I <mimalloc>/include <mimalloc>/build/libmimalloc.a -lpthread -lgmpxx -lgmp

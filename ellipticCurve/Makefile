@@ -20,28 +20,34 @@ $(TARGET): $(OBJ)
 clean:
 	$(RM) -rf $(OBJ) $(DEP) $(TARGET) ec_* fp*.o fp*.d
 
-.PHONY: clean benchmark
+.PHONY: 
+	clean 
+	test
+	test521
+	benchmark
+	benchmark521
+	benchmark521_mi
 
 .SECONDARY: $(DEP)
 
 
 ./ec_test: tests/test.cpp fp256.o curve.o
-	$(CXX) -o ec_test tests/test.cpp fp256.o curve.o $(CXXFLAGS) $(LDFLAGS)  
+	$(CXX) -o ec_test tests/test.cpp fp256.o curve.o $(CXXFLAGS) $(LDFLAGS)  -I ./include
 
 ./ec_test_mi: tests/test.cpp fp256.o curve.o
 	$(CXX) -o ec_test_mi tests/test.cpp fp256.o curve.o $(CXXFLAGS) $(LDFLAGS) $(INCLUDE) -DUSE_MIMALLOC
 
-test: ./ec_test_mi
-	./ec_test_mi
+test: ./ec_test
+	./ec_test
 
 ./ec_benchmark: benchmarks/benchmark.cpp fp256.o curve.o
-	$(CXX) -o ec_benchmark $? $(CXXFLAGS) $(LDFLAGS)  
+	$(CXX) -o ec_benchmark $? $(CXXFLAGS) $(LDFLAGS) -I ./include
 
 ./ec_benchmark_mi: benchmarks/benchmark.cpp fp256.o curve.o
 	$(CXX) -o ec_benchmark_mi $? $(CXXFLAGS) $(LDFLAGS) $(INCLUDE) -DUSE_MIMALLOC
 
-benchmark: ./ec_benchmark_mi
-	./ec_benchmark_mi
+benchmark: ./ec_benchmark
+	./ec_benchmark
 
 # このあたりも綺麗にしたい
 test521:
@@ -52,10 +58,10 @@ test521:
 benchmark521:
 	$(CXX) -o fp521.o -c src/fp521.cpp $(CXXFLAGS) -DYKM_ECC_SECP521 -I ./include
 	$(CXX) -o curve.o -c src/curve.cpp $(CXXFLAGS) -DYKM_ECC_SECP521 -I ./include
-	$(CXX) -o ec_benchmark521 benchmarks/benchmarkSecp521.cpp fp521.o curve.o $(CXXFLAGS) $(LDFLAGS) -DYKM_ECC_SECP521 $(INCLUDE)
+	$(CXX) -o ec_benchmark521 benchmarks/benchmarkSecp521.cpp fp521.o curve.o $(CXXFLAGS) $(LDFLAGS) -DYKM_ECC_SECP521 -I ./include
 
 benchmark521_mi:
 	$(CXX) -o fp521.o -c src/fp521.cpp $(CXXFLAGS) -I ./include
 	$(CXX) -o curve.o -c src/curve.cpp $(CXXFLAGS)  -I ./include
-	$(CXX) -o ec_benchmark521_mi benchmarks/benchmarkSecp521.cpp fp521.o curve.o $(CXXFLAGS) $(LDFLAGS) $(INCLUDE) 
+	$(CXX) -o ec_benchmark521_mi benchmarks/benchmarkSecp521.cpp fp521.o curve.o -DUSE_MIMALLOC $(CXXFLAGS) $(LDFLAGS) $(INCLUDE) 
 
