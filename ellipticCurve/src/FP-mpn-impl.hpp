@@ -102,32 +102,40 @@ void invmod(Fp& r, const Fp& x) {
     mp_limb_t s[Fp::size_+1];
     mp_size_t sn;
 
-#if 0
-    copy_n(u, (mp_limb_t *)x.value, Fp::size_);
-    copy_n(v, Fp::modulus, Fp::size_);
-    mpn_gcdext(g, s, &sn, u, Fp::size_, v, Fp::size_);
-    copy_n(r.value, s, Fp::size_);
-
-    if (sn < 0) {
-        sub_n(r.value, Fp::modulus, r.value, Fp::size_);
-    }
-#else
-    size_t x_size = Fp::size_;
+    mp_size_t x_size = Fp::size_;
     while (!x.value[x_size - 1] && x_size > 0) {
         x_size--;
     }
 
-    copy_n(u, (mp_limb_t *)x.value, Fp::size_);
-    copy_n(v, Fp::modulus, Fp::size_);
-    mpn_gcdext(g, s, &sn, u, Fp::size_, v, Fp::size_);
-    copy_n(r.value, s, Fp::size_);
-    mpn_zero(r.value + x_size, Fp::size_ - x_size);
-    //dump(r);
-
-    if (sn < 0) {
-        sub_n(r.value, Fp::modulus, r.value, Fp::size_);
+    copy_n(v, (mp_limb_t *)x.value, x_size);
+    mpn_zero(v + x_size, Fp::size_ - x_size);
+    copy_n(u, Fp::modulus, Fp::size_);
+    mpn_gcdext(g, s, &sn, u, Fp::size_, v, x_size); 
+    if (sn == 0) { // x == 1;
+        mpn_zero(r.value, Fp::size_);
+        r.value[0] = 1;
+        return;
     }
-#endif
+
+    mp_limb_t t[Fp::size_ * 2];
+    // 1 - s*p = t*x
+    if (sn < 0) { // -sp > 0
+        mpn_mul(t, (const mp_limb_t*)Fp::modulus, Fp::size_, (const mp_limb_t*)s, -sn); // s * p
+        mpn_add_1(t, t, -sn + Fp::size_, 1); // 1 + sp
+        mpn_tdiv_qr(s, u, 0, 
+                (const mp_limb_t*)t, -sn + Fp::size_, 
+                (const mp_limb_t*)x.value, x_size);
+
+    } else { // -sp < 0
+        mpn_mul(t, (const mp_limb_t*)Fp::modulus, Fp::size_, (const mp_limb_t*)s, sn); // s * p
+        mpn_sub_1(t, t, sn + Fp::size_, 1); // sp - 1
+        mpn_tdiv_qr(s, u, 0, 
+                (const mp_limb_t*)t, sn + Fp::size_, 
+                (const mp_limb_t*)x.value, x_size);
+        sub_n(s, Fp::modulus, s, Fp::size_);
+    }
+    copy_n(r.value, s, Fp::size_);
+
 }
 
 void sqr(Fp &r, const Fp &x) { // r <- x^2
