@@ -102,6 +102,7 @@ void invmod(Fp& r, const Fp& x) {
     mp_limb_t s[Fp::size_+1];
     mp_size_t sn;
 
+#if 0
     copy_n(u, (mp_limb_t *)x.value, Fp::size_);
     copy_n(v, Fp::modulus, Fp::size_);
     mpn_gcdext(g, s, &sn, u, Fp::size_, v, Fp::size_);
@@ -110,6 +111,23 @@ void invmod(Fp& r, const Fp& x) {
     if (sn < 0) {
         sub_n(r.value, Fp::modulus, r.value, Fp::size_);
     }
+#else
+    size_t x_size = Fp::size_;
+    while (!x.value[x_size - 1] && x_size > 0) {
+        x_size--;
+    }
+
+    copy_n(u, (mp_limb_t *)x.value, Fp::size_);
+    copy_n(v, Fp::modulus, Fp::size_);
+    mpn_gcdext(g, s, &sn, u, Fp::size_, v, Fp::size_);
+    copy_n(r.value, s, Fp::size_);
+    mpn_zero(r.value + x_size, Fp::size_ - x_size);
+    //dump(r);
+
+    if (sn < 0) {
+        sub_n(r.value, Fp::modulus, r.value, Fp::size_);
+    }
+#endif
 }
 
 void sqr(Fp &r, const Fp &x) { // r <- x^2

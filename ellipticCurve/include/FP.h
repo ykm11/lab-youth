@@ -148,6 +148,11 @@ public:
         return z; 
     }
 
+    Fp& operator=(const Fp& other) {
+        copy(*this, other);
+        return *this;
+    }
+
     bool operator==(const Fp& other) const {
         return isEq(*this, other);
     }
