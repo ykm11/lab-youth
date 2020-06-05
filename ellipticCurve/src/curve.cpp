@@ -428,7 +428,6 @@ void GLV::scalarMul(Point &R, const Point &P, const mpz_class &k) {
     }
     add(R, R, Q);
 
-#if 0
     if (naf0_size == 0 && naf1_size == 0) {
         return;
     }
@@ -483,64 +482,5 @@ void GLV::scalarMul(Point &R, const Point &P, const mpz_class &k) {
         }
         add(R, R, Q);
     }
-
-#else
-    int i;
-    for (i = naf1_size-1; i >= int(w_size-1); i=i-w_size) {
-        t0 = 0;
-        t1 = 0;
-        for (size_t j = 0; j < w_size; j++) {
-            EllipticCurve::dbl(R, R);
-            t0 <<= 1;
-            t0 += naf0[i - j];
-            t1 <<= 1;
-            t1 += naf1[i - j];
-        }
-        
-        if (t0 < 0) {
-            Point::neg(Q, tbl0[-t0]);
-        } else {
-            Q = tbl0[t0];
-        }
-        add(R, R, Q);
-
-        if (t1 < 0) {
-            Point::neg(Q, tbl1[-t1]);
-        } else {
-            Q = tbl1[t1];
-        }
-        add(R, R, Q);
-    }
-
-    if (i < 0) {
-        return;
-    }
-
-    t0 = t1 = 0;
-    while (i > 0) {
-        EllipticCurve::dbl(R, R);
-        t0 += naf0[i];
-        t0 <<= 1;
-        t1 += naf1[i];
-        t1 <<= 1;
-        i--;
-    }
-    EllipticCurve::dbl(R, R);
-    t0 += naf0[0];
-    t1 += naf1[0];
-    if (t0 < 0) {
-        Point::neg(Q, tbl0[-t0]);
-    } else {
-        Q = tbl0[t0];
-    }
-    add(R, R, Q);
-
-    if (t1 < 0) {
-        Point::neg(Q, tbl1[-t1]);
-    } else {
-        Q = tbl1[t1];
-    }
-    add(R, R, Q);
-#endif
 
 }
