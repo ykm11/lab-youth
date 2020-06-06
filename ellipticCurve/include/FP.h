@@ -107,6 +107,7 @@ public:
     mp_limb_t value[YKM_ECC_MAX_SIZE];
 
     Fp() { }
+    Fp(const Fp& v) : Fp() { copy(*this, v); }
     Fp(mp_limb_t v[YKM_ECC_MAX_SIZE]){
         copy_n(value, v, size_);
         if (cmp_n(value, modulus, size_) >= 0) {
