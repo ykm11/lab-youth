@@ -27,6 +27,7 @@ void Fp::setModulo(const mp_limb_t p[YKM_ECC_MAX_SIZE]) {
 
 void Fp::neg(Fp& r, const Fp& x) {
     if (zeroCmp(x)) {
+        mpn_zero(r.value, Fp::size_);
         return;
     }
     sub_n(r.value, modulus, (mp_limb_t*)x.value, size_);
@@ -38,9 +39,7 @@ bool isEq(const Fp& x, const Fp& y) {
 
 void add(Fp& z, const Fp& x, const Fp& y) {
     if (add_n(z.value, (mp_limb_t *)x.value, (mp_limb_t *)y.value, Fp::size_)) {
-        mp_limb_t r[Fp::size_];
-        sub_n(r, z.value, Fp::modulus, Fp::size_);
-        copy_n(z.value, r, Fp::size_);
+        sub_n(z.value, z.value, Fp::modulus, Fp::size_);
         return;
     }
 
@@ -50,10 +49,8 @@ void add(Fp& z, const Fp& x, const Fp& y) {
 }
 
 void add(Fp& z, const Fp& x, mp_limb_t scalar) {
-    if (add_1(z.value, (mp_limb_t *)x.value, Fp::size_, (mp_limb_t)scalar)) {
-        mp_limb_t r[Fp::size_];
-        sub_n(r, z.value, Fp::modulus, Fp::size_);
-        copy_n(z.value, r, Fp::size_);
+    if (add_1(z.value, (mp_limb_t *)x.value, Fp::size_, scalar)) {
+        sub_n(z.value, z.value, Fp::modulus, Fp::size_);
         return;
     }
     if (cmp_n(z.value, Fp::modulus, Fp::size_) >= 0) {
@@ -63,13 +60,7 @@ void add(Fp& z, const Fp& x, mp_limb_t scalar) {
 
 void sub(Fp& z, const Fp& x, const Fp& y) {
     if (sub_n(z.value, (mp_limb_t *)x.value, (mp_limb_t *)y.value, Fp::size_)) {
-#if 0
-        mp_limb_t r[Fp::size_];
-        add_n(r, z.value, Fp::modulus, Fp::size_);
-        copy_n(z.value, r, Fp::size_);
-#else
         add_n(z.value, z.value, Fp::modulus, Fp::size_);
-#endif
     }
 }
 

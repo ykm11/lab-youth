@@ -283,7 +283,8 @@ void naf_mul(TPoint &R, const TPoint &P, const mpz_class &x) {
     }
  
     getNafArray(naf, x);
-    while (naf_size >= 1 && naf[naf_size-1] == 0) {
+    while (naf_size > 0) {
+        if (naf[naf_size - 1]) break;
         naf_size--;
     }
 
