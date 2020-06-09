@@ -23,8 +23,10 @@ clean:
 .PHONY: 
 	clean 
 	test
+	test256
 	test521
 	benchmark
+	benchmark256
 	benchmark521
 	benchmark521_mi
 
@@ -37,8 +39,13 @@ clean:
 ./ec_test_mi: tests/test.cpp fp256.o curve.o
 	$(CXX) -o ec_test_mi tests/test.cpp fp256.o curve.o $(CXXFLAGS) $(LDFLAGS) $(INCLUDE) -DUSE_MIMALLOC
 
-test: ./ec_test
-	./ec_test
+test: 
+	make test256
+	make test521
+	@echo "--- Elliptic Curve 256 bits TEST ---"
+	./ec_test256
+	@echo "--- Elliptic Curve 521 bits TEST ---"
+	./ec_test521
 
 ./ec_benchmark: benchmarks/benchmark.cpp fp256.o curve.o
 	$(CXX) -o ec_benchmark $? $(CXXFLAGS) $(LDFLAGS) -I ./include
@@ -46,14 +53,25 @@ test: ./ec_test
 ./ec_benchmark_mi: benchmarks/benchmark.cpp fp256.o curve.o
 	$(CXX) -o ec_benchmark_mi $? $(CXXFLAGS) $(LDFLAGS) $(INCLUDE) -DUSE_MIMALLOC
 
-benchmark: ./ec_benchmark
-	./ec_benchmark
+benchmark: 
+	make benchmark256
+	make benchmark521
 
 # このあたりも綺麗にしたい
+test256:
+	$(CXX) -o fp256.o -c src/fp256.cpp $(CXXFLAGS) -I ./include
+	$(CXX) -o curve.o -c src/curve.cpp $(CXXFLAGS) -I ./include
+	$(CXX) -o ec_test256 tests/test.cpp fp256.o curve.o $(CXXFLAGS) $(LDFLAGS) -I ./include
+
 test521:
 	$(CXX) -o fp521.o -c src/fp521.cpp $(CXXFLAGS) -DYKM_ECC_SECP521 -I ./include
 	$(CXX) -o curve.o -c src/curve.cpp $(CXXFLAGS) -DYKM_ECC_SECP521 -I ./include
 	$(CXX) -o ec_test521 tests/test_secp521.cpp fp521.o curve.o $(CXXFLAGS) $(LDFLAGS) -DSECP521 -I ./include
+
+benchmark256:
+	$(CXX) -o fp256.o -c src/fp256.cpp $(CXXFLAGS) -I ./include
+	$(CXX) -o curve.o -c src/curve.cpp $(CXXFLAGS) -I ./include
+	$(CXX) -o ec_benchmark256 benchmarks/benchmark.cpp fp256.o curve.o $(CXXFLAGS) $(LDFLAGS) -I ./include
 
 benchmark521:
 	$(CXX) -o fp521.o -c src/fp521.cpp $(CXXFLAGS) -DYKM_ECC_SECP521 -I ./include
