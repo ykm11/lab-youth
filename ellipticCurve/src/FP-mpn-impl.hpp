@@ -74,7 +74,6 @@ void mul(Fp& z, const Fp& x, const Fp& y) {
     secp521Mod(z.value, tmp_z, Fp::modulus, t, s);
 
 #elif defined(YKM_ECC_USE_MPN)
-
     mp_limb_t tmp_z[Fp::size_ * 2];
     mp_limb_t q[Fp::size_ + 1];
 
@@ -102,8 +101,9 @@ void invmod(Fp& r, const Fp& x) {
     mpn_zero(v + x_size, Fp::size_ - x_size);
     copy_n(u, Fp::modulus, Fp::size_);
     mpn_gcdext(g, s, &sn, u, Fp::size_, v, x_size); 
+    
+    mpn_zero(r.value, Fp::size_);
     if (sn == 0) { // x == 1;
-        mpn_zero(r.value, Fp::size_);
         r.value[0] = 1;
         return;
     }
@@ -113,20 +113,18 @@ void invmod(Fp& r, const Fp& x) {
     if (sn < 0) { // -sp > 0
         mpn_mul(t, (const mp_limb_t*)Fp::modulus, Fp::size_, (const mp_limb_t*)s, -sn); // s * p
         mpn_add_1(t, t, -sn + Fp::size_, 1); // 1 + sp
-        mpn_tdiv_qr(s, u, 0, 
+        mpn_tdiv_qr(r.value, u, 0, 
                 (const mp_limb_t*)t, -sn + Fp::size_, 
                 (const mp_limb_t*)x.value, x_size);
 
     } else { // -sp < 0
         mpn_mul(t, (const mp_limb_t*)Fp::modulus, Fp::size_, (const mp_limb_t*)s, sn); // s * p
         mpn_sub_1(t, t, sn + Fp::size_, 1); // sp - 1
-        mpn_tdiv_qr(s, u, 0, 
+        mpn_tdiv_qr(r.value, u, 0, 
                 (const mp_limb_t*)t, sn + Fp::size_, 
                 (const mp_limb_t*)x.value, x_size);
-        sub_n(s, Fp::modulus, s, Fp::size_);
+        sub_n(r.value, Fp::modulus, r.value, Fp::size_);
     }
-    copy_n(r.value, s, Fp::size_);
-
 }
 
 void sqr(Fp &r, const Fp &x) { // r <- x^2
