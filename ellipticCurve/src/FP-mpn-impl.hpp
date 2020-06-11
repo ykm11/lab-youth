@@ -93,12 +93,12 @@ void invmod(Fp& r, const Fp& x) {
     mp_size_t sn;
 
     mp_size_t x_size = Fp::size_;
-    while (!x.value[x_size - 1] && x_size > 0) {
+    while (x_size > 0) {
+        if(!x.value[x_size - 1]) break;
         x_size--;
     }
 
-    copy_n(v, (mp_limb_t *)x.value, x_size);
-    mpn_zero(v + x_size, Fp::size_ - x_size);
+    copy_n(v, (mp_limb_t *)x.value, Fp::size_);
     copy_n(u, Fp::modulus, Fp::size_);
     mpn_gcdext(g, s, &sn, u, Fp::size_, v, x_size); 
     
@@ -109,7 +109,7 @@ void invmod(Fp& r, const Fp& x) {
     }
 
     mp_limb_t t[Fp::size_ * 2];
-    // 1 - s*p = t*x
+    // 1 - s*p = inv_x*x
     if (sn < 0) { // -sp > 0
         mpn_mul(t, (const mp_limb_t*)Fp::modulus, Fp::size_, (const mp_limb_t*)s, -sn); // s * p
         mpn_add_1(t, t, -sn + Fp::size_, 1); // 1 + sp
