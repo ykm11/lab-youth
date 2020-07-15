@@ -33,12 +33,8 @@ int main() {
 
     uint8_t tag[16];
 
-    array_t _aad, _plaintext;
-    _aad._value = aad;
-    _aad._size = sizeof(aad);
-
-    _plaintext._value = plaintext;
-    _plaintext._size = sizeof(plaintext);
+    array_t _aad = {aad, sizeof(aad)};
+    array_t _plaintext = {plaintext, sizeof(plaintext)};
 
     time_t begin, end;
     const size_t N = 100000;
