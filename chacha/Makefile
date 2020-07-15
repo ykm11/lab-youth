@@ -1,22 +1,24 @@
 TARGET=main
+OBJ=chacha_poly.o
 CXXFLAG=-O3 -Wall -Wextra
 LDFLAGS=-lgmpxx -lgmp
 INCLUDES= -I ./include
+SRCDIR=src
 
 all: $(TARGET)
 
-%.o: %.cpp
+%.o: $(SRCDIR)/%.cpp
 	$(CXX) -c $< -o $@ $(CXXFLAG) $(INCLUDES)
 
-main: main.o chacha_poly.o
-	$(CXX) main.o chacha_poly.o -o $@ $(CXXFLAG) $(LDFLAGS) $(INCLUDES)
+main: main.o $(OBJ)
+	$(CXX) main.o $(OBJ) -o $@ $(CXXFLAG) $(LDFLAGS) $(INCLUDES)
 
-test: test.cpp chacha_poly.o
-	$(CXX) test.cpp chacha_poly.o -o $@ $(CXXFLAG) $(LDFLAGS) $(INCLUDES)
+test: test.cpp $(OBJ)
+	$(CXX) test.cpp $(OBJ) -o $@ $(CXXFLAG) $(LDFLAGS) $(INCLUDES)
 	./test
 
-benchmark: benchmark.cpp chacha_poly.o
-	$(CXX) benchmark.cpp chacha_poly.o -o $@ $(CXXFLAG) $(LDFLAGS) $(INCLUDES)
+benchmark: benchmark.cpp $(OBJ)
+	$(CXX) benchmark.cpp $(OBJ) -o $@ $(CXXFLAG) $(LDFLAGS) $(INCLUDES)
 
 clean:
 	$(RM) *.o ./test ./benchmark ./main
