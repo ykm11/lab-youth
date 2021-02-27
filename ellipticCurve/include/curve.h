@@ -190,6 +190,22 @@ public:
     static void dbl(jPoint &R, const jPoint &P);
 };
 
+class TwistedEdwardCurve {
+public:
+    static Fp a, d;
+
+    static void initEd() {
+        Fp::setModulo(mpz_class("7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffed", 16));
+        a = Fp(-1);
+        d = Fp(mpz_class("52036cee2b6ffe738cc740797779e89800700a4d4141d8ab75eb4dca135978a3", 16));
+    }
+
+    static void Padd(Point &R, const Point &P, const Point &Q);
+    static void Pdbl(Point &R, const Point &P);
+};
+
+
+
 template<class TPoint>
 void sub(TPoint &R, const TPoint &P, const TPoint &Q) {
     TPoint::neg(R, Q); // R <- [-1]Q

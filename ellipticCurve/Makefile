@@ -83,3 +83,7 @@ benchmark521_mi:
 	$(CXX) -o curve.o -c src/curve.cpp $(CXXFLAGS)  -I ./include
 	$(CXX) -o ec_benchmark521_mi benchmarks/benchmarkSecp521.cpp fp521.o curve.o -DUSE_MIMALLOC $(CXXFLAGS) $(LDFLAGS) $(INCLUDE) 
 
+
+testEd: tests/test_twistedEd.cpp fp256.o curve.o
+	$(CXX) -o ec_ed_test tests/test_twistedEd.cpp fp256.o curve.o $(CXXFLAGS) $(LDFLAGS)  -I ./include
+

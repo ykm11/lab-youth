@@ -484,3 +484,68 @@ void GLV::scalarMul(Point &R, const Point &P, const mpz_class &k) {
     }
 
 }
+
+Fp TwistedEdwardCurve::a;
+Fp TwistedEdwardCurve::d;
+
+void TwistedEdwardCurve::Padd(Point &R, const Point &P, const Point &Q) {
+    Fp k, l, s, t, u, v, w;
+    Fp Rx, Ry, Rz;
+
+    // How to switch to DBL? 
+
+    mul(s, P.z, Q.z); // A := Z1 * Z2
+    sqr(t, s); // B := A^2 = (Z1 * Z2) ^ 2
+    mul(u, P.x, Q.x); // C := X1 * X2
+    mul(v, P.y, Q.y); // D := Y1 * Y2
+    mul(w, d, u);
+    mul(w, w, v); // E := d * (X1 * X2) * (Y1 * Y2)
+
+    sub(k, t, w); // F := B - E
+    add(l, t, w); // G := B + E
+
+    add(Ry, P.x, P.y);
+    add(Rz, Q.x, Q.y);
+    mul(Rx, Ry, Rz);
+    add(Rz, u, v); // (C + D)
+    sub(Rx, Rx, Rz); // - C - D = - (C + D)
+    mul(Rx, Rx, k);
+    mul(Rx, Rx, s);
+
+    mul(Ry, s, l);
+    mul(Ry, Ry, Rz);
+    
+    mul(Rz, k, l); 
+
+    R.x = Rx;
+    R.y = Ry;
+    R.z = Rz;
+}
+
+void TwistedEdwardCurve::Pdbl(Point &R, const Point &P) {
+    Fp k, l, s, t, u, v, w;
+    Fp Rx, Ry, Rz;
+
+    add(k, P.x, P.y); // (X1 + Y1)
+    sqr(k, k); // B := (X1 + Y1) ^ 2
+    sqr(l, P.x); // C := X1 ^ 2
+    sqr(s, P.y); // D := Y2 ^ 2
+    sub(t, s, l); // F := D - C = Y2 ^ 2 - X2 ^ 2
+    sqr(u, P.z); // H := Z ^ 2
+    Fp::mulInt(v, u, 2);
+    sub(v, t, v); // J := F - 2H
+
+    add(Rz, l, s); // C + D
+    sub(Rx, k, Rz); // B - (C + D)
+    mul(Rx, Rx, v);
+
+    Fp::neg(Rz, Rz);
+    mul(Ry, Rz, t);
+
+    mul(Rz, t, v);
+
+    R.x = Rx;
+    R.y = Ry;
+    R.z = Rz;
+}
+
