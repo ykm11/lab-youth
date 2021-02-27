@@ -20,7 +20,6 @@ void test_TwistedEd_add() {
     Point P(mpz_class("216936d3cd6e53fec0a4e231fdd6dc5c692cc7609525a7b2c9562d608f25d51a", 16), 
             mpz_class("6666666666666666666666666666666666666666666666666666666666666658", 16), 
             1);
-    dump(P);
 
     Point Q;
     TwistedEdwardCurve::Pdbl(Q, P);
@@ -30,7 +29,29 @@ void test_TwistedEd_add() {
     dump(Q);
 }
 
+void test_TwistedEd_scalarMul() {
+    TwistedEdwardCurve::initEd();
+    Point P(mpz_class("216936d3cd6e53fec0a4e231fdd6dc5c692cc7609525a7b2c9562d608f25d51a", 16), 
+            mpz_class("6666666666666666666666666666666666666666666666666666666666666658", 16), 
+            1);
+
+    mpz_class x("c11f535ca9a31c6ef3ec441f75e362c1b67ae4a37121af9cd35ce110754363cd", 16);
+    Point R;
+    TwistedEdwardCurve::scalarMul(R, P, x);
+
+    Point correct_R(mpz_class("7e2eecc8c6ef10e861af05ac15e1361f4f7e15d2023a1617f5f0cb10cea940e8", 16), 
+            mpz_class("6c8be36d9349bfaae4d09dfb379b49417dc65afbf41e9815a14be0d53abdfe88", 16), 
+            1);
+
+    printf("[+] Ed25519 scalarMult TEST: ");
+    if (R == correct_R) {
+        puts("OK");
+    } else {
+        puts("FAILED");
+    }
+}
 
 int main() {
-    test_TwistedEd_add();
+    //test_TwistedEd_add();
+    test_TwistedEd_scalarMul();
 }

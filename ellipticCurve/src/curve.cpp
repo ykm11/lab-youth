@@ -487,10 +487,34 @@ void GLV::scalarMul(Point &R, const Point &P, const mpz_class &k) {
 
 Fp TwistedEdwardCurve::a;
 Fp TwistedEdwardCurve::d;
+Point TwistedEdwardCurve::base;
+
+void TwistedEdwardCurve::Pneg(Point &R, const Point &P) {
+#if 1
+    Fp::neg(R.x, P.x);
+    R.y = P.y;
+#else
+    R.x = P.x;
+    Fp::neg(R.y, P.y);
+#endif
+    R.z = P.z;
+}
 
 void TwistedEdwardCurve::Padd(Point &R, const Point &P, const Point &Q) {
     Fp k, l, s, t, u, v, w;
     Fp Rx, Ry, Rz;
+
+    if (zeroCmp(P.z)) {
+        R.x = Q.x;
+        R.y = Q.y;
+        R.z = Q.z;
+        return;
+    }else if (zeroCmp(Q.z)) {
+        R.x = P.x;
+        R.y = P.y;
+        R.z = P.z;
+        return;
+    }
 
     // How to switch to DBL? 
 
@@ -526,6 +550,14 @@ void TwistedEdwardCurve::Pdbl(Point &R, const Point &P) {
     Fp k, l, s, t, u, v, w;
     Fp Rx, Ry, Rz;
 
+    if (zeroCmp(P.z)) {
+        R.x = P.x;
+        R.y = P.y;
+        R.z = P.z;
+        return;
+    }
+    // 最適化（しなさい）
+
     add(k, P.x, P.y); // (X1 + Y1)
     sqr(k, k); // B := (X1 + Y1) ^ 2
     sqr(l, P.x); // C := X1 ^ 2
@@ -549,3 +581,69 @@ void TwistedEdwardCurve::Pdbl(Point &R, const Point &P) {
     R.z = Rz;
 }
 
+#if 1
+void TwistedEdwardCurve::scalarMul(Point &R, const Point &P, const mpz_class &x) { 
+    size_t naf_size = mpz_sizeinbase(x.get_mpz_t(), 2) + 1;
+    int8_t naf[naf_size];
+    memset(naf, 0, naf_size);
+
+    const size_t w_size = 5;
+    const size_t tblSize = 1 << w_size;
+    Point tbl[tblSize];
+    setInfPoint(tbl[0]);
+    tbl[1] = P;
+
+    for (size_t k = 2; k < 21; k=k+2) {
+        TwistedEdwardCurve::Pdbl(tbl[k], tbl[k/2]);
+        TwistedEdwardCurve::Padd(tbl[k+1], tbl[k], P);
+    }
+ 
+    getNafArray(naf, x);
+    while (naf_size > 0) {
+        if (naf[naf_size - 1]) break;
+        naf_size--;
+    }
+
+    Point Q;
+    int8_t t = 1;
+    while((naf_size-1) % w_size != 0) {
+        t <<= 1;
+        t += naf[naf_size-2];
+        naf_size--;
+    }
+    if (t < 0) {
+        TwistedEdwardCurve::Pneg(R, tbl[-t]);
+    } else {
+        R = tbl[t];
+    }
+
+    for (int i = naf_size-2; i >= int(w_size-1); i=i-w_size) {
+        t = 0;
+        for (size_t j = 0; j < w_size; j++) {
+            TwistedEdwardCurve::Pdbl(R, R);
+            t <<= 1;
+            t += naf[i-j];
+        }
+
+        if (t < 0) {
+            TwistedEdwardCurve::Pneg(Q, tbl[-t]);
+        } else {
+            Q = tbl[t];
+        }
+        TwistedEdwardCurve::Padd(R, R, Q);
+    }
+}
+#else
+void TwistedEdwardCurve::scalarMul(Point &R, const Point &P, const mpz_class &x) { 
+    size_t k_bits = mpz_sizeinbase(x.get_mpz_t(), 2);
+    setPoint(R, P.x, P.y, P.z);
+
+    for (int i = k_bits-2; i >= 0; i--) {
+        TwistedEdwardCurve::Pdbl(R, R);
+
+        if (mpz_tstbit(x.get_mpz_t(), i) == 1) {
+            TwistedEdwardCurve::Padd(R, R, P);
+        }
+    }
+}
+#endif
