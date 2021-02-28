@@ -8,7 +8,7 @@
 void pollard_rho_f(const Point& alpha, const Point& beta, Point& x,
         mpz_class& a, mpz_class& b, const mpz_class& order) {
     Fp x_x, x_y;
-    x.xy(x_x, x_y);
+    if (!zeroCmp(x.z)) x.xy(x_x, x_y);
 
     if (x_x.value[0] % 3 == 0) {
         add(x, beta, x);
