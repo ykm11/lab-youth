@@ -3,14 +3,15 @@ OBJ=$(SRC:.cpp=.o)
 DEP=$(SRC:.cpp=.d)
 
 TARGET=main
-CXXFLAGS=-Wall -Wextra -O3 -std=c++17 -DNDEBUG -DYKM_ECC_USE_MPN
+CXXFLAGS=-Wall -Wextra -O3 -std=c++17 -DNDEBUG 
+MPNFLAG = -DYKM_ECC_USE_MPN
 LDFLAGS=-lgmpxx -lgmp -lpthread
 INCLUDE=-I /usr/local/lib/mimalloc-1.6/include /usr/local/lib/mimalloc-1.6/libmimalloc.a -I ./include
 
 all: $(TARGET)
 
 %.o: src/%.cpp
-	$(CXX) -c $< -o $@ $(CXXFLAGS) -MMD -MP -MF $(@:.o=.d) -I ./include
+	$(CXX) -c $< -o $@ $(CXXFLAGS) $(MPNFLAG) -MMD -MP -MF $(@:.o=.d) -I ./include
 
 -include $(DEP)
 
@@ -34,10 +35,10 @@ clean:
 
 
 ./ec_test: tests/test.cpp fp256.o curve.o
-	$(CXX) -o ec_test tests/test.cpp fp256.o curve.o $(CXXFLAGS) $(LDFLAGS)  -I ./include
+	$(CXX) -o ec_test tests/test.cpp fp256.o curve.o $(CXXFLAGS) $(MPNFLAG) $(LDFLAGS)  -I ./include
 
 ./ec_test_mi: tests/test.cpp fp256.o curve.o
-	$(CXX) -o ec_test_mi tests/test.cpp fp256.o curve.o $(CXXFLAGS) $(LDFLAGS) $(INCLUDE) -DUSE_MIMALLOC
+	$(CXX) -o ec_test_mi tests/test.cpp fp256.o curve.o $(CXXFLAGS) $(MPNFLAG) $(LDFLAGS) $(INCLUDE) -DUSE_MIMALLOC
 
 test: 
 	make test256
@@ -48,10 +49,10 @@ test:
 	./ec_test521
 
 ./ec_benchmark: benchmarks/benchmark.cpp fp256.o curve.o
-	$(CXX) -o ec_benchmark $? $(CXXFLAGS) $(LDFLAGS) -I ./include
+	$(CXX) -o ec_benchmark $? $(CXXFLAGS) $(MPNFLAG) $(LDFLAGS) -I ./include
 
 ./ec_benchmark_mi: benchmarks/benchmark.cpp fp256.o curve.o
-	$(CXX) -o ec_benchmark_mi $? $(CXXFLAGS) $(LDFLAGS) $(INCLUDE) -DUSE_MIMALLOC
+	$(CXX) -o ec_benchmark_mi $? $(CXXFLAGS) $(MPNFLAG) $(LDFLAGS) $(INCLUDE) -DUSE_MIMALLOC
 
 benchmark: 
 	make benchmark256
@@ -59,36 +60,41 @@ benchmark:
 
 # このあたりも綺麗にしたい
 test256:
-	$(CXX) -o fp256.o -c src/fp256.cpp $(CXXFLAGS) -I ./include
-	$(CXX) -o curve.o -c src/curve.cpp $(CXXFLAGS) -I ./include
-	$(CXX) -o ec_test256 tests/test.cpp fp256.o curve.o $(CXXFLAGS) $(LDFLAGS) -I ./include
+	$(CXX) -o fp256.o -c src/fp256.cpp $(CXXFLAGS) $(MPNFLAG) -I ./include
+	$(CXX) -o curve.o -c src/curve.cpp $(CXXFLAGS) $(MPNFLAG) -I ./include
+	$(CXX) -o ec_test256 tests/test.cpp fp256.o curve.o $(CXXFLAGS) $(MPNFLAG) $(LDFLAGS) -I ./include
 
 test521:
-	$(CXX) -o fp521.o -c src/fp521.cpp $(CXXFLAGS) -DYKM_ECC_SECP521 -I ./include
-	$(CXX) -o curve.o -c src/curve.cpp $(CXXFLAGS) -DYKM_ECC_SECP521 -I ./include
-	$(CXX) -o ec_test521 tests/test_secp521.cpp fp521.o curve.o $(CXXFLAGS) $(LDFLAGS) -DSECP521 -I ./include
+	$(CXX) -o fp521.o -c src/fp521.cpp $(CXXFLAGS) $(MPNFLAG) -DYKM_ECC_SECP521 -I ./include
+	$(CXX) -o curve.o -c src/curve.cpp $(CXXFLAGS) $(MPNFLAG) -DYKM_ECC_SECP521 -I ./include
+	$(CXX) -o ec_test521 tests/test_secp521.cpp fp521.o curve.o $(CXXFLAGS) $(MPNFLAG) $(LDFLAGS) -DSECP521 -I ./include
 
 benchmark256:
-	$(CXX) -o fp256.o -c src/fp256.cpp $(CXXFLAGS) -I ./include
-	$(CXX) -o curve.o -c src/curve.cpp $(CXXFLAGS) -I ./include
-	$(CXX) -o ec_benchmark256 benchmarks/benchmark.cpp fp256.o curve.o $(CXXFLAGS) $(LDFLAGS) -I ./include
+	$(CXX) -o fp256.o -c src/fp256.cpp $(CXXFLAGS) $(MPNFLAG) -I ./include
+	$(CXX) -o curve.o -c src/curve.cpp $(CXXFLAGS) $(MPNFLAG) -I ./include
+	$(CXX) -o ec_benchmark256 benchmarks/benchmark.cpp fp256.o curve.o $(CXXFLAGS) $(MPNFLAG) $(LDFLAGS) -I ./include
 
 benchmark521:
-	$(CXX) -o fp521.o -c src/fp521.cpp $(CXXFLAGS) -DYKM_ECC_SECP521 -I ./include
-	$(CXX) -o curve.o -c src/curve.cpp $(CXXFLAGS) -DYKM_ECC_SECP521 -I ./include
-	$(CXX) -o ec_benchmark521 benchmarks/benchmarkSecp521.cpp fp521.o curve.o $(CXXFLAGS) $(LDFLAGS) -DYKM_ECC_SECP521 -I ./include
+	$(CXX) -o fp521.o -c src/fp521.cpp $(CXXFLAGS) $(MPNFLAG) -DYKM_ECC_SECP521 -I ./include
+	$(CXX) -o curve.o -c src/curve.cpp $(CXXFLAGS) $(MPNFLAG) -DYKM_ECC_SECP521 -I ./include
+	$(CXX) -o ec_benchmark521 benchmarks/benchmarkSecp521.cpp fp521.o curve.o $(CXXFLAGS) $(MPNFLAG) $(LDFLAGS) -DYKM_ECC_SECP521 -I ./include
 
 benchmark521_mi:
-	$(CXX) -o fp521.o -c src/fp521.cpp $(CXXFLAGS) -I ./include
-	$(CXX) -o curve.o -c src/curve.cpp $(CXXFLAGS)  -I ./include
-	$(CXX) -o ec_benchmark521_mi benchmarks/benchmarkSecp521.cpp fp521.o curve.o -DUSE_MIMALLOC $(CXXFLAGS) $(LDFLAGS) $(INCLUDE) 
+	$(CXX) -o fp521.o -c src/fp521.cpp $(CXXFLAGS) $(MPNFLAG) -I ./include
+	$(CXX) -o curve.o -c src/curve.cpp $(CXXFLAGS) $(MPNFLAG)  -I ./include
+	$(CXX) -o ec_benchmark521_mi benchmarks/benchmarkSecp521.cpp fp521.o curve.o -DUSE_MIMALLOC $(CXXFLAGS) $(MPNFLAG) $(LDFLAGS) $(INCLUDE) 
 
 
 testEd25519: tests/test_twistedEd.cpp fp256.o curve.o
-	$(CXX) -o ec_ed_test tests/test_twistedEd.cpp fp256.o curve.o $(CXXFLAGS) $(LDFLAGS)  -I ./include
+	$(CXX) -o ec_ed_test tests/test_twistedEd.cpp fp256.o curve.o $(CXXFLAGS) $(MPNFLAG) $(LDFLAGS)  -I ./include
 
 benchmarkEd25519:
+	$(CXX) -o fp256.o -c src/fp256.cpp $(CXXFLAGS) $(MPNFLAG) -I ./include
+	$(CXX) -o curve.o -c src/curve.cpp $(CXXFLAGS) $(MPNFLAG) -I ./include
+	$(CXX) -o ec_benchmarkEd25519 benchmarks/bench_ed25519.cpp fp256.o curve.o $(CXXFLAGS) $(MPNFLAG) $(LDFLAGS) -I ./include
+
+benchmarkEd25519_mpz:
 	$(CXX) -o fp256.o -c src/fp256.cpp $(CXXFLAGS) -I ./include
 	$(CXX) -o curve.o -c src/curve.cpp $(CXXFLAGS) -I ./include
-	$(CXX) -o ec_benchmarkEd25519 benchmarks/bench_ed25519.cpp fp256.o curve.o $(CXXFLAGS) $(LDFLAGS) -I ./include
+	$(CXX) -o ec_benchmarkEd25519_mpz benchmarks/bench_ed25519.cpp fp256.o curve.o $(CXXFLAGS) $(LDFLAGS) -I ./include
 

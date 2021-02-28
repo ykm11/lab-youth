@@ -4,6 +4,47 @@
 
 #include "FP.h"
 
+void benchmark_add() {
+    const int n = 10000;
+    time_t begin, end;
+
+    TwistedEdwardCurve::initEd();
+    Point P(mpz_class("216936d3cd6e53fec0a4e231fdd6dc5c692cc7609525a7b2c9562d608f25d51a", 16), 
+            mpz_class("6666666666666666666666666666666666666666666666666666666666666658", 16), 
+            1);
+
+    mpz_class x("c11f535ca9a31c6ef3ec441f75e362c1b67ae4a37121af9cd35ce110754363cd", 16);
+    Point R;
+
+    begin = clock();
+    for(int i = 0; i < n; i++) {
+        TwistedEdwardCurve::Padd(R, P, P);
+    }
+    end = clock();
+    printf("\tEd25519 add\t\t time = %fusec\n", (end - begin) / double(CLOCKS_PER_SEC) / n * 1e6);
+}
+
+void benchmark_dbl() {
+    const int n = 10000;
+    time_t begin, end;
+
+    TwistedEdwardCurve::initEd();
+    Point P(mpz_class("216936d3cd6e53fec0a4e231fdd6dc5c692cc7609525a7b2c9562d608f25d51a", 16), 
+            mpz_class("6666666666666666666666666666666666666666666666666666666666666658", 16), 
+            1);
+
+    mpz_class x("c11f535ca9a31c6ef3ec441f75e362c1b67ae4a37121af9cd35ce110754363cd", 16);
+    Point R;
+
+    begin = clock();
+    for(int i = 0; i < n; i++) {
+        TwistedEdwardCurve::Pdbl(R, P);
+    }
+    end = clock();
+    printf("\tEd25519 dbl\t\t time = %fusec\n", (end - begin) / double(CLOCKS_PER_SEC) / n * 1e6);
+}
+
+
 void benchmark_scalarMul() {
     const int n = 1000;
     time_t begin, end;
@@ -24,6 +65,9 @@ void benchmark_scalarMul() {
     printf("\tEd25519 scalarMult\t time = %fusec\n", (end - begin) / double(CLOCKS_PER_SEC) / n * 1e6);
 }
 
+
 int main() {
+    benchmark_add();
+    benchmark_dbl();
     benchmark_scalarMul();
 }

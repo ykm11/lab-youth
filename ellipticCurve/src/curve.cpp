@@ -547,7 +547,7 @@ void TwistedEdwardCurve::Padd(Point &R, const Point &P, const Point &Q) {
 }
 
 void TwistedEdwardCurve::Pdbl(Point &R, const Point &P) {
-    Fp k, l, s, t, u, v, w;
+    Fp k, l, s, t, u, v;
     Fp Rx, Ry, Rz;
 
     if (zeroCmp(P.z)) {
@@ -581,7 +581,6 @@ void TwistedEdwardCurve::Pdbl(Point &R, const Point &P) {
     R.z = Rz;
 }
 
-#if 1
 void TwistedEdwardCurve::scalarMul(Point &R, const Point &P, const mpz_class &x) { 
     size_t naf_size = mpz_sizeinbase(x.get_mpz_t(), 2) + 1;
     int8_t naf[naf_size];
@@ -633,17 +632,4 @@ void TwistedEdwardCurve::scalarMul(Point &R, const Point &P, const mpz_class &x)
         TwistedEdwardCurve::Padd(R, R, Q);
     }
 }
-#else
-void TwistedEdwardCurve::scalarMul(Point &R, const Point &P, const mpz_class &x) { 
-    size_t k_bits = mpz_sizeinbase(x.get_mpz_t(), 2);
-    setPoint(R, P.x, P.y, P.z);
 
-    for (int i = k_bits-2; i >= 0; i--) {
-        TwistedEdwardCurve::Pdbl(R, R);
-
-        if (mpz_tstbit(x.get_mpz_t(), i) == 1) {
-            TwistedEdwardCurve::Padd(R, R, P);
-        }
-    }
-}
-#endif
