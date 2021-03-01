@@ -558,26 +558,25 @@ void TwistedEdwardCurve::Pdbl(Point &R, const Point &P) {
     }
     // 最適化（しなさい）
 
-    add(k, P.x, P.y); // (X1 + Y1)
-    sqr(k, k); // B := (X1 + Y1) ^ 2
-    sqr(l, P.x); // C := X1 ^ 2
-    sqr(s, P.y); // D := Y2 ^ 2
-    sub(t, s, l); // F := D - C = Y2 ^ 2 - X2 ^ 2
+    add(k, P.x, P.y); // (X + Y)
+    sqr(k, k); // B := (X + Y) ^ 2
+    sqr(l, P.x); // C := X ^ 2
+    sqr(s, P.y); // D := Y ^ 2
+    sub(t, s, l); // F := D - C = Y ^ 2 - X ^ 2
     sqr(u, P.z); // H := Z ^ 2
     Fp::mulInt(v, u, 2);
     sub(v, t, v); // J := F - 2H
 
-    add(Rz, l, s); // C + D
-    sub(Rx, k, Rz); // B - (C + D)
-    mul(Rx, Rx, v);
+    add(u, l, s); // C + D
+    sub(Rx, k, u); // B - (C + D)
+    mul(Rx, Rx, v); // Rx
 
-    Fp::neg(Rz, Rz);
-    mul(Ry, Rz, t);
+    mul(Ry, u, t); // -Ry
 
-    mul(Rz, t, v);
+    mul(Rz, t, v); // Rz
 
     R.x = Rx;
-    R.y = Ry;
+    Fp::neg(R.y, Ry);
     R.z = Rz;
 }
 
