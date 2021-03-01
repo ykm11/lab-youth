@@ -487,7 +487,7 @@ void GLV::scalarMul(Point &R, const Point &P, const mpz_class &k) {
 
 Fp TwistedEdwardCurve::a;
 Fp TwistedEdwardCurve::d;
-Point TwistedEdwardCurve::base;
+Point TwistedEdwardCurve::base_;
 
 void TwistedEdwardCurve::Pneg(Point &R, const Point &P) {
 #if 1
@@ -580,6 +580,10 @@ void TwistedEdwardCurve::Pdbl(Point &R, const Point &P) {
     R.z = Rz;
 }
 
+void TwistedEdwardCurve::baseMult(Point &R, const mpz_class &x) { 
+    scalarMul(R, base_, x);
+}
+
 void TwistedEdwardCurve::scalarMul(Point &R, const Point &P, const mpz_class &x) { 
     size_t naf_size = mpz_sizeinbase(x.get_mpz_t(), 2) + 1;
     int8_t naf[naf_size];
@@ -631,4 +635,51 @@ void TwistedEdwardCurve::scalarMul(Point &R, const Point &P, const mpz_class &x)
         TwistedEdwardCurve::Padd(R, R, Q);
     }
 }
+
+void TwistedEdwardCurve::encodePoint(uint8_t buf[33], const Point &P) {
+/*
+def encodepoint(P):
+  x = P[0]
+  y = P[1]
+  bits = [(y >> i) & 1 for i in range(b - 1)] + [x & 1]
+  return ''.join([chr(sum([bits[i * 8 + j] << j for j in range(8)])) for i in range(b/8)])
+*/
+    Fp x, y;
+    P.xy(x, y);
+#ifdef YKM_ECC_USE_MPN
+    buf[32] = x.value[0] & 1;
+    memcpy(buf, y.value, 32);
+#else
+#endif
+}
+
+void TwistedEdwardCurve::genPublicKey(uint8_t *pk, const uint8_t *sk, size_t len) {
+/*
+def publickey(sk):
+  h = H(sk)
+  a = 2**(b-2) + sum(2**i * bit(h,i) for i in range(3,b-2))
+  A = scalarmult(B,a)
+  return encodepoint(A)
+*/
+	uint8_t hash[64];
+	//sha512(hash, sk, len); // len(secret key) == 32 ?
+    mp_limb_t h[4];
+    memcpy(h, hash, 32);
+
+    h[0] &= 0xFFFFFFFFFFFFFFF8;
+    h[3] &= 0x7FFFFFFFFFFFFFFF;
+    h[3] |= 0x4000000000000000;
+
+    mpz_t a;
+    a->_mp_d = h;
+    a->_mp_size = 4;
+    a->_mp_alloc = 4;
+
+    Point R;
+    mpz_class aa(a);
+    baseMult(R, aa);
+    encodePoint(pk, R);
+
+}
+
 
