@@ -504,12 +504,12 @@ void TwistedEdwardCurve::Padd(Point &R, const Point &P, const Point &Q) {
     Fp k, l, s, t, u, v, w;
     Fp Rx, Ry, Rz;
 
-    if (zeroCmp(P.z)) {
+    if (zeroCmp(P.x)) {
         R.x = Q.x;
         R.y = Q.y;
         R.z = Q.z;
         return;
-    }else if (zeroCmp(Q.z)) {
+    }else if (zeroCmp(Q.x)) {
         R.x = P.x;
         R.y = P.y;
         R.z = P.z;
@@ -550,7 +550,7 @@ void TwistedEdwardCurve::Pdbl(Point &R, const Point &P) {
     Fp k, l, s, t, u, v;
     Fp Rx, Ry, Rz;
 
-    if (zeroCmp(P.z)) {
+    if (zeroCmp(P.x)) {
         R.x = P.x;
         R.y = P.y;
         R.z = P.z;
