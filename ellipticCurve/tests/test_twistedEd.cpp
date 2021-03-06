@@ -1,6 +1,7 @@
 #include "curve.h"
 #include "FP.h"
 #include <iostream>
+#include <string.h>
 
 #include <gmpxx.h>
 
@@ -83,9 +84,53 @@ void test_Ed25519_order() {
     dump(R);
 }
 
+void test_Ed25519_encodePoint() {
+    uint8_t buf[32];
+    TwistedEdwardCurve::initEd();
+    Point R;
+
+    mpz_class x("43145378195037189031758314739173849104", 16);
+    TwistedEdwardCurve::scalarMul(R, TwistedEdwardCurve::base_, x);
+    TwistedEdwardCurve::encodePoint(buf, R);
+
+    uint8_t act_buf[] = {
+        0xd7, 0xa7, 0x24, 0xa4, 0x00, 0xd2, 0x46, 0x4a, 
+        0x8a, 0xc3, 0x2d, 0x18, 0x7d, 0x30, 0x53, 0xe4, 
+        0x62, 0x58, 0x04, 0x86, 0x86, 0x92, 0xaa, 0x44, 
+        0x47, 0x76, 0x9c, 0x52, 0x7c, 0xc0, 0x4f, 0x32,
+    };
+
+    printf("[+] encodePoint TEST: ");
+    if (memcmp(buf, act_buf, 32) == 0) {
+        puts("OK");
+    } else {
+        puts("FAILED");
+    }
+}
+
+void test_Ed25519_xrecover() {
+    Fp rx, ry;
+    Fp x;
+    Point R;
+    TwistedEdwardCurve::initEd();
+
+    R = TwistedEdwardCurve::base_;
+    R.xy(rx, ry);
+    TwistedEdwardCurve::xrecover(x, ry);
+
+    dump(x);
+    dump(rx);
+    TwistedEdwardCurve::baseMult(R, 100);
+    R.xy(rx, ry);
+    TwistedEdwardCurve::xrecover(x, ry);
+}
+
+
 int main() {
     //test_TwistedEd_add();
     test_Ed25519_order();
     test_TwistedEd_scalarMul();
     test_TwistedEd_baseMult();
+    test_Ed25519_encodePoint();
+    test_Ed25519_xrecover();
 }

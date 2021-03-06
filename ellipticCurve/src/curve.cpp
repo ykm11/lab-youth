@@ -487,6 +487,7 @@ void GLV::scalarMul(Point &R, const Point &P, const mpz_class &k) {
 
 Fp TwistedEdwardCurve::a;
 Fp TwistedEdwardCurve::d;
+Fp TwistedEdwardCurve::I_;
 Point TwistedEdwardCurve::base_;
 
 void TwistedEdwardCurve::Pneg(Point &R, const Point &P) {
@@ -636,7 +637,7 @@ void TwistedEdwardCurve::scalarMul(Point &R, const Point &P, const mpz_class &x)
     }
 }
 
-void TwistedEdwardCurve::encodePoint(uint8_t buf[33], const Point &P) {
+void TwistedEdwardCurve::encodePoint(uint8_t buf[32], const Point &P) {
 /*
 def encodepoint(P):
   x = P[0]
@@ -647,11 +648,51 @@ def encodepoint(P):
     Fp x, y;
     P.xy(x, y);
 #ifdef YKM_ECC_USE_MPN
-    buf[32] = x.value[0] & 1;
     memcpy(buf, y.value, 32);
+    buf[31] &= 0x7f;
+    buf[31] |= ((uint8_t)(x.value[0] & 1) << 7);
 #else
 #endif
 }
+
+void TwistedEdwardCurve::xrecover(Fp &x, const Fp &y) {
+/*
+def xrecover(y):
+  xx = (y*y-1) * inv(d*y*y+1)
+  x = expmod(xx,(q+3)/8,q)
+  if (x*x - xx) % q != 0: x = (x*I) % q
+  if x % 2 != 0: x = q-x
+  return x
+*/
+#ifdef YKM_ECC_USE_MPN
+	Fp xx, yy;
+    Fp u, v;
+
+    mp_limb_t tp[80*Fp::size_];
+    Fp e(mpz_class("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe", 16));
+
+	sqr(yy, y); // yy
+    sub_1(xx.value, yy.value, Fp::size_, 1); // yy - 1
+    mul(u, d, yy); // d * yy
+    add_1(u.value, u.value, Fp::size_, 1); // d * yy + 1
+    invmod(v, u); // inv(d * yy + 1)
+    mul(xx, xx, v);
+    powMod(x.value, xx.value, e.value, Fp::modulus, tp, Fp::size_);
+
+    // if (x*x - xx) % q != 0: x = (x*I) % q
+    sqr(v, x);
+    if (!isEq(v, xx)) {
+        mul(x, x, I_);
+    }
+
+    // if x % 2 != 0: x = q-x
+    if (x.value[0] % 2 == 1) {
+        sub(x, Fp::modulus, x);
+    }
+#else
+#endif
+}
+
 
 void TwistedEdwardCurve::genPublicKey(uint8_t *pk, const uint8_t *sk, size_t len) {
 /*
@@ -679,7 +720,6 @@ def publickey(sk):
     mpz_class aa(a);
     baseMult(R, aa);
     encodePoint(pk, R);
-
 }
 
 

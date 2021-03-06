@@ -193,12 +193,14 @@ public:
 class TwistedEdwardCurve {
 public:
     static Fp a, d;
+    static Fp I_;
     static Point base_;
 
     static void initEd() {
         Fp::setModulo(mpz_class("7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffed", 16));
         a = Fp(-1);
         d = Fp(mpz_class("52036cee2b6ffe738cc740797779e89800700a4d4141d8ab75eb4dca135978a3", 16));
+        I_ = Fp(mpz_class("2b8324804fc1df0b2b4d00993dfbd7a72f431806ad2fe478c4ee1b274a0ea0b0", 16));
 
         Fp bx(mpz_class("216936d3cd6e53fec0a4e231fdd6dc5c692cc7609525a7b2c9562d608f25d51a", 16));
         Fp by(mpz_class("6666666666666666666666666666666666666666666666666666666666666658", 16));
@@ -211,6 +213,7 @@ public:
     static void scalarMul(Point &R, const Point &P, const mpz_class &x);
     static void baseMult(Point &R, const mpz_class &x);
     static void encodePoint(uint8_t *buf, const Point &P);
+    static void xrecover(Fp &x, const Fp &y);
     static void genPublicKey(uint8_t *pk, const uint8_t *sk, size_t len);
 };
 
