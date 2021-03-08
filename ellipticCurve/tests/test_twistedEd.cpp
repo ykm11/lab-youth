@@ -118,11 +118,12 @@ void test_Ed25519_xrecover() {
     R.xy(rx, ry);
     TwistedEdwardCurve::xrecover(x, ry);
 
-    dump(x);
-    dump(rx);
-    TwistedEdwardCurve::baseMult(R, 100);
-    R.xy(rx, ry);
-    TwistedEdwardCurve::xrecover(x, ry);
+    printf("[+] xrecover for Base TEST: ");
+    if(isEq(x, rx)) {
+        puts("OK");
+    } else {
+        puts("FAILED");
+    }
 }
 
 
